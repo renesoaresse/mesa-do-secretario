@@ -1,0 +1,375 @@
+/* =========================================================
+   CONTROLS (Input / Select / Textarea) — PADRÃO
+========================================================= */
+.sidebar .control {
+  width: 100%;
+  padding: 10px 10px;
+  border-radius: 10px;
+
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-light);
+
+  outline: none;
+}
+
+.sidebar .control:hover {
+  background: var(--input-bg-hover);
+  border-color: var(--input-border-strong);
+}
+
+.sidebar .control:focus {
+  border-color: var(--gold-500);
+}
+
+.sidebar .control::placeholder {
+  color: var(--text-dim);
+}
+
+.sidebar .control-textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+/* SELECT — seta custom na cor do texto */
+.sidebar .control-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  height: 42px;
+  padding-right: 42px;
+
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+}
+
+.sidebar .control-select option {
+  color: #111827;
+}
+
+/* Form row */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* =========================================================
+   SESSION TYPE CARDS
+========================================================= */
+.session-card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.session-card {
+  text-align: center;
+  padding: 18px 12px;
+  border-radius: 12px;
+
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-light);
+}
+
+.session-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.session-card--active {
+  border-color: var(--gold-500);
+  background: rgba(201, 162, 77, 0.14);
+}
+
+.session-card__icon {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.session-card__title {
+  font-size: 14px;
+  font-weight: 900;
+}
+.session-card__subtitle {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.session-card--active .session-card__subtitle {
+  color: var(--gold-400);
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-light);
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  border-color: var(--gold-500);
+  background: rgba(201, 162, 77, 0.18);
+  color: var(--gold-400);
+  font-weight: 900;
+}
+.btn-primary:hover {
+  background: rgba(201, 162, 77, 0.26);
+}
+
+.mini-btn {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(0, 0, 0, 0.14);
+  color: var(--text-light);
+  font-size: 12px;
+  font-weight: 800;
+}
+.mini-btn:hover {
+  background: rgba(0, 0, 0, 0.24);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* =========================================================
+   SECTION TITLE (refatorado)
+========================================================= */
+.section-title {
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+.section-title__row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.section-title__text {
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+.section-title__sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.9;
+  font-weight: 700;
+}
+
+.section-title__divider {
+  height: 1px;
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* =========================================================
+   PBO — Palavra bem da Ordem (3 LINHAS)
+========================================================= */
+
+.pbo {
+  display: block;
+}
+
+.sidebar .pbo-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* card/linha */
+.sidebar .pbo-row {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 14px 14px 16px;
+  border-left: 4px solid var(--gold-500);
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.sidebar .pbo-row:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(2px);
+}
+
+/* variações de cor por coluna */
+.sidebar .pbo-row--sul {
+  border-left-color: #4caf50;
+}
+.sidebar .pbo-row--norte {
+  border-left-color: #2196f3;
+}
+.sidebar .pbo-row--oriente {
+  border-left-color: #ff9800;
+}
+
+/* header do card */
+.sidebar .pbo-row__header {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.sidebar .pbo-row__title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.sidebar .pbo-row__help {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+}
+
+/* textarea */
+.sidebar .pbo-row__textarea {
+  width: 100%;
+  min-height: 70px;
+  resize: vertical;
+
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+
+  color: #ffffff;
+  padding: 12px;
+  font-size: 13px;
+
+  outline: none;
+}
+
+.sidebar .pbo-row__textarea::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.sidebar .pbo-row__textarea:focus {
+  border-color: var(--gold-500);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* =========================================================
+   RESPONSIVO
+========================================================= */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  .session-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   BADGE
+========================================================= */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--gold-500);
+  color: #1a1a1a;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   SIDEBAR DRAWER (Accordion)
+========================================================= */
+
+.sidebar-drawer {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+/* Header clicável */
+.sidebar-drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  cursor: pointer;
+  user-select: none;
+
+  padding: 10px 6px;
+  margin-bottom: 6px;
+
+  color: #facc15; /* dourado do seu layout */
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Título + ícone */
+.sidebar-drawer__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-drawer__icon {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* Chevron */
+.sidebar-drawer__chevron {
+  font-size: 14px;
+  opacity: 0.8;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-drawer.is-open .sidebar-drawer__chevron {
+  transform: rotate(0deg);
+}
+
+/* Conteúdo (animado) */
+.sidebar-drawer__content {
+  overflow: hidden;
+  transition:
+    grid-template-rows 0.25s ease,
+    opacity 0.25s ease;
+
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+.sidebar-drawer.is-open .sidebar-drawer__content {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.sidebar-drawer__content > * {
+  overflow: hidden;
+}
