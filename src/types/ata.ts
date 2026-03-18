@@ -1,12 +1,12 @@
-export type SessionType = "economica" | "magna" | "conjunta";
-export type Grau = "Aprendiz" | "Companheiro" | "Mestre";
+export type SessionType = 'economica' | 'magna' | 'conjunta';
+export type Grau = 'Aprendiz' | 'Companheiro' | 'Mestre';
 
 export type SessionConfig = {
   grau: Grau;
   numSessao: number;
-  dataISO: string;     // YYYY-MM-DD
-  horaInicio: string;  // HH:mm
-  horaEnc: string;     // HH:mm
+  dataISO: string; // YYYY-MM-DD
+  horaInicio: string; // HH:mm
+  horaEnc: string; // HH:mm
   numPresenca: number;
 };
 
@@ -31,11 +31,7 @@ export type PalavraBemOrdem = {
   oriente: string;
 };
 
-export type DocumentType =
-  | "Prancha/Edital"
-  | "Ato/Decreto"
-  | "Ofício"
-  | "Comunicação";
+export type DocumentType = 'Prancha/Edital' | 'Ato/Decreto' | 'Ofício' | 'Comunicação';
 
 export type Documento = {
   id: string;
@@ -45,9 +41,9 @@ export type Documento = {
   subject: string;
 };
 
-export type DocumentDraft = Omit<Documento, "id">;
+export type DocumentDraft = Omit<Documento, 'id'>;
 
-export type StatusKind = "success" | "error" | "info";
+export type StatusKind = 'success' | 'error' | 'info';
 
 export type StatusState = {
   kind: StatusKind;

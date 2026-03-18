@@ -1,0 +1,28 @@
+/* =========================================================
+   THEME TOKENS
+========================================================= */
+:root {
+  --blue-900: #0b1d3a;
+  --blue-850: #0f2648;
+  --blue-800: #102a52;
+  --blue-700: #163a6b;
+
+  --gold-500: #c9a24d;
+  --gold-450: #d3ad5c;
+  --gold-400: #e0b866;
+
+  --text-light: #f5f7fa;
+  --text-muted: #c7d0dd;
+  --text-dim: #9fb0c6;
+  --text-dark: #1f2937;
+
+  --bg-app: #eef1f4;
+
+  --input-bg: rgba(255, 255, 255, 0.08);
+  --input-bg-hover: rgba(255, 255, 255, 0.12);
+  --input-border: rgba(255, 255, 255, 0.22);
+  --input-border-strong: rgba(255, 255, 255, 0.32);
+
+  --border-light: #d6dae1;
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.12);
+}

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 type FormGroupProps = {
   label: string;
@@ -7,7 +7,7 @@ type FormGroupProps = {
 
 export function FormGroup({ label, children }: FormGroupProps) {
   return (
-    <label style={{ display: "block" }}>
+    <label style={{ display: 'block' }}>
       <div style={{ fontSize: 12, marginBottom: 6, opacity: 0.8 }}>{label}</div>
       {children}
     </label>

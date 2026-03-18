@@ -1,5 +1,5 @@
-import React from "react";
-import type { StatusState } from "../../types/ata";
+import React from 'react';
+import type { StatusState } from '../../types/ata';
 
 type Props = {
   status: StatusState;

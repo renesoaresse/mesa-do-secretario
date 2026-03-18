@@ -1,0 +1,286 @@
+/* =========================================================
+   DOCUMENTO A4 (baseado no index.html)
+   - Corrige: margens, header, título, PBO, assinaturas (2 + 1)
+========================================================= */
+
+#documentPreview,
+#documentPreview.abnt-page,
+.preview-sheet.abnt-page {
+  width: 794px;
+  min-height: 1123px;
+
+  background: #ffffff;
+  border: 1px solid #d6dae1;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+
+  /* IMPORTANTE: ajuste que costuma bater mais com o index */
+  padding: 56px 64px;
+
+  transform-origin: top center;
+
+  color: #111827;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 12pt;
+  line-height: 1.5;
+}
+
+/* parágrafos padrão */
+#documentPreview p {
+  margin: 0 0 12pt 0;
+  text-align: justify;
+  text-indent: 1.25cm;
+}
+
+/* blocos sem recuo */
+#documentPreview p.no-indent {
+  text-indent: 0;
+}
+
+/* centralizados menores */
+#documentPreview p.center-small {
+  text-align: center;
+  text-indent: 0;
+  margin-top: 18pt;
+}
+
+/* tema (italico central) */
+#documentPreview p.center-italic {
+  text-align: center;
+  text-indent: 0;
+  font-weight: 700;
+  font-style: italic;
+  margin: 0 0 20pt 0;
+}
+
+/* Header */
+#documentPreview .header-center {
+  text-align: center;
+  margin-bottom: 18pt;
+  font-size: 12pt;
+  font-weight: 700;
+}
+
+/* Title */
+#documentPreview .title-center {
+  text-align: center;
+  font-weight: 800;
+  margin: 14pt 0 18pt;
+
+  padding: 10pt 8pt;
+  border-radius: 4pt;
+
+  border: 1px solid rgba(17, 24, 39, 0.18);
+  background: transparent;
+}
+
+/* variações */
+#documentPreview .title-center.economica {
+  background: rgba(16, 42, 82, 0.04);
+}
+
+#documentPreview .title-center.magna {
+  background: rgba(201, 162, 77, 0.12);
+  border-color: rgba(201, 162, 77, 0.45);
+}
+
+#documentPreview .title-center.conjunta {
+  background: rgba(59, 130, 246, 0.06);
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+/* peso do strong (pra ficar mais próximo do index) */
+#documentPreview strong {
+  font-weight: 700;
+}
+
+/* PBO */
+#documentPreview .pbo-block {
+  margin-left: 1.25cm;
+  margin-bottom: 8pt;
+  text-indent: 0;
+}
+
+#documentPreview .pbo-empty {
+  margin-left: 1.25cm;
+  text-indent: 0;
+  margin-bottom: 12pt;
+}
+
+/* Assinaturas: 2 em cima + 1 embaixo */
+#documentPreview .signatures {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 18pt;
+  margin-top: 80pt;
+  text-align: center;
+}
+
+#documentPreview .sig-line {
+  padding-top: 10pt;
+  border-top: 1px solid #111827;
+  font-size: 11pt;
+}
+
+#documentPreview .sig-line--half {
+  width: 42%;
+}
+
+#documentPreview .sig-line--full {
+  width: 100%;
+  margin-top: 50pt;
+}
+
+/* =========================================================
+   HEADER do documento (igual ao exemplo do index.html)
+   Logo à esquerda + caixa com borda + linha abaixo
+========================================================= */
+
+#documentPreview .doc-top {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 10px;
+}
+
+/* LOGO */
+#documentPreview .doc-top__logo,
+.logo-img {
+  width: 92px;
+  height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#documentPreview .doc-top__logo-img {
+  max-width: 92px;
+  max-height: 92px;
+  object-fit: contain;
+}
+
+/* quando não tem logo, mantém o espaço igual */
+#documentPreview .doc-top__logo--empty {
+  border: 0;
+}
+
+/* CAIXA DO TEXTO */
+#documentPreview .doc-top__box {
+  flex: 1;
+  padding: 10px 18px;
+}
+
+#documentPreview .doc-top__text {
+  text-align: center;
+  font-size: 12pt;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+/* LINHA HORIZONTAL ABAIXO */
+#documentPreview .doc-top__rule {
+  margin: 10px 0 18pt;
+}
+
+/* =========================================================
+   PRINT — A4 com respiros corretos (igual preview, sem scale)
+========================================================= */
+
+/* Margens reais da página (padrão bem aceito em A4) */
+@page {
+  size: A4;
+  margin: 20mm 18mm; /* topo/baixo 20mm, lados 18mm */
+}
+
+@media print {
+  /* 1) Reset do "ambiente" de impressão */
+  html,
+  body {
+    width: 210mm;
+    height: 297mm;
+    background: #ffffff !important;
+  }
+
+  /* Evita cabeçalho/rodapé do browser brigar com o layout */
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    margin: 0 !important;
+  }
+
+  /* 2) Esconde UI */
+  .sidebar,
+  .preview-toolbar,
+  .preview-actions,
+  .autosave-toast,
+  .preview-container > :not(.preview-sheet-wrap) {
+    display: none !important;
+  }
+
+  /* 3) A área principal vira só o documento */
+  .main {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  /* wrapper centralizador do preview não precisa de padding */
+  .preview-sheet-wrap {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* 4) Documento: imprime 1:1 (sem sombra, sem borda, sem zoom) */
+  #documentPreview,
+  #documentPreview.abnt-page,
+  .preview-sheet.abnt-page {
+    /* remove "visual de preview" */
+    box-shadow: none !important;
+    border: none !important;
+
+    /* remove zoom/scale */
+    transform: none !important;
+
+    /* importante: no print, a página é definida pelo @page.
+       Então não force width em px. Use 100% da área imprimível. */
+    width: 100% !important;
+    min-height: auto !important;
+
+    /* mantém a mesma sensação de respiro do preview,
+       mas agora quem manda são as margens do @page */
+    padding: 0 !important;
+
+    background: #ffffff !important;
+  }
+
+  /* 5) Tipografia/ABNT (mantém igual ao preview) */
+  #documentPreview {
+    font-family: 'Times New Roman', Times, serif !important;
+    font-size: 11pt !important;
+    line-height: 1.25 !important;
+    color: #111827 !important;
+  }
+
+  /* 6) Quebras de página seguras */
+  #documentPreview p,
+  #documentPreview .header-center,
+  #documentPreview .title-center,
+  #documentPreview .signatures,
+  #documentPreview .sig-line {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* 7) Evita que linhas de assinatura quebrem no meio */
+  #documentPreview .signatures {
+    break-before: auto;
+  }
+
+  /* 8) Links/seleções */
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+}
