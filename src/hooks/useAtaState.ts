@@ -178,7 +178,10 @@ export function useAtaState() {
   const handlePrint = () => window.print();
 
   const handleSave = () => {
-    setDocStatus({ kind: 'success', text: 'Salvo (mock).' });
+    setDocStatus({
+      kind: 'success',
+      text: storage.hasDesktopBridge() ? 'Salvo com integração segura.' : 'Salvo (mock).',
+    });
     markChanged();
   };
 

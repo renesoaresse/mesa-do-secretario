@@ -14,6 +14,8 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - helpers reutilizáveis de teste em `src/test/render.tsx` e `src/test/factories.ts`
 - suíte de testes para o preview seguro cobrindo texto malicioso, entidades escapadas,
   blocos condicionais, estabilidade durante edição e helpers textuais reutilizáveis
+- suíte de testes para o shell Electron cobrindo preload seguro, regras de navegação,
+  bloqueio de novas janelas e persistência mediada por IPC
 
 ### Alterado
 
@@ -27,12 +29,21 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
   para reduzir regressões e manter tratamento consistente de todos os campos textuais
 - `MainPreview` passou a ser validado com o `DocumentPreview` real em teste de integração
 - `DocumentPreview.tsx` voltou ao escopo de coverage do Vitest
+- `src/electron/main.ts` passou a explicitar `sandbox`, preload dedicado e bloqueios
+  padrão para navegação externa e `window.open`
+- `src/services/storage.ts` agora usa a ponte segura do Electron quando disponível,
+  mantendo fallback para `localStorage` no ambiente web
+- `src/app/App.tsx` e `src/components/layout/MainPreview.tsx` passaram a sinalizar e
+  respeitar o runtime endurecido sem quebrar o fluxo atual
 
 ### Segurança
 
 - removido o uso de `dangerouslySetInnerHTML` no preview de atas
 - todos os campos textuais do preview agora são exibidos como texto literal, sem interpretar
   HTML vindo da entrada do usuário ou de futuras importações
+- adicionada API mínima no preload com superfície tipada e sem canal genérico
+- operações privilegiadas de persistência passaram a ser centralizadas no processo principal
+- adicionada política de conteúdo restritiva em `index.html`, compatível com o fluxo atual
 
 ## [0.2.0] - 2026-03-18
 
