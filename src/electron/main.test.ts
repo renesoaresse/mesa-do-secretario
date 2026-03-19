@@ -108,7 +108,9 @@ describe('electron main security', () => {
     const fileSystem = {
       existsSync: vi.fn(() => true),
       mkdirSync: vi.fn(),
-      readFileSync: vi.fn(() => JSON.stringify({ officersConfig: { vm: 'Mestre' } })),
+      readFileSync: vi.fn(() =>
+        JSON.stringify({ ataDraft: { sessionType: 'magna' }, officersConfig: { vm: 'Mestre' } }),
+      ),
       writeFileSync: vi.fn(),
     };
 
@@ -130,6 +132,9 @@ describe('electron main security', () => {
 
     loadHandler?.(trustedEvent, 'officersConfig');
     expect(trustedEvent.returnValue).toEqual({ vm: 'Mestre' });
+
+    loadHandler?.(trustedEvent, 'ataDraft');
+    expect(trustedEvent.returnValue).toEqual({ sessionType: 'magna' });
 
     loadHandler?.(trustedEvent, 'forbiddenKey');
     expect(trustedEvent.returnValue).toBeNull();

@@ -16,6 +16,8 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
   blocos condicionais, estabilidade durante edição e helpers textuais reutilizáveis
 - suíte de testes para o shell Electron cobrindo preload seguro, regras de navegação,
   bloqueio de novas janelas e persistência mediada por IPC
+- helper de testes para seed e leitura do storage em `src/test/storage.ts`
+- cenários E2E cobrindo restauração dos campos persistidos e limpeza de dados legados
 
 ### Alterado
 
@@ -35,6 +37,11 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
   mantendo fallback para `localStorage` no ambiente web
 - `src/app/App.tsx` e `src/components/layout/MainPreview.tsx` passaram a sinalizar e
   respeitar o runtime endurecido sem quebrar o fluxo atual
+- persistência da ata migrada para um draft canônico com restauração dos campos principais
+  restantes em `src/hooks/useAtaState.ts` e `src/services/storage.ts`
+- compatibilidade mantida com `officersConfig` e `lojaConfig` durante a migração do estado
+- `src/app/App.tsx` e `src/components/layout/SidebarContent.tsx` foram simplificados após a
+  remoção completa do fluxo de documentos
 
 ### Segurança
 
@@ -44,6 +51,11 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - adicionada API mínima no preload com superfície tipada e sem canal genérico
 - operações privilegiadas de persistência passaram a ser centralizadas no processo principal
 - adicionada política de conteúdo restritiva em `index.html`, compatível com o fluxo atual
+
+### Removido
+
+- módulo de documentos, incluindo tipos, componentes, lógica de estado e testes em
+  `src/features/documents/`
 
 ## [0.2.0] - 2026-03-18
 

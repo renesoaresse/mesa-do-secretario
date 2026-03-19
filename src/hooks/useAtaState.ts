@@ -1,8 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { storage } from '../services/storage';
 import type {
-  DocumentDraft,
-  Documento,
+  AtaDraft,
   LojaConfig,
   MagnaFields,
   Officers,
@@ -10,12 +9,7 @@ import type {
   PreviewData,
   SessionConfig,
   SessionType,
-  StatusState,
 } from '../types/ata';
-
-function uid() {
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
 
 const DEFAULT_OFFICERS: Officers = { vm: '', vig1: '', vig2: '', or: '', sec: '' };
 
@@ -29,119 +23,114 @@ const DEFAULT_LOJA_CONFIG: LojaConfig = {
   cidadeEstado: '',
 };
 
+const DEFAULT_SESSION_CONFIG: SessionConfig = {
+  grau: 'Aprendiz',
+  numSessao: 0,
+  dataISO: '',
+  horaInicio: '',
+  horaEnc: '',
+  numPresenca: 0,
+};
+
+const DEFAULT_MAGNA_FIELDS: MagnaFields = {
+  tema: '',
+  oradorConvidado: '',
+  autoridades: '',
+  atoEspecial: '',
+};
+
+const DEFAULT_PBO: PalavraBemOrdem = {
+  sul: 'Irmãos do Sul',
+  norte: 'Irmãos do Norte',
+  oriente: 'Irmãos do Oriente',
+};
+
+const DEFAULT_ATA_DRAFT: AtaDraft = {
+  sessionType: 'economica',
+  sessionConfig: DEFAULT_SESSION_CONFIG,
+  magnaFields: DEFAULT_MAGNA_FIELDS,
+  visitors: [],
+  officers: DEFAULT_OFFICERS,
+  tronco: 0,
+  ordemDia: '',
+  pbo: DEFAULT_PBO,
+  lojaConfig: DEFAULT_LOJA_CONFIG,
+  balaustreTexto: '',
+  atosDecretosTexto: '',
+  expedientesTexto: '',
+  bolsaPropostasTexto: '',
+};
+
 export function useAtaState() {
-  // Preview
+  const initialDraft = storage.loadAtaDraft(DEFAULT_ATA_DRAFT);
+
   const [zoom, setZoom] = useState(1);
-
-  // Session
-  const [sessionType, setSessionType] = useState<SessionType>('economica');
-  const [sessionConfig, setSessionConfig] = useState<SessionConfig>({
-    grau: 'Aprendiz',
-    numSessao: 0,
-    dataISO: '',
-    horaInicio: '',
-    horaEnc: '',
-    numPresenca: 0,
-  });
-
-  const [magnaFields, setMagnaFields] = useState<MagnaFields>({
-    tema: '',
-    oradorConvidado: '',
-    autoridades: '',
-    atoEspecial: '',
-  });
-
-  // Documents
-  const [docDraft, setDocDraft] = useState<DocumentDraft>({
-    type: 'Prancha/Edital',
-    number: '',
-    origin: '',
-    subject: '',
-  });
-  const [documents, setDocuments] = useState<Documento[]>([]);
-  const [docStatus, setDocStatus] = useState<StatusState>(null);
-
-  // Visitors
-  const [visitors, setVisitors] = useState<string[]>([]);
-
-  // Officers (persisted)
-  const [officers, setOfficers] = useState<Officers>(() =>
-    storage.load<Officers>('officersConfig', DEFAULT_OFFICERS),
-  );
-
-  // Others
-  const [tronco, setTronco] = useState(0);
-  const [ordemDia, setOrdemDia] = useState('');
-  const [pbo, setPbo] = useState<PalavraBemOrdem>({
-    sul: 'Irmãos do Sul',
-    norte: 'Irmãos do Norte',
-    oriente: 'Irmãos do Oriente',
-  });
-
+  const [sessionType, setSessionType] = useState<SessionType>(initialDraft.sessionType);
+  const [sessionConfig, setSessionConfig] = useState<SessionConfig>(initialDraft.sessionConfig);
+  const [magnaFields, setMagnaFields] = useState<MagnaFields>(initialDraft.magnaFields);
+  const [visitors, setVisitors] = useState<string[]>(initialDraft.visitors);
+  const [officers, setOfficers] = useState<Officers>(initialDraft.officers);
+  const [tronco, setTronco] = useState(initialDraft.tronco);
+  const [ordemDia, setOrdemDia] = useState(initialDraft.ordemDia);
+  const [pbo, setPbo] = useState<PalavraBemOrdem>(initialDraft.pbo);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(new Date());
   const [autoSaveVisible, setAutoSaveVisible] = useState(false);
+  const [lojaConfig, setLojaConfig] = useState<LojaConfig>(initialDraft.lojaConfig);
+  const [balaustreTexto, setBalaustreTexto] = useState(initialDraft.balaustreTexto);
+  const [atosDecretosTexto, setAtosDecretosTexto] = useState(initialDraft.atosDecretosTexto);
+  const [expedientesTexto, setExpedientesTexto] = useState(initialDraft.expedientesTexto);
+  const [bolsaPropostasTexto, setBolsaPropostasTexto] = useState(initialDraft.bolsaPropostasTexto);
 
-  // Loja config (persisted)
-  const [lojaConfig, setLojaConfig] = useState<LojaConfig>(() =>
-    storage.load<LojaConfig>('lojaConfig', DEFAULT_LOJA_CONFIG),
+  const currentDraft = useMemo<AtaDraft>(
+    () => ({
+      sessionType,
+      sessionConfig,
+      magnaFields,
+      visitors,
+      officers,
+      tronco,
+      ordemDia,
+      pbo,
+      lojaConfig,
+      balaustreTexto,
+      atosDecretosTexto,
+      expedientesTexto,
+      bolsaPropostasTexto,
+    }),
+    [
+      sessionType,
+      sessionConfig,
+      magnaFields,
+      visitors,
+      officers,
+      tronco,
+      ordemDia,
+      pbo,
+      lojaConfig,
+      balaustreTexto,
+      atosDecretosTexto,
+      expedientesTexto,
+      bolsaPropostasTexto,
+    ],
   );
 
-  // Open text sections
-  const [balaustreTexto, setBalaustreTexto] = useState('');
-  const [atosDecretosTexto, setAtosDecretosTexto] = useState('');
-  const [expedientesTexto, setExpedientesTexto] = useState('');
-  const [bolsaPropostasTexto, setBolsaPropostasTexto] = useState('');
+  useEffect(() => {
+    storage.saveAtaDraft(currentDraft);
+  }, [currentDraft]);
 
-  // Helpers
   const markChanged = () => {
     setLastSavedAt(new Date());
     setAutoSaveVisible(true);
     window.setTimeout(() => setAutoSaveVisible(false), 1200);
   };
 
-  // Handlers
   const updateOfficers = (patch: Partial<Officers>) => {
-    setOfficers((s) => {
-      const next = { ...s, ...patch };
-      storage.save('officersConfig', next);
-      return next;
-    });
+    setOfficers((state) => ({ ...state, ...patch }));
     markChanged();
   };
 
   const updateLojaConfig = (patch: Partial<LojaConfig>) => {
-    setLojaConfig((s) => {
-      const next = { ...s, ...patch };
-      storage.save('lojaConfig', next);
-      return next;
-    });
-    markChanged();
-  };
-
-  const addDocument = (draft: DocumentDraft) => {
-    const { number, origin, subject } = draft;
-    if (!number.trim() || !origin.trim() || !subject.trim()) {
-      setDocStatus({ kind: 'error', text: 'Preencha todos os campos do documento.' });
-      return;
-    }
-    setDocuments((prev) => [
-      {
-        id: uid(),
-        type: draft.type,
-        number: number.trim(),
-        origin: origin.trim(),
-        subject: subject.trim(),
-      },
-      ...prev,
-    ]);
-    setDocDraft((d) => ({ ...d, number: '', origin: '', subject: '' }));
-    setDocStatus({ kind: 'success', text: 'Documento adicionado.' });
-    markChanged();
-  };
-
-  const removeDocument = (id: string) => {
-    setDocuments((prev) => prev.filter((d) => d.id !== id));
-    setDocStatus({ kind: 'info', text: 'Documento removido.' });
+    setLojaConfig((state) => ({ ...state, ...patch }));
     markChanged();
   };
 
@@ -156,43 +145,33 @@ export function useAtaState() {
   };
 
   const updateSessionConfig = (patch: Partial<SessionConfig>) => {
-    setSessionConfig((s) => ({ ...s, ...patch }));
+    setSessionConfig((state) => ({ ...state, ...patch }));
     markChanged();
   };
 
   const updateMagnaFields = (patch: Partial<MagnaFields>) => {
-    setMagnaFields((m) => ({ ...m, ...patch }));
+    setMagnaFields((state) => ({ ...state, ...patch }));
     markChanged();
   };
 
   const updatePbo = (patch: Partial<PalavraBemOrdem>) => {
-    setPbo((x) => ({ ...x, ...patch }));
-    markChanged();
-  };
-
-  const onPickPdf = (file: File) => {
-    setDocStatus({ kind: 'info', text: `PDF selecionado (mock): ${file.name}` });
+    setPbo((state) => ({ ...state, ...patch }));
     markChanged();
   };
 
   const handlePrint = () => window.print();
 
   const handleSave = () => {
-    setDocStatus({
-      kind: 'success',
-      text: storage.hasDesktopBridge() ? 'Salvo com integração segura.' : 'Salvo (mock).',
-    });
+    storage.saveAtaDraft(currentDraft);
     markChanged();
   };
 
-  // Preview data (memoized)
   const previewData: PreviewData = useMemo(
     () => ({
       lojaConfig,
       sessionType,
       sessionConfig,
       magnaFields,
-      documents,
       visitors,
       officers,
       tronco,
@@ -208,7 +187,6 @@ export function useAtaState() {
       sessionType,
       sessionConfig,
       magnaFields,
-      documents,
       visitors,
       officers,
       tronco,
@@ -222,14 +200,10 @@ export function useAtaState() {
   );
 
   return {
-    // State
     zoom,
     sessionType,
     sessionConfig,
     magnaFields,
-    docDraft,
-    documents,
-    docStatus,
     visitors,
     officers,
     tronco,
@@ -243,47 +217,39 @@ export function useAtaState() {
     expedientesTexto,
     bolsaPropostasTexto,
     previewData,
-
-    // Setters
     setZoom,
     setSessionType,
-    setDocDraft,
-    setTronco: (n: number) => {
-      setTronco(n);
+    setTronco: (value: number) => {
+      setTronco(value);
       markChanged();
     },
-    setOrdemDia: (s: string) => {
-      setOrdemDia(s);
+    setOrdemDia: (value: string) => {
+      setOrdemDia(value);
       markChanged();
     },
-    setBalaustreTexto: (s: string) => {
-      setBalaustreTexto(s);
+    setBalaustreTexto: (value: string) => {
+      setBalaustreTexto(value);
       markChanged();
     },
-    setAtosDecretosTexto: (s: string) => {
-      setAtosDecretosTexto(s);
+    setAtosDecretosTexto: (value: string) => {
+      setAtosDecretosTexto(value);
       markChanged();
     },
-    setExpedientesTexto: (s: string) => {
-      setExpedientesTexto(s);
+    setExpedientesTexto: (value: string) => {
+      setExpedientesTexto(value);
       markChanged();
     },
-    setBolsaPropostasTexto: (s: string) => {
-      setBolsaPropostasTexto(s);
+    setBolsaPropostasTexto: (value: string) => {
+      setBolsaPropostasTexto(value);
       markChanged();
     },
-
-    // Handlers
     updateSessionConfig,
     updateMagnaFields,
     updateOfficers,
     updateLojaConfig,
     updatePbo,
-    addDocument,
-    removeDocument,
     addVisitor,
     removeVisitor,
-    onPickPdf,
     handlePrint,
     handleSave,
     markChanged,

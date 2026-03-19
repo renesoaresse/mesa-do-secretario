@@ -1,12 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import {
-  makeDocumentDraft,
-  makeMagnaFields,
-  makeOfficers,
-  makePbo,
-  makeSessionConfig,
-} from '../../test/factories';
+import { makeMagnaFields, makeOfficers, makePbo, makeSessionConfig } from '../../test/factories';
 import { SidebarContent } from './SidebarContent';
 
 vi.mock('../../features/session/components/SessionTypeSelector', () => ({
@@ -50,13 +44,6 @@ const baseProps = {
   onSessionConfigChange: vi.fn(),
   magnaFields: makeMagnaFields(),
   onMagnaFieldsChange: vi.fn(),
-  docDraft: makeDocumentDraft(),
-  onDocDraftChange: vi.fn(),
-  documents: [],
-  docStatus: null,
-  onPickPdf: vi.fn(),
-  onAddDocument: vi.fn(),
-  onRemoveDocument: vi.fn(),
   visitors: [],
   onAddVisitor: vi.fn(),
   onRemoveVisitor: vi.fn(),
@@ -101,6 +88,7 @@ describe('SidebarContent', () => {
     expect(screen.getByText('VisitorsPanel')).toBeInTheDocument();
     expect(screen.getByText('FooterActions')).toBeInTheDocument();
     expect(screen.getByText('LastSaveInfo')).toBeInTheDocument();
+    expect(screen.queryByText(/documentos pdf/i)).not.toBeInTheDocument();
   });
 
   it('renderiza campos da sessao magna somente quando sessionType=magna', () => {

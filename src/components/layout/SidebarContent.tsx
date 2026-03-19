@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { SessionTypeSelector } from '../../features/session/components/SessionTypeSelector';
 import { SessionConfigForm } from '../../features/session/components/SessionConfigForm';
 import { MagnaFieldsForm } from '../../features/session/components/MagnaFieldsForm';
@@ -13,14 +11,11 @@ import { LojaConfigForm } from '../../features/loja-config/components/LojaConfig
 import type { LojaConfig } from '../../types/ata';
 
 import type {
-  DocumentDraft,
-  Documento,
   MagnaFields,
   Officers,
   PalavraBemOrdem,
   SessionConfig,
   SessionType,
-  StatusState,
 } from '../../types/ata';
 import { SidebarDrawer } from './SidebarDrawer';
 import { OpenTextSection } from '../../features/session/components/OpenTextSection';
@@ -32,13 +27,6 @@ type Props = {
   onSessionConfigChange: (patch: Partial<SessionConfig>) => void;
   magnaFields: MagnaFields;
   onMagnaFieldsChange: (patch: Partial<MagnaFields>) => void;
-  docDraft: DocumentDraft;
-  onDocDraftChange: (patch: Partial<DocumentDraft>) => void;
-  documents: Documento[];
-  docStatus: StatusState;
-  onPickPdf: (file: File) => void;
-  onAddDocument: () => void;
-  onRemoveDocument: (id: string) => void;
   visitors: string[];
   onAddVisitor: (name: string) => void;
   onRemoveVisitor: (idx: number) => void;

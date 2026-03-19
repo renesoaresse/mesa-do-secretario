@@ -31,17 +31,21 @@ export type PalavraBemOrdem = {
   oriente: string;
 };
 
-export type DocumentType = 'Prancha/Edital' | 'Ato/Decreto' | 'Ofício' | 'Comunicação';
-
-export type Documento = {
-  id: string;
-  type: DocumentType;
-  number: string;
-  origin: string;
-  subject: string;
+export type AtaDraft = {
+  sessionType: SessionType;
+  sessionConfig: SessionConfig;
+  magnaFields: MagnaFields;
+  visitors: string[];
+  officers: Officers;
+  tronco: number;
+  ordemDia: string;
+  pbo: PalavraBemOrdem;
+  lojaConfig: LojaConfig;
+  balaustreTexto: string;
+  atosDecretosTexto: string;
+  expedientesTexto: string;
+  bolsaPropostasTexto: string;
 };
-
-export type DocumentDraft = Omit<Documento, 'id'>;
 
 export type StatusKind = 'success' | 'error' | 'info';
 
@@ -55,7 +59,6 @@ export type PreviewData = {
   sessionType: SessionType;
   sessionConfig: SessionConfig;
   magnaFields: MagnaFields;
-  documents: Documento[];
   visitors: string[];
   officers: Officers;
   tronco: number;

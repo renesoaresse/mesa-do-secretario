@@ -7,7 +7,7 @@ export const STORAGE_CHANNELS = {
   clear: 'storage:clear',
 } as const;
 
-type DesktopStorageKey = 'officersConfig' | 'lojaConfig';
+type DesktopStorageKey = 'ataDraft' | 'officersConfig' | 'lojaConfig';
 
 export const electronApi = {
   storage: {
