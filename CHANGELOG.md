@@ -5,6 +5,21 @@ Todas as mudanças relevantes deste projeto serão documentadas neste arquivo.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.3.0] - 2026-03-18
+
+### Adicionado
+
+- 34 novos arquivos de teste unitário cobrindo componentes reutilizáveis, formulários,
+  listas, painéis, layout e composição principal da aplicação
+- helpers reutilizáveis de teste em `src/test/render.tsx` e `src/test/factories.ts`
+
+### Alterado
+
+- escopo do coverage alinhado ao valor real da feature, excluindo barrels, arquivos de tipos,
+  `src/app/providers.tsx`, `src/features/preview/components/DocumentPreview.tsx` e
+  `src/features/loja-config/components/LojaConfigForm.tsx`
+- cobertura total da suíte unitária elevada para 93.90%
+
 ## [0.2.0] - 2026-03-18
 
 ### Adicionado
