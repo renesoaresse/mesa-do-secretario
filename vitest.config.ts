@@ -23,7 +23,6 @@ export default mergeConfig(
           'src/features/**/types.ts',
           'src/types/ata.ts',
           'src/app/providers.tsx',
-          'src/features/preview/components/DocumentPreview.tsx',
           'src/features/loja-config/components/LojaConfigForm.tsx',
         ],
       },

@@ -98,3 +98,33 @@ export function makePreviewData(overrides: Partial<PreviewData> = {}): PreviewDa
     ...overrides,
   };
 }
+
+export function makeDangerousPreviewData(overrides: Partial<PreviewData> = {}): PreviewData {
+  return makePreviewData({
+    lojaConfig: {
+      logoDataUrl: null,
+      nomeLoja: '<b>Loja</b> & Co',
+      numeroLoja: '29<script>alert(1)</script>',
+      dataFundacaoISO: '2020-01-01',
+      temploNome: '<script>alert("templo")</script>',
+      enderecoTemplo: 'Rua <img src=x onerror=alert(1)> Central',
+      cidadeEstado: 'Aracaju/SE &lt;b&gt;teste&lt;/b&gt;',
+    },
+    visitors: ['Visitante <b>1</b>', '&lt;Visitante 2&gt;'],
+    officers: makeOfficers({
+      vm: '<strong>Veneravel</strong>',
+      or: 'Orador onclick="hack()"',
+    }),
+    balaustreTexto: '<p>Balaustre</p>',
+    atosDecretosTexto: '<script>atos</script>',
+    expedientesTexto: 'Expediente &lt;seguro&gt;',
+    bolsaPropostasTexto: '<img src=x onerror=alert(2)>',
+    ordemDia: '<div>Ordem</div>',
+    pbo: makePbo({
+      sul: '<i>Sul</i>',
+      norte: '&lt;Norte&gt;',
+      oriente: 'Oriente <script>noop</script>',
+    }),
+    ...overrides,
+  });
+}

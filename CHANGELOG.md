@@ -12,6 +12,8 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - 34 novos arquivos de teste unitário cobrindo componentes reutilizáveis, formulários,
   listas, painéis, layout e composição principal da aplicação
 - helpers reutilizáveis de teste em `src/test/render.tsx` e `src/test/factories.ts`
+- suíte de testes para o preview seguro cobrindo texto malicioso, entidades escapadas,
+  blocos condicionais, estabilidade durante edição e helpers textuais reutilizáveis
 
 ### Alterado
 
@@ -19,6 +21,18 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
   `src/app/providers.tsx`, `src/features/preview/components/DocumentPreview.tsx` e
   `src/features/loja-config/components/LojaConfigForm.tsx`
 - cobertura total da suíte unitária elevada para 93.90%
+- preview do documento migrado de HTML injetado para renderização declarativa em React,
+  preservando `#documentPreview`, classes, `aria-label` e comportamento de zoom
+- lógica textual do preview centralizada em `src/features/preview/components/documentPreviewText.ts`
+  para reduzir regressões e manter tratamento consistente de todos os campos textuais
+- `MainPreview` passou a ser validado com o `DocumentPreview` real em teste de integração
+- `DocumentPreview.tsx` voltou ao escopo de coverage do Vitest
+
+### Segurança
+
+- removido o uso de `dangerouslySetInnerHTML` no preview de atas
+- todos os campos textuais do preview agora são exibidos como texto literal, sem interpretar
+  HTML vindo da entrada do usuário ou de futuras importações
 
 ## [0.2.0] - 2026-03-18
 
