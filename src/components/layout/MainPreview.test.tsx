@@ -3,10 +3,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { makePreviewData } from '../../test/factories';
 import { MainPreview } from './MainPreview';
 
-vi.mock('../../features/preview/components/DocumentPreview', () => ({
-  DocumentPreview: ({ zoom }: { zoom: number }) => <div>DocumentPreview {zoom}</div>,
-}));
-
 describe('MainPreview', () => {
   it('renderiza a toolbar e o preview do documento', () => {
     render(
@@ -19,6 +15,6 @@ describe('MainPreview', () => {
     );
 
     expect(screen.getByRole('group', { name: /ações do preview/i })).toBeInTheDocument();
-    expect(screen.getByText('DocumentPreview 1')).toBeInTheDocument();
+    expect(screen.getByLabelText('Pré-visualização do documento')).toBeInTheDocument();
   });
 });
