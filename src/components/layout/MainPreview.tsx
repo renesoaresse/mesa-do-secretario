@@ -11,8 +11,31 @@ type MainPreviewProps = {
 };
 
 export function MainPreview({ sessionType, zoom, onZoomChange, dataDocument }: MainPreviewProps) {
+  const handleBlockedNavigation = (event: React.MouseEvent<HTMLElement>) => {
+    const target = event.target;
+
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    const anchor = target.closest('a[href]');
+
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href') ?? '';
+    const isExternal =
+      href.startsWith('http://') || href.startsWith('https://') || href.startsWith('javascript:');
+
+    if (isExternal || anchor.getAttribute('target') === '_blank') {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
   return (
-    <main className="main">
+    <main className="main" onClickCapture={handleBlockedNavigation}>
       <PreviewActions sessionType={sessionType} zoom={zoom} onZoomChange={onZoomChange} />
 
       <DocumentPreview zoom={zoom} data={dataDocument} />

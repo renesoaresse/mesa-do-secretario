@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { installMockElectronApi, removeMockElectronApi } from '../test/electron';
 import {
   makeDocumentDraft,
   makeMagnaFields,
@@ -71,12 +72,24 @@ vi.mock('../components/layout/MainPreview', () => ({
 
 describe('App', () => {
   it('renderiza composicao principal com header, content e preview', () => {
+    removeMockElectronApi();
     render(<App />);
 
+    expect(document.querySelector('[data-runtime="web"]')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /gerador de ata/i })).toBeInTheDocument();
     expect(screen.getByText(/contador: 42 - v/i)).toBeInTheDocument();
     expect(screen.getByText('SidebarContent economica')).toBeInTheDocument();
     expect(screen.getByText('MainPreview 1')).toBeInTheDocument();
     expect(screen.getByText(/alterações salvas automaticamente/i)).toBeInTheDocument();
+  });
+
+  it('permanece funcional quando a API segura do Electron esta disponivel', () => {
+    installMockElectronApi();
+
+    render(<App />);
+
+    expect(document.querySelector('[data-runtime="desktop-secure"]')).toBeInTheDocument();
+    expect(screen.getByText('SidebarContent economica')).toBeInTheDocument();
+    expect(screen.getByText('MainPreview 1')).toBeInTheDocument();
   });
 });

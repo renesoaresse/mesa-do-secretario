@@ -1,10 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+import { installMockElectronApi, removeMockElectronApi } from '../test/electron';
 import { useAtaState } from './useAtaState';
 
 describe('useAtaState', () => {
   beforeEach(() => {
     localStorage.clear();
+    removeMockElectronApi();
   });
 
   it('deve retornar o estado inicial com valores padrão', () => {
@@ -84,6 +86,39 @@ describe('useAtaState', () => {
 
     const { result } = renderHook(() => useAtaState());
     expect(result.current.lojaConfig.nomeLoja).toBe('Loja Persisted');
+  });
+
+  it('deve persistir officers pela API segura do Electron quando disponivel', () => {
+    const electronStorage = installMockElectronApi();
+    const { result } = renderHook(() => useAtaState());
+
+    act(() => {
+      result.current.updateOfficers({ vm: 'Veneravel Seguro' });
+    });
+
+    expect(result.current.officers.vm).toBe('Veneravel Seguro');
+    expect(electronStorage.load('officersConfig')).toEqual(
+      expect.objectContaining({ vm: 'Veneravel Seguro' }),
+    );
+    expect(localStorage.getItem('officersConfig')).toBeNull();
+  });
+
+  it('deve carregar lojaConfig pela API segura do Electron quando disponivel', () => {
+    installMockElectronApi({
+      lojaConfig: {
+        logoDataUrl: null,
+        nomeLoja: 'Loja Desktop',
+        numeroLoja: '29',
+        dataFundacaoISO: '',
+        temploNome: '',
+        enderecoTemplo: '',
+        cidadeEstado: '',
+      },
+    });
+
+    const { result } = renderHook(() => useAtaState());
+
+    expect(result.current.lojaConfig.nomeLoja).toBe('Loja Desktop');
   });
 
   it('deve adicionar e remover documentos', () => {
