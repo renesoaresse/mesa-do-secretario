@@ -30,16 +30,12 @@ describe('electron preload', () => {
   it('mapeia chamadas de storage para canais síncronos específicos', async () => {
     const { electronApi, STORAGE_CHANNELS } = await import('./preload');
 
-    electronApi.storage.load('officersConfig');
+    electronApi.storage.load('ataDraft');
     electronApi.storage.save('lojaConfig', { nomeLoja: 'Teste' });
     electronApi.storage.remove('officersConfig');
     electronApi.storage.clear();
 
-    expect(ipcRendererMock.sendSync).toHaveBeenNthCalledWith(
-      1,
-      STORAGE_CHANNELS.load,
-      'officersConfig',
-    );
+    expect(ipcRendererMock.sendSync).toHaveBeenNthCalledWith(1, STORAGE_CHANNELS.load, 'ataDraft');
     expect(ipcRendererMock.sendSync).toHaveBeenNthCalledWith(2, STORAGE_CHANNELS.save, {
       key: 'lojaConfig',
       value: { nomeLoja: 'Teste' },

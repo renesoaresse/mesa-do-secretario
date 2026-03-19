@@ -1,6 +1,5 @@
 import type {
-  DocumentDraft,
-  Documento,
+  AtaDraft,
   MagnaFields,
   Officers,
   PalavraBemOrdem,
@@ -26,27 +25,6 @@ export function makeMagnaFields(overrides: Partial<MagnaFields> = {}): MagnaFiel
     oradorConvidado: 'Convidado',
     autoridades: 'Autoridades',
     atoEspecial: 'Ato',
-    ...overrides,
-  };
-}
-
-export function makeDocumentDraft(overrides: Partial<DocumentDraft> = {}): DocumentDraft {
-  return {
-    type: 'Prancha/Edital',
-    number: '001',
-    origin: 'GLMESE',
-    subject: 'Assunto',
-    ...overrides,
-  };
-}
-
-export function makeDocumento(overrides: Partial<Documento> = {}): Documento {
-  return {
-    id: 'doc-1',
-    type: 'Prancha/Edital',
-    number: '001',
-    origin: 'GLMESE',
-    subject: 'Assunto',
     ...overrides,
   };
 }
@@ -85,7 +63,6 @@ export function makePreviewData(overrides: Partial<PreviewData> = {}): PreviewDa
     sessionType: 'economica',
     sessionConfig: makeSessionConfig(),
     magnaFields: makeMagnaFields(),
-    documents: [makeDocumento()],
     visitors: ['Visitante 1'],
     officers: makeOfficers(),
     tronco: 10,
@@ -127,4 +104,47 @@ export function makeDangerousPreviewData(overrides: Partial<PreviewData> = {}): 
     }),
     ...overrides,
   });
+}
+
+export function makeAtaDraft(overrides: Partial<AtaDraft> = {}): AtaDraft {
+  return {
+    sessionType: 'economica',
+    sessionConfig: makeSessionConfig(),
+    magnaFields: makeMagnaFields(),
+    visitors: ['Visitante 1'],
+    officers: makeOfficers(),
+    tronco: 10,
+    ordemDia: 'Ordem do dia',
+    pbo: makePbo(),
+    lojaConfig: makePreviewData().lojaConfig,
+    balaustreTexto: 'Balaustre',
+    atosDecretosTexto: 'Atos',
+    expedientesTexto: 'Expedientes',
+    bolsaPropostasTexto: 'Bolsa',
+    ...overrides,
+  };
+}
+
+export function makeLegacyAtaDraft(overrides: Record<string, unknown> = {}) {
+  return {
+    ...makeAtaDraft(),
+    documents: [
+      {
+        id: 'doc-1',
+        type: 'Prancha/Edital',
+        number: '001',
+        origin: 'GLMESE',
+        subject: 'Assunto',
+      },
+    ],
+    docDraft: {
+      type: 'Prancha/Edital',
+      number: '001',
+      origin: 'GLMESE',
+      subject: 'Assunto',
+    },
+    docStatus: { kind: 'info', text: 'Legacy' },
+    previewData: makePreviewData(),
+    ...overrides,
+  };
 }

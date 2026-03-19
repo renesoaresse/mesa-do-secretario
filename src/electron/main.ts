@@ -11,14 +11,16 @@ export const STORAGE_CHANNELS = {
   clear: 'storage:clear',
 } as const;
 
-export const ALLOWED_STORAGE_KEYS = ['officersConfig', 'lojaConfig'] as const;
+export const ALLOWED_STORAGE_KEYS = ['ataDraft', 'officersConfig', 'lojaConfig'] as const;
 
 type AllowedStorageKey = (typeof ALLOWED_STORAGE_KEYS)[number];
 
-type FileSystemLike = Pick<
-  typeof fs,
-  'existsSync' | 'mkdirSync' | 'readFileSync' | 'writeFileSync'
->;
+type FileSystemLike = {
+  existsSync: (path: string) => boolean;
+  mkdirSync: (path: string, options: { recursive: true }) => void;
+  readFileSync: (path: string, encoding: 'utf-8') => string;
+  writeFileSync: (path: string, data: string, encoding: 'utf-8') => void;
+};
 
 type SyncEventLike = {
   senderFrame?: { url: string } | null;

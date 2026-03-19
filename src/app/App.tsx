@@ -36,13 +36,6 @@ export default function App() {
               onSessionConfigChange={state.updateSessionConfig}
               magnaFields={state.magnaFields}
               onMagnaFieldsChange={state.updateMagnaFields}
-              docDraft={state.docDraft}
-              onDocDraftChange={(patch) => state.setDocDraft((d) => ({ ...d, ...patch }))}
-              documents={state.documents}
-              docStatus={state.docStatus}
-              onPickPdf={state.onPickPdf}
-              onAddDocument={() => state.addDocument(state.docDraft)}
-              onRemoveDocument={state.removeDocument}
               visitors={state.visitors}
               onAddVisitor={state.addVisitor}
               onRemoveVisitor={state.removeVisitor}
