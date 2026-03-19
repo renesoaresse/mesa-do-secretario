@@ -5,6 +5,15 @@ Todas as mudanças relevantes deste projeto serão documentadas neste arquivo.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [UNRELEASED]
+
+### Alterado
+
+- wiki-docs: removida página Contribuição e todas as referências à Constituição do Projeto,
+  mantendo 8 páginas (Home, Instalação, Quickstart, Arquitetura, Padrões de Código,
+  Testes, Build e Distribuição, Changelog)
+- quickstart.md: atualizada lista de arquivos para 8 páginas
+
 ## [0.3.0] - 2026-03-18
 
 ### Adicionado
