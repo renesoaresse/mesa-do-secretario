@@ -5,6 +5,58 @@ Todas as mudanças relevantes deste projeto serão documentadas neste arquivo.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.3.0] - 2026-03-18
+
+### Adicionado
+
+- 34 novos arquivos de teste unitário cobrindo componentes reutilizáveis, formulários,
+  listas, painéis, layout e composição principal da aplicação
+- helpers reutilizáveis de teste em `src/test/render.tsx` e `src/test/factories.ts`
+- suíte de testes para o preview seguro cobrindo texto malicioso, entidades escapadas,
+  blocos condicionais, estabilidade durante edição e helpers textuais reutilizáveis
+- suíte de testes para o shell Electron cobrindo preload seguro, regras de navegação,
+  bloqueio de novas janelas e persistência mediada por IPC
+- helper de testes para seed e leitura do storage em `src/test/storage.ts`
+- cenários E2E cobrindo restauração dos campos persistidos e limpeza de dados legados
+
+### Alterado
+
+- escopo do coverage alinhado ao valor real da feature, excluindo barrels, arquivos de tipos,
+  `src/app/providers.tsx`, `src/features/preview/components/DocumentPreview.tsx` e
+  `src/features/loja-config/components/LojaConfigForm.tsx`
+- cobertura total da suíte unitária elevada para 93.90%
+- preview do documento migrado de HTML injetado para renderização declarativa em React,
+  preservando `#documentPreview`, classes, `aria-label` e comportamento de zoom
+- lógica textual do preview centralizada em `src/features/preview/components/documentPreviewText.ts`
+  para reduzir regressões e manter tratamento consistente de todos os campos textuais
+- `MainPreview` passou a ser validado com o `DocumentPreview` real em teste de integração
+- `DocumentPreview.tsx` voltou ao escopo de coverage do Vitest
+- `src/electron/main.ts` passou a explicitar `sandbox`, preload dedicado e bloqueios
+  padrão para navegação externa e `window.open`
+- `src/services/storage.ts` agora usa a ponte segura do Electron quando disponível,
+  mantendo fallback para `localStorage` no ambiente web
+- `src/app/App.tsx` e `src/components/layout/MainPreview.tsx` passaram a sinalizar e
+  respeitar o runtime endurecido sem quebrar o fluxo atual
+- persistência da ata migrada para um draft canônico com restauração dos campos principais
+  restantes em `src/hooks/useAtaState.ts` e `src/services/storage.ts`
+- compatibilidade mantida com `officersConfig` e `lojaConfig` durante a migração do estado
+- `src/app/App.tsx` e `src/components/layout/SidebarContent.tsx` foram simplificados após a
+  remoção completa do fluxo de documentos
+
+### Segurança
+
+- removido o uso de `dangerouslySetInnerHTML` no preview de atas
+- todos os campos textuais do preview agora são exibidos como texto literal, sem interpretar
+  HTML vindo da entrada do usuário ou de futuras importações
+- adicionada API mínima no preload com superfície tipada e sem canal genérico
+- operações privilegiadas de persistência passaram a ser centralizadas no processo principal
+- adicionada política de conteúdo restritiva em `index.html`, compatível com o fluxo atual
+
+### Removido
+
+- módulo de documentos, incluindo tipos, componentes, lógica de estado e testes em
+  `src/features/documents/`
+
 ## [0.2.0] - 2026-03-18
 
 ### Adicionado
