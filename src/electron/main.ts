@@ -29,7 +29,11 @@ type SyncEventLike = {
 };
 
 function getPreloadPath() {
-  return path.join(app.getAppPath(), 'dist-electron', 'preload.js');
+  const preloadPath = path.join(app.getAppPath(), 'dist-electron', 'preload.cjs');
+  console.log('Preload path:', preloadPath);
+  console.log('App is packaged:', app.isPackaged);
+  console.log('App path:', app.getAppPath());
+  return preloadPath;
 }
 
 function getStorageFilePath(userDataPath: string) {
@@ -171,6 +175,16 @@ export function createMainWindow() {
     console.log('Loading index.html from:', indexPath);
     mainWindow.loadFile(indexPath);
   }
+
+  mainWindow.webContents.on('console-message', (_event, level, message) => {
+    if (level >= 2) {
+      console.log('Console error:', message);
+    }
+  });
+
+  mainWindow.webContents.on('render-process-gone', (_event, details) => {
+    console.error('Render process gone:', details);
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null;

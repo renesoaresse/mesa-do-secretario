@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.3.0",
   "type": "module",
-  "main": "dist-electron/main.js",
+  "main": "dist-electron/main.cjs",
   "author": {
     "name": "Renê Rocha Soares Neto"
   },
@@ -15,12 +15,12 @@
   "scripts": {
     "dev": "vite",
     "clean": "rimraf dist dist-electron release",
-    "electron:tsc": "tsc -p src/electron/tsconfig.json",
+    "electron:tsc": "tsc -p src/electron/tsconfig.json && cd dist-electron && mv main.js main.cjs && mv preload.js preload.cjs",
     "build:web": "vite build",
     "build:electron": "yarn electron:tsc",
     "build": "yarn clean && yarn build:web && yarn build:electron",
     "electron:dev": "concurrently -k --names \"vite,electron\" --prefix \"[{name}]\" \"vite\" \"wait-on http://localhost:5173 && yarn electron:tsc && electron .\"",
-    "dist": "electron-builder --win --publish never && electron-builder --mac --publish never",
+    "dist": "yarn build && electron-builder --win --publish never && electron-builder --mac --publish never",
     "dist:win": "yarn build && electron-builder --win --publish never",
     "dist:mac": "yarn build && electron-builder --mac --publish never",
     "prepare": "husky",
@@ -34,7 +34,8 @@
   },
   "dependencies": {
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "wouter": "^3.9.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",

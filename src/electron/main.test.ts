@@ -70,7 +70,7 @@ describe('electron main security', () => {
           nodeIntegration: false,
           contextIsolation: true,
           sandbox: true,
-          preload: '/app/dist-electron/preload.js',
+          preload: '/app/dist-electron/preload.cjs',
         }),
       }),
     );
