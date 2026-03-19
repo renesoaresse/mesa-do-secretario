@@ -184,4 +184,15 @@ export const storage = {
       },
     };
   },
+
+  hasSavedAta(): boolean {
+    const desktopStorage = getDesktopStorage();
+
+    if (desktopStorage) {
+      const data = desktopStorage.load<unknown>(STORAGE_KEYS.ataDraft);
+      return data !== null;
+    }
+
+    return localStorage.getItem(STORAGE_KEYS.ataDraft) !== null;
+  },
 };

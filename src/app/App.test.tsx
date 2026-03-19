@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { installMockElectronApi, removeMockElectronApi } from '../test/electron';
 import {
   makeMagnaFields,
@@ -8,7 +8,7 @@ import {
   makePreviewData,
   makeSessionConfig,
 } from '../test/factories';
-import App from './App';
+import { AppEditor } from './AppEditor';
 
 const sidebarContentSpy = vi.hoisted(() =>
   vi.fn(({ sessionType }: { sessionType: string }) => <div>SidebarContent {sessionType}</div>),
@@ -65,9 +65,17 @@ vi.mock('../components/layout/MainPreview', () => ({
 }));
 
 describe('App', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    removeMockElectronApi();
+  });
+
   it('renderiza composicao principal com header, content e preview', () => {
     removeMockElectronApi();
-    render(<App />);
+    render(<AppEditor />);
 
     expect(document.querySelector('[data-runtime="web"]')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /gerador de ata/i })).toBeInTheDocument();
@@ -85,7 +93,7 @@ describe('App', () => {
   it('permanece funcional quando a API segura do Electron esta disponivel', () => {
     installMockElectronApi();
 
-    render(<App />);
+    render(<AppEditor />);
 
     expect(document.querySelector('[data-runtime="desktop-secure"]')).toBeInTheDocument();
     expect(screen.getByText('SidebarContent economica')).toBeInTheDocument();
