@@ -19,7 +19,5 @@ function getSessionLabel(type: SessionType) {
       return 'Sessão Econômica';
     case 'magna':
       return 'Sessão Magna';
-    case 'conjunta':
-      return 'Sessão Conjunta';
   }
 }

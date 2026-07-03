@@ -274,6 +274,214 @@
 }
 
 /* =========================================================
+   COMBOBOX (busca de loja)
+========================================================= */
+.combo-panel {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 4px;
+
+  max-height: 260px;
+  overflow-y: auto;
+
+  background: #1f2430;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+
+.combo-hint {
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.combo-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-light);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.combo-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.combo-option--other {
+  margin-top: 2px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--gold-400);
+  font-weight: 800;
+}
+
+/* =========================================================
+   LISTA DE LOJAS EM SESSÃO CONJUNTA
+========================================================= */
+.conjunta-empty {
+  margin-top: 10px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.conjunta-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.conjunta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 12px;
+  border-radius: 10px;
+  border-left: 3px solid var(--gold-500);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.conjunta-row:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.conjunta-row__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.conjunta-row__nome {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-light);
+  line-height: 1.25;
+}
+
+.conjunta-row__oriente {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.conjunta-row__obreiros {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sidebar .conjunta-row__obreiros .control {
+  width: 64px;
+  padding: 6px 8px;
+  text-align: center;
+}
+
+.conjunta-row__remove {
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 6px 9px;
+}
+
+/* Loja escolhida para o visitante (chip) */
+.visitor-loja-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  padding: 8px 12px;
+  border-radius: 10px;
+  border-left: 3px solid var(--gold-500);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.visitor-loja-chip__text {
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.visitor-loja-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* =========================================================
+   MODAL
+========================================================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.modal-panel {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
+
+  background: #1f2430;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.modal-title {
+  font-size: 15px;
+  color: var(--text-light);
+}
+
+.modal-body {
+  padding: 16px;
+}
+
+/* =========================================================
    RESPONSIVO
 ========================================================= */
 @media (max-width: 768px) {

@@ -1,17 +1,19 @@
-import type { AtaDraft, LojaConfig, Officers } from '../types/ata';
+import type { AtaDraft, Loja, LojaConfig, Officers } from '../types/ata';
 import type { DesktopStorageKey } from '../types/electron-api';
 
 export const STORAGE_KEYS = {
   ataDraft: 'ataDraft',
   officersConfig: 'officersConfig',
   lojaConfig: 'lojaConfig',
+  lojasCadastro: 'lojasCadastro',
 } as const;
 
 function isDesktopStorageKey(key: string): key is DesktopStorageKey {
   return (
     key === STORAGE_KEYS.ataDraft ||
     key === STORAGE_KEYS.officersConfig ||
-    key === STORAGE_KEYS.lojaConfig
+    key === STORAGE_KEYS.lojaConfig ||
+    key === STORAGE_KEYS.lojasCadastro
   );
 }
 
@@ -40,13 +42,41 @@ function getNumber(value: unknown, fallback: number) {
 }
 
 function getSessionType(value: unknown, fallback: AtaDraft['sessionType']) {
-  return value === 'economica' || value === 'magna' || value === 'conjunta' ? value : fallback;
+  return value === 'economica' || value === 'magna' ? value : fallback;
 }
 
-function getStringArray(value: unknown, fallback: string[]) {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === 'string')
-    : fallback;
+function getVisitors(value: unknown, fallback: AtaDraft['visitors']): AtaDraft['visitors'] {
+  if (!Array.isArray(value)) return fallback;
+  // Compat: versões antigas guardavam visitantes como string.
+  return value
+    .map((item) => {
+      if (typeof item === 'string') {
+        return { nome: item, lojaId: '', lojaNome: '', oriente: '', potencia: '' };
+      }
+      if (isRecord(item) && typeof item.nome === 'string') {
+        return {
+          nome: item.nome,
+          lojaId: getString(item.lojaId, ''),
+          lojaNome: getString(item.lojaNome, ''),
+          oriente: getString(item.oriente, ''),
+          potencia: getString(item.potencia, ''),
+        };
+      }
+      return null;
+    })
+    .filter((item): item is AtaDraft['visitors'][number] => item !== null);
+}
+
+function getLojasConjunta(value: unknown, fallback: AtaDraft['lojasConjunta']) {
+  if (!Array.isArray(value)) return fallback;
+  return value
+    .filter(isRecord)
+    .filter((item) => typeof item.id === 'string')
+    .map((item) => ({
+      id: item.id as string,
+      nome: getString(item.nome, ''),
+      obreiros: getNumber(item.obreiros, 0),
+    }));
 }
 
 function sanitizeAtaDraft(value: unknown, defaultDraft: AtaDraft): AtaDraft {
@@ -60,18 +90,26 @@ function sanitizeAtaDraft(value: unknown, defaultDraft: AtaDraft): AtaDraft {
   const pbo = getRecord(value.pbo);
   const lojaConfig = getRecord(value.lojaConfig);
 
+  // Migração: versões antigas guardavam "conjunta" como tipo de sessão.
+  // Agora vira um flag booleano dentro do sessionConfig.
+  const legacyConjunta = value.sessionType === 'conjunta';
+
   return {
     ...defaultDraft,
     sessionType: getSessionType(value.sessionType, defaultDraft.sessionType),
     sessionConfig: {
       ...defaultDraft.sessionConfig,
       ...sessionConfig,
+      conjunta:
+        typeof sessionConfig.conjunta === 'boolean'
+          ? sessionConfig.conjunta
+          : legacyConjunta || defaultDraft.sessionConfig.conjunta,
     },
     magnaFields: {
       ...defaultDraft.magnaFields,
       ...magnaFields,
     },
-    visitors: getStringArray(value.visitors, defaultDraft.visitors),
+    visitors: getVisitors(value.visitors, defaultDraft.visitors),
     officers: {
       ...defaultDraft.officers,
       ...officers,
@@ -82,6 +120,7 @@ function sanitizeAtaDraft(value: unknown, defaultDraft: AtaDraft): AtaDraft {
       ...defaultDraft.pbo,
       ...pbo,
     },
+    lojasConjunta: getLojasConjunta(value.lojasConjunta, defaultDraft.lojasConjunta),
     lojaConfig: {
       ...defaultDraft.lojaConfig,
       ...lojaConfig,
@@ -91,6 +130,19 @@ function sanitizeAtaDraft(value: unknown, defaultDraft: AtaDraft): AtaDraft {
     expedientesTexto: getString(value.expedientesTexto, defaultDraft.expedientesTexto),
     bolsaPropostasTexto: getString(value.bolsaPropostasTexto, defaultDraft.bolsaPropostasTexto),
   };
+}
+
+function sanitizeLojas(value: unknown): Loja[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter(isRecord).map((item) => ({
+    id: getString(item.id, crypto.randomUUID()),
+    nome: getString(item.nome, ''),
+    oriente: getString(item.oriente, ''),
+    potencia: getString(item.potencia, ''),
+  }));
 }
 
 export const storage = {
@@ -183,6 +235,14 @@ export const storage = {
         ...legacyLojaConfig,
       },
     };
+  },
+
+  loadLojas(defaultLojas: Loja[] = []): Loja[] {
+    return sanitizeLojas(this.load<unknown>(STORAGE_KEYS.lojasCadastro, defaultLojas));
+  },
+
+  saveLojas(lojas: Loja[]): void {
+    this.save<Loja[]>(STORAGE_KEYS.lojasCadastro, sanitizeLojas(lojas));
   },
 
   hasSavedAta(): boolean {

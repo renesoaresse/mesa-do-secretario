@@ -13,8 +13,6 @@ function getTitle(type: SessionType) {
       return 'Sessão Econômica';
     case 'magna':
       return 'Sessão Magna';
-    case 'conjunta':
-      return 'Sessão Conjunta';
   }
 }
 
@@ -24,8 +22,6 @@ function getSubtitle(type: SessionType) {
       return 'Regular';
     case 'magna':
       return 'Solene';
-    case 'conjunta':
-      return 'Especial';
   }
 }
 
@@ -37,8 +33,6 @@ function getIcon(type: SessionType) {
       return '🪙';
     case 'magna':
       return '👑';
-    case 'conjunta':
-      return '🤝';
   }
 }
 
@@ -46,7 +40,7 @@ export function SessionTypeSelector({ value, onChange }: Props) {
   return (
     <section>
       <div className="session-card-grid">
-        {(['economica', 'magna', 'conjunta'] as SessionType[]).map((type) => (
+        {(['economica', 'magna'] as SessionType[]).map((type) => (
           <SessionTypeButton
             key={type}
             type={type}

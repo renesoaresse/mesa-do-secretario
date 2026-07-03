@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { makeDangerousPreviewData, makePreviewData } from '../../../test/factories';
+import { makeDangerousPreviewData, makePreviewData, makeVisitor } from '../../../test/factories';
 import { DocumentPreview } from './DocumentPreview';
 
 describe('DocumentPreview', () => {
@@ -95,7 +95,10 @@ describe('DocumentPreview', () => {
       <DocumentPreview
         zoom={1}
         data={makeDangerousPreviewData({
-          visitors: ['<Visitante Importado>', '&amp;Outro'],
+          visitors: [
+            makeVisitor({ nome: '<Visitante Importado>' }),
+            makeVisitor({ nome: '&amp;Outro' }),
+          ],
           bolsaPropostasTexto: '&lt;script&gt;externo&lt;/script&gt;',
         })}
       />,

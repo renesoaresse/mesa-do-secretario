@@ -5,7 +5,19 @@ import type {
   PalavraBemOrdem,
   PreviewData,
   SessionConfig,
+  Visitor,
 } from '../types/ata';
+
+export function makeVisitor(overrides: Partial<Visitor> = {}): Visitor {
+  return {
+    nome: 'Visitante 1',
+    lojaId: '',
+    lojaNome: '',
+    oriente: '',
+    potencia: '',
+    ...overrides,
+  };
+}
 
 export function makeSessionConfig(overrides: Partial<SessionConfig> = {}): SessionConfig {
   return {
@@ -15,6 +27,7 @@ export function makeSessionConfig(overrides: Partial<SessionConfig> = {}): Sessi
     horaInicio: '19:30',
     horaEnc: '21:00',
     numPresenca: 12,
+    conjunta: false,
     ...overrides,
   };
 }
@@ -63,11 +76,12 @@ export function makePreviewData(overrides: Partial<PreviewData> = {}): PreviewDa
     sessionType: 'economica',
     sessionConfig: makeSessionConfig(),
     magnaFields: makeMagnaFields(),
-    visitors: ['Visitante 1'],
+    visitors: [makeVisitor({ nome: 'Visitante 1' })],
     officers: makeOfficers(),
     tronco: 10,
     ordemDia: 'Ordem do dia',
     pbo: makePbo(),
+    lojasConjunta: [],
     balaustreTexto: 'Balaustre',
     atosDecretosTexto: 'Atos',
     expedientesTexto: 'Expedientes',
@@ -87,7 +101,10 @@ export function makeDangerousPreviewData(overrides: Partial<PreviewData> = {}): 
       enderecoTemplo: 'Rua <img src=x onerror=alert(1)> Central',
       cidadeEstado: 'Aracaju/SE &lt;b&gt;teste&lt;/b&gt;',
     },
-    visitors: ['Visitante <b>1</b>', '&lt;Visitante 2&gt;'],
+    visitors: [
+      makeVisitor({ nome: 'Visitante <b>1</b>' }),
+      makeVisitor({ nome: '&lt;Visitante 2&gt;' }),
+    ],
     officers: makeOfficers({
       vm: '<strong>Veneravel</strong>',
       or: 'Orador onclick="hack()"',
@@ -111,11 +128,12 @@ export function makeAtaDraft(overrides: Partial<AtaDraft> = {}): AtaDraft {
     sessionType: 'economica',
     sessionConfig: makeSessionConfig(),
     magnaFields: makeMagnaFields(),
-    visitors: ['Visitante 1'],
+    visitors: [makeVisitor({ nome: 'Visitante 1' })],
     officers: makeOfficers(),
     tronco: 10,
     ordemDia: 'Ordem do dia',
     pbo: makePbo(),
+    lojasConjunta: [],
     lojaConfig: makePreviewData().lojaConfig,
     balaustreTexto: 'Balaustre',
     atosDecretosTexto: 'Atos',

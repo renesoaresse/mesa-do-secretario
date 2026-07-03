@@ -1,4 +1,4 @@
-import type { PreviewData, SessionType } from '../../../types/ata';
+import type { LojaConjunta, PreviewData, SessionType, Visitor } from '../../../types/ata';
 
 type PboKey = 'sul' | 'norte' | 'oriente';
 
@@ -23,13 +23,13 @@ export function getPreviewDateParts(dataISO: string) {
   };
 }
 
-export function getSessionTypeMeta(sessionType: SessionType) {
-  if (sessionType === 'magna') {
-    return { className: 'magna', title: 'MAGNA' };
+export function getSessionTypeMeta(sessionType: SessionType, conjunta = false) {
+  if (conjunta) {
+    return { className: 'conjunta', title: 'CONJUNTA' };
   }
 
-  if (sessionType === 'conjunta') {
-    return { className: 'conjunta', title: 'CONJUNTA' };
+  if (sessionType === 'magna') {
+    return { className: 'magna', title: 'MAGNA' };
   }
 
   return { className: 'economica', title: 'ECONÔMICA' };
@@ -53,26 +53,67 @@ export function formatPalavraBemOrdemEntries(palavraData: PreviewData['pbo']): P
   return entries;
 }
 
-export function gerarTextoPresenca(presenca: number, visitors: string[]) {
+// Junta nomes com vírgula e "e" antes do último: "A", "A e B", "A, B e C".
+export function joinNomes(items: string[]): string {
+  const list = items.filter((item) => item.trim().length > 0);
+  if (list.length === 0) return '';
+  if (list.length === 1) return list[0];
+  return `${list.slice(0, -1).join(', ')} e ${list[list.length - 1]}`;
+}
+
+// Sufixo após a loja anfitriã: " e X" (1 loja) ou ", X, Y e Z" (2+ lojas).
+export function gerarSufixoLojasConjunta(lojasConjunta: LojaConjunta[]): string {
+  const nomes = lojasConjunta.map((loja) => loja.nome.trim()).filter(Boolean);
+  if (nomes.length === 0) return '';
+  if (nomes.length === 1) return ` e a ${nomes[0]}`;
+  return `, a ${nomes.slice(0, -1).join(', ')} e a ${nomes[nomes.length - 1]}`;
+}
+
+export function gerarTextoPresenca(
+  presenca: number,
+  visitors: Visitor[],
+  lojasConjunta: LojaConjunta[] = [],
+) {
+  const quadro = `${FORMAT.pad(presenca)} (${FORMAT.extenso(presenca)}) IIr∴ do quadro`;
+  const obreirosLojas = lojasConjunta.map(
+    (loja) =>
+      `${FORMAT.pad(loja.obreiros)} (${FORMAT.extenso(loja.obreiros)}) IIr∴ da ${loja.nome}`,
+  );
+  const presencaTexto = joinNomes([quadro, ...obreirosLojas]);
+
+  // Sessão conjunta: presença lista o quadro + obreiros de cada loja e encerra,
+  // sem o complemento de visitantes (esses aparecem na Saudação aos Visitantes).
+  if (obreirosLojas.length > 0) {
+    return `contando com a presença de ${presencaTexto} que assinaram o Livro de Presença.`;
+  }
+
   if (visitors.length === 0) {
-    return `contando com a presença de ${FORMAT.pad(presenca)} (${FORMAT.extenso(presenca)}) IIr∴ do quadro, que assinaram o Livro de Presença.`;
+    return `contando com a presença de ${presencaTexto}, que assinaram o Livro de Presença.`;
   }
 
   const pluralVisitantes = visitors.length > 1;
 
-  return `contando com a presença de ${FORMAT.pad(presenca)} (${FORMAT.extenso(presenca)}) IIr∴ do quadro, e ${FORMAT.pad(visitors.length)} (${FORMAT.extenso(visitors.length)}) ${pluralVisitantes ? 'IIr∴ visitantes' : 'Ir∴ visitante'} que assinaram o Livro de Presença.`;
+  return `contando com a presença de ${presencaTexto}, e ${FORMAT.pad(visitors.length)} (${FORMAT.extenso(visitors.length)}) ${pluralVisitantes ? 'IIr∴ visitantes' : 'Ir∴ visitante'} que assinaram o Livro de Presença.`;
 }
 
-export function gerarTextoSaudacao(visitors: string[], orador: string) {
+// Detalhe de um visitante: "Ir∴ visitante Fulano da Loja X do Oriente de Y filiado à Potência Z".
+export function descreverVisitante(visitor: Visitor): string {
+  let texto = `Ir∴ visitante ${visitor.nome}`;
+  if (hasText(visitor.lojaNome)) texto += ` da ${visitor.lojaNome}`;
+  if (hasText(visitor.oriente)) texto += ` do Oriente de ${visitor.oriente}`;
+  if (hasText(visitor.potencia)) texto += ` filiado à Potência ${visitor.potencia}`;
+  return texto;
+}
+
+export function gerarTextoSaudacao(visitors: Visitor[], orador: string) {
   if (visitors.length === 0) {
     return 'Foi suprimido por não ter visitantes.';
   }
 
-  const plural = visitors.length > 1;
   const primeiroNomeOrador = (orador || '').trim().split(/\s+/)[0] || 'Orador';
-  const visitantesTexto = visitors.join(', ');
+  const visitantesTexto = joinNomes(visitors.map(descreverVisitante));
 
-  return `O Ir∴ Or∴ ${primeiroNomeOrador} saudou ${plural ? 'os nossos IIr∴ visitantes' : 'o nosso Ir∴ visitante'} ${visitantesTexto}, na forma ritualística.`;
+  return `O Ir∴ Or∴ ${primeiroNomeOrador} saudou o ${visitantesTexto}, na forma ritualística.`;
 }
 
 export function formatDateBR(iso: string) {

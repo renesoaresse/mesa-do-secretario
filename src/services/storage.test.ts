@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { makeAtaDraft, makeLegacyAtaDraft } from '../test/factories';
+import { makeAtaDraft, makeLegacyAtaDraft, makeVisitor } from '../test/factories';
 import { readStorage, seedStorage } from '../test/storage';
 import { storage } from './storage';
 
@@ -61,7 +61,7 @@ describe('storage service', () => {
       expect(loaded).not.toHaveProperty('documents');
       expect(loaded).not.toHaveProperty('docStatus');
       expect(loaded).not.toHaveProperty('docDraft');
-      expect(loaded.visitors).toEqual(['Visitante 1']);
+      expect(loaded.visitors).toEqual([makeVisitor({ nome: 'Visitante 1' })]);
     });
 
     it('deve usar officersConfig e lojaConfig legados quando o draft canonico ainda nao existir', () => {

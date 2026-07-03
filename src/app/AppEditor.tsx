@@ -6,9 +6,11 @@ import { SessionIndicator } from '../features/session/components/SessionIndicato
 import { AutoSaveToast } from '../components/ui/AutoSaveToast';
 import { SidebarContent } from '../components/layout/SidebarContent';
 import { useAtaState } from '../hooks/useAtaState';
+import { useLojas } from '../features/loja-config';
 
 export function AppEditor() {
   const state = useAtaState();
+  const { lojas, addLoja } = useLojas();
   const runtimeMode =
     typeof window !== 'undefined' && window.electronAPI ? 'desktop-secure' : 'web';
 
@@ -34,6 +36,12 @@ export function AppEditor() {
               }}
               sessionConfig={state.sessionConfig}
               onSessionConfigChange={state.updateSessionConfig}
+              lojas={lojas}
+              lojasConjunta={state.lojasConjunta}
+              onAddLojaConjunta={state.addLojaConjunta}
+              onRemoveLojaConjunta={state.removeLojaConjunta}
+              onSetObreirosConjunta={state.setObreirosConjunta}
+              onCreateLoja={addLoja}
               magnaFields={state.magnaFields}
               onMagnaFieldsChange={state.updateMagnaFields}
               visitors={state.visitors}

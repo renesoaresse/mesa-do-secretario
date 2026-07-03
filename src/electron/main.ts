@@ -11,7 +11,12 @@ export const STORAGE_CHANNELS = {
   clear: 'storage:clear',
 } as const;
 
-export const ALLOWED_STORAGE_KEYS = ['ataDraft', 'officersConfig', 'lojaConfig'] as const;
+export const ALLOWED_STORAGE_KEYS = [
+  'ataDraft',
+  'officersConfig',
+  'lojaConfig',
+  'lojasCadastro',
+] as const;
 
 type AllowedStorageKey = (typeof ALLOWED_STORAGE_KEYS)[number];
 
@@ -204,7 +209,11 @@ Marcio Alves de Andrade
 Loja Maçônica Luzes do Cruzeiro nº 29
 
 Renê Rocha Soares Neto
-Loja Maçônica Hans Werner Menna Barreto König nº 19`,
+Loja Maçônica Hans Werner Menna Barreto König nº 19
+
+Victor Moura Amado
+Loja Maçônica Segredo dos 33 nº 09
+`,
       copyright: '© 2026 Mesa do Secretário',
     });
 
