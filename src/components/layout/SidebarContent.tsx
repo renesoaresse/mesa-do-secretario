@@ -1,5 +1,6 @@
 import { SessionTypeSelector } from '../../features/session/components/SessionTypeSelector';
 import { SessionConfigForm } from '../../features/session/components/SessionConfigForm';
+import { SessionConjuntaForm } from '../../features/session/components/SessionConjuntaForm';
 import { MagnaFieldsForm } from '../../features/session/components/MagnaFieldsForm';
 import { VisitorsPanel } from '../../features/visitors/components/VisitorsPanel';
 import { OfficersForm } from '../../features/officers/components/OfficersForm';
@@ -8,7 +9,7 @@ import { PalavraBemDaOrdemPanel } from '../../features/palavra/components/Palavr
 import { FooterActions } from '../ui/FooterActions';
 import { LastSaveInfo } from '../ui/LastSaveInfo';
 import { LojaConfigForm } from '../../features/loja-config/components/LojaConfigForm';
-import type { LojaConfig } from '../../types/ata';
+import type { Loja, LojaConfig, LojaConjunta, Visitor } from '../../types/ata';
 
 import type {
   MagnaFields,
@@ -25,10 +26,16 @@ type Props = {
   onSessionTypeChange: (t: SessionType) => void;
   sessionConfig: SessionConfig;
   onSessionConfigChange: (patch: Partial<SessionConfig>) => void;
+  lojas: Loja[];
+  lojasConjunta: LojaConjunta[];
+  onAddLojaConjunta: (id: string, nome: string) => void;
+  onRemoveLojaConjunta: (id: string) => void;
+  onSetObreirosConjunta: (id: string, obreiros: number) => void;
+  onCreateLoja: (input: Omit<Loja, 'id'>) => Loja;
   magnaFields: MagnaFields;
   onMagnaFieldsChange: (patch: Partial<MagnaFields>) => void;
-  visitors: string[];
-  onAddVisitor: (name: string) => void;
+  visitors: Visitor[];
+  onAddVisitor: (visitor: Visitor) => void;
   onRemoveVisitor: (idx: number) => void;
   officers: Officers;
   onOfficersChange: (patch: Partial<Officers>) => void;
@@ -55,6 +62,7 @@ type Props = {
 
 export function SidebarContent(props: Props) {
   const isMagna = props.sessionType === 'magna';
+  const isConjunta = props.sessionConfig.conjunta;
 
   return (
     <>
@@ -64,6 +72,19 @@ export function SidebarContent(props: Props) {
       <SidebarDrawer title="Configuração da Sessão" icon="⚙️" defaultOpen>
         <SessionConfigForm value={props.sessionConfig} onChange={props.onSessionConfigChange} />
       </SidebarDrawer>
+      {isConjunta && (
+        <SidebarDrawer title="Sessão Conjunta" icon="🤝" defaultOpen>
+          <SessionConjuntaForm
+            lojas={props.lojas}
+            selected={props.lojasConjunta}
+            lojaConfig={props.lojaConfig}
+            onAdd={props.onAddLojaConjunta}
+            onRemove={props.onRemoveLojaConjunta}
+            onSetObreiros={props.onSetObreirosConjunta}
+            onCreateLoja={props.onCreateLoja}
+          />
+        </SidebarDrawer>
+      )}
       <SidebarDrawer title="Oficiais da Loja" icon="🏛" defaultOpen={false}>
         <OfficersForm value={props.officers} onChange={props.onOfficersChange} />
       </SidebarDrawer>
@@ -119,8 +140,11 @@ export function SidebarContent(props: Props) {
       <SidebarDrawer title="Visitantes" icon="👥" defaultOpen={false}>
         <VisitorsPanel
           items={props.visitors}
+          lojas={props.lojas}
+          lojaConfig={props.lojaConfig}
           onAdd={props.onAddVisitor}
           onRemove={props.onRemoveVisitor}
+          onCreateLoja={props.onCreateLoja}
         />
       </SidebarDrawer>
       <SidebarDrawer title="Palavra a Bem da Ordem" icon="🗣" defaultOpen={false}>

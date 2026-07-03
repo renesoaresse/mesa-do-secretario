@@ -1,7 +1,8 @@
 import React from 'react';
+import type { Visitor } from '../../../types/ata';
 
 type Props = {
-  items: string[];
+  items: Visitor[];
   onRemove: (index: number) => void;
 };
 
@@ -14,9 +15,12 @@ export function VisitorList({ items, onRemove }: Props) {
 
   return (
     <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 0', display: 'grid', gap: 8 }}>
-      {items.map((name, idx) => (
-        <li key={`${name}-${idx}`} className="dark-list-item">
-          <span className="dark-list-text">{name}</span>
+      {items.map((visitor, idx) => (
+        <li key={`${visitor.nome}-${idx}`} className="dark-list-item">
+          <div className="dark-list-text">
+            <span>{visitor.nome}</span>
+            {visitor.lojaNome && <small className="visitor-loja-sub">{visitor.lojaNome}</small>}
+          </div>
           <button type="button" className="mini-btn" onClick={() => onRemove(idx)}>
             Remover
           </button>

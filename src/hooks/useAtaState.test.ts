@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { installMockElectronApi, removeMockElectronApi } from '../test/electron';
-import { makeAtaDraft, makeLegacyAtaDraft } from '../test/factories';
+import { makeAtaDraft, makeLegacyAtaDraft, makeVisitor } from '../test/factories';
 import { seedStorage } from '../test/storage';
 import { useAtaState } from './useAtaState';
 
@@ -66,7 +66,7 @@ describe('useAtaState', () => {
       'ataDraft',
       makeAtaDraft({
         sessionType: 'magna',
-        visitors: ['Visitante Persistido'],
+        visitors: [makeVisitor({ nome: 'Visitante Persistido' })],
         tronco: 42,
         ordemDia: 'Ordem persistida',
       }),
@@ -75,7 +75,7 @@ describe('useAtaState', () => {
     const { result } = renderHook(() => useAtaState());
 
     expect(result.current.sessionType).toBe('magna');
-    expect(result.current.visitors).toEqual(['Visitante Persistido']);
+    expect(result.current.visitors).toEqual([makeVisitor({ nome: 'Visitante Persistido' })]);
     expect(result.current.tronco).toBe(42);
     expect(result.current.ordemDia).toBe('Ordem persistida');
   });
@@ -117,24 +117,27 @@ describe('useAtaState', () => {
     const { result } = renderHook(() => useAtaState());
 
     act(() => {
-      result.current.setSessionType('conjunta');
-      result.current.updateSessionConfig({ numSessao: 7 });
+      result.current.setSessionType('magna');
+      result.current.updateSessionConfig({ numSessao: 7, conjunta: true });
       result.current.updateMagnaFields({ tema: 'Tema Persistido' });
       result.current.updateOfficers({ vm: 'Veneravel Persistido' });
       result.current.updateLojaConfig({ nomeLoja: 'Loja Persistida' });
-      result.current.addVisitor('Visitante Persistido');
+      result.current.addVisitor(makeVisitor({ nome: 'Visitante Persistido' }));
       result.current.setOrdemDia('Ordem Persistida');
       result.current.setBalaustreTexto('Balaustre Persistido');
     });
 
     const stored = JSON.parse(localStorage.getItem('ataDraft') ?? '{}');
 
-    expect(stored.sessionType).toBe('conjunta');
+    expect(stored.sessionType).toBe('magna');
     expect(stored.sessionConfig.numSessao).toBe(7);
+    expect(stored.sessionConfig.conjunta).toBe(true);
     expect(stored.magnaFields.tema).toBe('Tema Persistido');
     expect(stored.officers.vm).toBe('Veneravel Persistido');
     expect(stored.lojaConfig.nomeLoja).toBe('Loja Persistida');
-    expect(stored.visitors).toContain('Visitante Persistido');
+    expect(stored.visitors).toContainEqual(
+      expect.objectContaining({ nome: 'Visitante Persistido' }),
+    );
     expect(stored.ordemDia).toBe('Ordem Persistida');
     expect(stored.balaustreTexto).toBe('Balaustre Persistido');
   });
@@ -143,10 +146,10 @@ describe('useAtaState', () => {
     const { result } = renderHook(() => useAtaState());
 
     act(() => {
-      result.current.addVisitor('Visitante 1');
+      result.current.addVisitor(makeVisitor({ nome: 'Visitante 1' }));
     });
 
-    expect(result.current.visitors).toEqual(['Visitante 1']);
+    expect(result.current.visitors).toEqual([makeVisitor({ nome: 'Visitante 1' })]);
 
     act(() => {
       result.current.removeVisitor(0);
@@ -162,6 +165,6 @@ describe('useAtaState', () => {
 
     expect(result.current).not.toHaveProperty('documents');
     expect(result.current).not.toHaveProperty('docStatus');
-    expect(result.current.visitors).toEqual(['Visitante 1']);
+    expect(result.current.visitors).toEqual([makeVisitor({ nome: 'Visitante 1' })]);
   });
 });

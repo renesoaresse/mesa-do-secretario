@@ -4,6 +4,7 @@ import {
   FORMAT,
   formatDateBR,
   formatPalavraBemOrdemEntries,
+  gerarSufixoLojasConjunta,
   gerarTextoPresenca,
   gerarTextoSaudacao,
   getPreviewDateParts,
@@ -44,6 +45,7 @@ function buildPreviewContent(data: PreviewData) {
     ordemDia,
     pbo,
     lojaConfig,
+    lojasConjunta,
     balaustreTexto,
     atosDecretosTexto,
     expedientesTexto,
@@ -52,9 +54,12 @@ function buildPreviewContent(data: PreviewData) {
 
   const { dia, mes, ano, anoVLFormatado } = getPreviewDateParts(sessionConfig.dataISO);
   const isMagna = sessionType === 'magna';
-  const sessionTypeMeta = getSessionTypeMeta(sessionType);
+  const isConjunta = sessionConfig.conjunta;
+  const sessionTypeMeta = getSessionTypeMeta(sessionType, isConjunta);
 
-  const textoPresenca = gerarTextoPresenca(sessionConfig.numPresenca, visitors);
+  const lojasConj = isConjunta ? lojasConjunta : [];
+  const sufixoLojasConjunta = gerarSufixoLojasConjunta(lojasConj);
+  const textoPresenca = gerarTextoPresenca(sessionConfig.numPresenca, visitors, lojasConj);
   const textoSaudacao = gerarTextoSaudacao(visitors, officers.or);
   const pboEntries = formatPalavraBemOrdemEntries(pbo);
 
@@ -105,8 +110,9 @@ function buildPreviewContent(data: PreviewData) {
         À Glória do G∴ D∴ G∴ A∴ D∴ U∴ e de São João, nosso Padroeiro, ao {FORMAT.ordinal(dia)} dia
         do mês de {mes} do ano de {ano}, às {sessionConfig.horaInicio}h, reuniu-se no{' '}
         {lojaConfig.temploNome} na {lojaConfig.enderecoTemplo}, Oriente de {lojaConfig.cidadeEstado}
-        , a {lojaConfig.nomeLoja} nº {lojaConfig.numeroLoja}, no grau de{' '}
-        <strong>{sessionConfig.grau} de Maçom</strong>, {textoPresenca}
+        , a {lojaConfig.nomeLoja} nº {lojaConfig.numeroLoja}
+        {sufixoLojasConjunta}, no grau de <strong>{sessionConfig.grau} de Maçom</strong>,{' '}
+        {textoPresenca}
       </p>
 
       <p>

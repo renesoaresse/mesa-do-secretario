@@ -10,6 +10,7 @@ Aplicação desktop para apoio administrativo em sessões maçônicas,
 permitindo geração e gestão de atas de forma padronizada.
 
 ## ✨ Features
+
 - Geração automática de atas
 - Preview em tempo real
 - Exportação para impressão
@@ -17,6 +18,7 @@ permitindo geração e gestão de atas de forma padronizada.
 - Distribuição como aplicativo desktop
 
 ## 🧱 Stack
+
 - React
 - Vite
 - Electron
@@ -25,22 +27,26 @@ permitindo geração e gestão de atas de forma padronizada.
 ## 📦 Instalação
 
 ### Desenvolvimento
+
 yarn install
 yarn dev
 
 ### Build
+
 yarn build
 
 ### Distribuição
+
 yarn dist:win
 yarn dist:mac
 
-
 ## Autores
 
-Marcio Alves de Andrade 
+Marcio Alves de Andrade
 Loja Maçônica Luzes do Cruzeiro nº 29
 
 Renê Rocha Soares Neto
 Loja Maçônica Hans Werner Menna Barreto König nº 19
 
+Victor Moura Amado
+Loja Maçônica Segredo dos 33 nº 09

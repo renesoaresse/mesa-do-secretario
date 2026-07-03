@@ -74,6 +74,20 @@ export function SessionConfigForm({ value, onChange }: Props) {
           />
         </FormGroup>
       </FormRow>
+
+      <div style={{ height: 10 }} />
+
+      <FormRow>
+        <FormGroup label="Sessão Conjunta?">
+          <Select
+            value={value.conjunta ? 'sim' : 'nao'}
+            onChange={(e) => onChange({ conjunta: e.target.value === 'sim' })}
+          >
+            <option value="nao">Não</option>
+            <option value="sim">Sim</option>
+          </Select>
+        </FormGroup>
+      </FormRow>
     </section>
   );
 }

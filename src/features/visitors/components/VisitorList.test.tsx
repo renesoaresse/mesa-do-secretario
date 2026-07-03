@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithUser } from '../../../test/render';
+import { makeVisitor } from '../../../test/factories';
 import { VisitorList } from './VisitorList';
 
 describe('VisitorList', () => {
@@ -12,7 +13,10 @@ describe('VisitorList', () => {
   it('renderiza visitantes e remove pelo indice', async () => {
     const onRemove = vi.fn();
     const { user } = renderWithUser(
-      <VisitorList items={['Visitante A', 'Visitante B']} onRemove={onRemove} />,
+      <VisitorList
+        items={[makeVisitor({ nome: 'Visitante A' }), makeVisitor({ nome: 'Visitante B' })]}
+        onRemove={onRemove}
+      />,
     );
 
     await user.click(screen.getAllByRole('button', { name: /remover/i })[1]);

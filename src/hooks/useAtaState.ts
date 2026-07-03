@@ -3,12 +3,14 @@ import { storage } from '../services/storage';
 import type {
   AtaDraft,
   LojaConfig,
+  LojaConjunta,
   MagnaFields,
   Officers,
   PalavraBemOrdem,
   PreviewData,
   SessionConfig,
   SessionType,
+  Visitor,
 } from '../types/ata';
 
 const DEFAULT_OFFICERS: Officers = { vm: '', vig1: '', vig2: '', or: '', sec: '' };
@@ -30,6 +32,7 @@ const DEFAULT_SESSION_CONFIG: SessionConfig = {
   horaInicio: '',
   horaEnc: '',
   numPresenca: 0,
+  conjunta: false,
 };
 
 const DEFAULT_MAGNA_FIELDS: MagnaFields = {
@@ -54,6 +57,7 @@ const DEFAULT_ATA_DRAFT: AtaDraft = {
   tronco: 0,
   ordemDia: '',
   pbo: DEFAULT_PBO,
+  lojasConjunta: [],
   lojaConfig: DEFAULT_LOJA_CONFIG,
   balaustreTexto: '',
   atosDecretosTexto: '',
@@ -68,11 +72,12 @@ export function useAtaState() {
   const [sessionType, setSessionType] = useState<SessionType>(initialDraft.sessionType);
   const [sessionConfig, setSessionConfig] = useState<SessionConfig>(initialDraft.sessionConfig);
   const [magnaFields, setMagnaFields] = useState<MagnaFields>(initialDraft.magnaFields);
-  const [visitors, setVisitors] = useState<string[]>(initialDraft.visitors);
+  const [visitors, setVisitors] = useState<Visitor[]>(initialDraft.visitors);
   const [officers, setOfficers] = useState<Officers>(initialDraft.officers);
   const [tronco, setTronco] = useState(initialDraft.tronco);
   const [ordemDia, setOrdemDia] = useState(initialDraft.ordemDia);
   const [pbo, setPbo] = useState<PalavraBemOrdem>(initialDraft.pbo);
+  const [lojasConjunta, setLojasConjunta] = useState<LojaConjunta[]>(initialDraft.lojasConjunta);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(new Date());
   const [autoSaveVisible, setAutoSaveVisible] = useState(false);
   const [lojaConfig, setLojaConfig] = useState<LojaConfig>(initialDraft.lojaConfig);
@@ -91,6 +96,7 @@ export function useAtaState() {
       tronco,
       ordemDia,
       pbo,
+      lojasConjunta,
       lojaConfig,
       balaustreTexto,
       atosDecretosTexto,
@@ -106,6 +112,7 @@ export function useAtaState() {
       tronco,
       ordemDia,
       pbo,
+      lojasConjunta,
       lojaConfig,
       balaustreTexto,
       atosDecretosTexto,
@@ -134,8 +141,8 @@ export function useAtaState() {
     markChanged();
   };
 
-  const addVisitor = (name: string) => {
-    setVisitors((prev) => [name, ...prev]);
+  const addVisitor = (visitor: Visitor) => {
+    setVisitors((prev) => [visitor, ...prev]);
     markChanged();
   };
 
@@ -159,6 +166,23 @@ export function useAtaState() {
     markChanged();
   };
 
+  const addLojaConjunta = (id: string, nome: string) => {
+    setLojasConjunta((prev) =>
+      prev.some((item) => item.id === id) ? prev : [...prev, { id, nome, obreiros: 0 }],
+    );
+    markChanged();
+  };
+
+  const removeLojaConjunta = (id: string) => {
+    setLojasConjunta((prev) => prev.filter((item) => item.id !== id));
+    markChanged();
+  };
+
+  const setObreirosConjunta = (id: string, obreiros: number) => {
+    setLojasConjunta((prev) => prev.map((item) => (item.id === id ? { ...item, obreiros } : item)));
+    markChanged();
+  };
+
   const handlePrint = () => window.print();
 
   const handleSave = () => {
@@ -177,6 +201,7 @@ export function useAtaState() {
       tronco,
       ordemDia,
       pbo,
+      lojasConjunta,
       balaustreTexto,
       atosDecretosTexto,
       expedientesTexto,
@@ -192,6 +217,7 @@ export function useAtaState() {
       tronco,
       ordemDia,
       pbo,
+      lojasConjunta,
       balaustreTexto,
       atosDecretosTexto,
       expedientesTexto,
@@ -209,6 +235,7 @@ export function useAtaState() {
     tronco,
     ordemDia,
     pbo,
+    lojasConjunta,
     lastSavedAt,
     autoSaveVisible,
     lojaConfig,
@@ -248,6 +275,9 @@ export function useAtaState() {
     updateOfficers,
     updateLojaConfig,
     updatePbo,
+    addLojaConjunta,
+    removeLojaConjunta,
+    setObreirosConjunta,
     addVisitor,
     removeVisitor,
     handlePrint,
