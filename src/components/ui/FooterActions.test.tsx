@@ -16,6 +16,19 @@ describe('FooterActions', () => {
     expect(onSave).toHaveBeenCalledTimes(1);
   });
 
+  it('renderiza a acao de PDF entre Imprimir e Salvar', () => {
+    renderWithUser(
+      <FooterActions
+        onPrint={vi.fn()}
+        onSave={vi.fn()}
+        pdfAction={<button type="button">PDF com senha</button>}
+      />,
+    );
+
+    const nomes = screen.getAllByRole('button').map((button) => button.textContent);
+    expect(nomes).toEqual(['Imprimir', 'PDF com senha', 'Salvar']);
+  });
+
   it('mostra estado salvando e desabilita o botao de salvar', () => {
     renderWithUser(<FooterActions onPrint={vi.fn()} onSave={vi.fn()} saving />);
     const button = screen.getByRole('button', { name: /salvando/i });

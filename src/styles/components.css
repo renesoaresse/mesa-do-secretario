@@ -26,6 +26,13 @@
   color: var(--text-dim);
 }
 
+/* Ícones nativos de data/hora (calendário/relógio) vêm escuros no Chromium:
+   inverte para acompanhar o texto claro do campo. */
+.control::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(2);
+  cursor: pointer;
+}
+
 .sidebar .control-textarea {
   resize: vertical;
   min-height: 90px;
@@ -184,6 +191,30 @@
   height: 1px;
   margin-top: 8px;
   background: rgba(255, 255, 255, 0.12);
+}
+
+/* =========================================================
+   CHECKBOX
+========================================================= */
+.checkbox-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sidebar .checkbox-field__input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--gold-500);
+  cursor: pointer;
+}
+
+.checkbox-field__label {
+  font-size: 12px;
+  color: var(--text-light);
+  opacity: 0.9;
 }
 
 /* =========================================================
@@ -479,6 +510,44 @@
 
 .modal-body {
   padding: 16px;
+}
+
+/* =========================================================
+   CAMPO DE SENHA (input + botão de olho)
+========================================================= */
+.password-field {
+  position: relative;
+  display: block;
+}
+
+.sidebar .password-field__input {
+  padding-right: 44px;
+}
+
+.password-field__toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-light);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.password-field__toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* =========================================================

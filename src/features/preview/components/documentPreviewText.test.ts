@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { makePbo, makeVisitor } from '../../../test/factories';
 import {
+  PBO_SILENCIO,
   formatPalavraBemOrdemEntries,
   gerarSufixoLojasConjunta,
   gerarTextoPresenca,
@@ -11,15 +12,20 @@ import {
 const loja = (nome: string, obreiros: number) => ({ id: nome, nome, obreiros });
 
 describe('documentPreviewText', () => {
-  it('gera fallback quando palavra a bem da ordem estiver vazia', () => {
-    expect(formatPalavraBemOrdemEntries(makePbo({ sul: '', norte: '', oriente: '' }))).toEqual([]);
+  it('registra silencio em todas as colunas quando nada foi preenchido', () => {
+    expect(formatPalavraBemOrdemEntries(makePbo({ sul: '', norte: '', oriente: '' }))).toEqual([
+      { key: 'sul', label: 'Coluna do Sul', value: PBO_SILENCIO },
+      { key: 'norte', label: 'Coluna do Norte', value: PBO_SILENCIO },
+      { key: 'oriente', label: 'Oriente', value: PBO_SILENCIO },
+    ]);
   });
 
-  it('gera blocos apenas para colunas preenchidas', () => {
+  it('gera bloco para toda coluna, com silencio nas vazias', () => {
     expect(
-      formatPalavraBemOrdemEntries(makePbo({ sul: 'Sul', norte: '', oriente: 'Oriente' })),
+      formatPalavraBemOrdemEntries(makePbo({ sul: 'Sul', norte: '   ', oriente: 'Oriente' })),
     ).toEqual([
       { key: 'sul', label: 'Coluna do Sul', value: 'Sul' },
+      { key: 'norte', label: 'Coluna do Norte', value: PBO_SILENCIO },
       { key: 'oriente', label: 'Oriente', value: 'Oriente' },
     ]);
   });
@@ -92,7 +98,9 @@ describe('documentPreviewText', () => {
   });
 
   it('gera saudacao padrao quando nao houver visitantes', () => {
-    expect(gerarTextoSaudacao([], 'Orador Teste')).toBe('Foi suprimido por não ter visitantes.');
+    expect(gerarTextoSaudacao([], 'Orador Teste')).toBe(
+      'Foi suprimida em razão da ausência de visitantes.',
+    );
   });
 
   it('mantem entidades escapadas e nomes de visitantes como texto literal', () => {

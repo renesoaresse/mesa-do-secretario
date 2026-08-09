@@ -7,7 +7,14 @@ export const STORAGE_CHANNELS = {
   clear: 'storage:clear',
 } as const;
 
+export const PDF_CHANNELS = {
+  render: 'pdf:render',
+  save: 'pdf:save',
+} as const;
+
 type DesktopStorageKey = 'ataDraft' | 'officersConfig' | 'lojaConfig' | 'lojasCadastro';
+
+type PdfSaveResult = { saved: boolean; filePath?: string };
 
 export const electronApi = {
   storage: {
@@ -22,6 +29,13 @@ export const electronApi = {
     clear: () => {
       ipcRenderer.sendSync(STORAGE_CHANNELS.clear);
     },
+  },
+  // A senha nunca cruza a ponte: o processo principal só devolve o PDF cru e
+  // grava os bytes que o renderer já criptografou.
+  pdf: {
+    render: () => ipcRenderer.invoke(PDF_CHANNELS.render) as Promise<Uint8Array | null>,
+    save: (payload: { fileName: string; data: Uint8Array }) =>
+      ipcRenderer.invoke(PDF_CHANNELS.save, payload) as Promise<PdfSaveResult>,
   },
 };
 

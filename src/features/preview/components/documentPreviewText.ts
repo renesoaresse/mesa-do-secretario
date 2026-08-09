@@ -35,22 +35,39 @@ export function getSessionTypeMeta(sessionType: SessionType, conjunta = false) {
   return { className: 'economica', title: 'ECONÔMICA' };
 }
 
+export const PBO_SILENCIO = 'Reinou silêncio na coluna.';
+
+// Supressões decididas pelo V∴ M∴: substituem todo o conteúdo da sessão no balaústre.
+export const TRONCO_SUPRIMIDO_TEXTO = 'Por ordem do V∴ M∴, a bolsa de beneficência foi suprimida!';
+
+export const PBO_SUPRIMIDO_TEXTO =
+  'Por ordem do V∴ M∴, a palavra a bem da Ordem e o quadro particular foram suprimidos!';
+
+// Sem balaústre digitado, registra-se que não houve balaústre na sessão.
+export const BALAUSTRE_PADRAO = 'Não houve balaústre a ser apresentado nesta sessão!';
+
+// Sem atos ou decretos digitados, registra-se que nada foi lido/apreciado.
+export const ATOS_DECRETOS_PADRAO =
+  'Não houve atos ou decretos a serem lidos/apreciados nesta sessão!';
+
+// Sem expediente digitado, o balaústre registra a postagem padrão das pranchas.
+export const EXPEDIENTE_PADRAO =
+  'Todas as pranchas recebidas foram devidamente postadas no ambiente virtual para conhecimento de todos os irmãos, conforme determinação da Mui Resp∴ Grande Loja Maçônica do Estado de Sergipe!';
+
+// Toda coluna aparece no balaústre: a preenchida com o texto digitado,
+// a vazia com o registro ritualístico de silêncio.
 export function formatPalavraBemOrdemEntries(palavraData: PreviewData['pbo']): PboEntry[] {
-  const entries: PboEntry[] = [];
+  const colunas: Array<{ key: PboKey; label: string }> = [
+    { key: 'sul', label: 'Coluna do Sul' },
+    { key: 'norte', label: 'Coluna do Norte' },
+    { key: 'oriente', label: 'Oriente' },
+  ];
 
-  if (hasText(palavraData.sul)) {
-    entries.push({ key: 'sul', label: 'Coluna do Sul', value: palavraData.sul });
-  }
-
-  if (hasText(palavraData.norte)) {
-    entries.push({ key: 'norte', label: 'Coluna do Norte', value: palavraData.norte });
-  }
-
-  if (hasText(palavraData.oriente)) {
-    entries.push({ key: 'oriente', label: 'Oriente', value: palavraData.oriente });
-  }
-
-  return entries;
+  return colunas.map(({ key, label }) => ({
+    key,
+    label,
+    value: hasText(palavraData[key]) ? palavraData[key] : PBO_SILENCIO,
+  }));
 }
 
 // Junta nomes com vírgula e "e" antes do último: "A", "A e B", "A, B e C".
@@ -107,7 +124,7 @@ export function descreverVisitante(visitor: Visitor): string {
 
 export function gerarTextoSaudacao(visitors: Visitor[], orador: string) {
   if (visitors.length === 0) {
-    return 'Foi suprimido por não ter visitantes.';
+    return 'Foi suprimida em razão da ausência de visitantes.';
   }
 
   const primeiroNomeOrador = (orador || '').trim().split(/\s+/)[0] || 'Orador';

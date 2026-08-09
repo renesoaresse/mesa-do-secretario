@@ -87,6 +87,16 @@ export function SessionConfigForm({ value, onChange }: Props) {
             <option value="sim">Sim</option>
           </Select>
         </FormGroup>
+
+        <FormGroup label="Numerar Linhas?">
+          <Select
+            value={value.numerarLinhas ? 'sim' : 'nao'}
+            onChange={(e) => onChange({ numerarLinhas: e.target.value === 'sim' })}
+          >
+            <option value="nao">Não</option>
+            <option value="sim">Sim</option>
+          </Select>
+        </FormGroup>
       </FormRow>
     </section>
   );

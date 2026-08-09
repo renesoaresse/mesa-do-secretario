@@ -23,4 +23,34 @@ describe('SessionConfigForm', () => {
     expect(onChange).toHaveBeenCalledWith({ horaInicio: '20:00' });
     expect(onChange).toHaveBeenCalledWith({ horaEnc: '22:00' });
   });
+
+  it('liga e desliga sessao conjunta e numeracao de linhas', () => {
+    const onChange = vi.fn();
+    renderWithUser(<SessionConfigForm value={makeSessionConfig()} onChange={onChange} />);
+
+    const conjunta = screen.getByLabelText('Sessão Conjunta?');
+    const numerarLinhas = screen.getByLabelText('Numerar Linhas?');
+
+    expect(conjunta).toHaveValue('nao');
+    expect(numerarLinhas).toHaveValue('nao');
+
+    fireEvent.change(numerarLinhas, { target: { value: 'sim' } });
+    expect(onChange).toHaveBeenCalledWith({ numerarLinhas: true });
+
+    fireEvent.change(conjunta, { target: { value: 'sim' } });
+    expect(onChange).toHaveBeenCalledWith({ conjunta: true });
+  });
+
+  it('reflete numeracao de linhas ligada', () => {
+    const onChange = vi.fn();
+    renderWithUser(
+      <SessionConfigForm value={makeSessionConfig({ numerarLinhas: true })} onChange={onChange} />,
+    );
+
+    const numerarLinhas = screen.getByLabelText('Numerar Linhas?');
+    expect(numerarLinhas).toHaveValue('sim');
+
+    fireEvent.change(numerarLinhas, { target: { value: 'nao' } });
+    expect(onChange).toHaveBeenCalledWith({ numerarLinhas: false });
+  });
 });

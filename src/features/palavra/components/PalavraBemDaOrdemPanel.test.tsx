@@ -7,7 +7,14 @@ import { PalavraBemDaOrdemPanel } from './PalavraBemDaOrdemPanel';
 describe('PalavraBemDaOrdemPanel', () => {
   it('renderiza as tres colunas e emite patch parcial', () => {
     const onChange = vi.fn();
-    renderWithUser(<PalavraBemDaOrdemPanel value={makePbo()} onChange={onChange} />);
+    renderWithUser(
+      <PalavraBemDaOrdemPanel
+        value={makePbo()}
+        onChange={onChange}
+        suprimido={false}
+        onSuprimidoChange={vi.fn()}
+      />,
+    );
 
     const textareas = screen.getAllByRole('textbox');
     expect(textareas).toHaveLength(3);
@@ -19,5 +26,31 @@ describe('PalavraBemDaOrdemPanel', () => {
     expect(onChange).toHaveBeenCalledWith({ sul: 'Sul atualizado' });
     expect(onChange).toHaveBeenCalledWith({ norte: 'Norte atualizado' });
     expect(onChange).toHaveBeenCalledWith({ oriente: 'Oriente atualizado' });
+  });
+
+  it('esconde as colunas quando suprimido e emite a mudanca do checkbox', () => {
+    const onSuprimidoChange = vi.fn();
+    const { rerender } = renderWithUser(
+      <PalavraBemDaOrdemPanel
+        value={makePbo()}
+        onChange={vi.fn()}
+        suprimido={false}
+        onSuprimidoChange={onSuprimidoChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByLabelText('Suprimido'));
+    expect(onSuprimidoChange).toHaveBeenCalledWith(true);
+
+    rerender(
+      <PalavraBemDaOrdemPanel
+        value={makePbo()}
+        onChange={vi.fn()}
+        suprimido
+        onSuprimidoChange={onSuprimidoChange}
+      />,
+    );
+
+    expect(screen.queryAllByRole('textbox')).toHaveLength(0);
   });
 });

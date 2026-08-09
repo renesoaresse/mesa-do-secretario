@@ -7,8 +7,21 @@ export interface ElectronStorageApi {
   clear: () => void;
 }
 
+export interface PdfSaveResult {
+  saved: boolean;
+  filePath?: string;
+}
+
+export interface ElectronPdfApi {
+  /** Renderiza a janela atual em PDF usando a mesma folha de estilo da impressão. */
+  render: () => Promise<Uint8Array | null>;
+  /** Abre o diálogo de "Salvar como" e grava os bytes já criptografados. */
+  save: (payload: { fileName: string; data: Uint8Array }) => Promise<PdfSaveResult>;
+}
+
 export interface ElectronApi {
   storage: ElectronStorageApi;
+  pdf: ElectronPdfApi;
 }
 
 declare global {
