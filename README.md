@@ -50,3 +50,6 @@ Loja Maçônica Hans Werner Menna Barreto König nº 19
 
 Victor Moura Amado
 Loja Maçônica Segredo dos 33 nº 09
+
+Jorge Luiz Mendes Gonçalves Junior
+Loja Maçônica 7 de Setembro nº 01

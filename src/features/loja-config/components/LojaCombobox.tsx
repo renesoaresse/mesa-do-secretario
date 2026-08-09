@@ -181,7 +181,7 @@ export function LojaCombobox({
             <TextInput
               value={novaPotencia}
               onChange={(e) => setNovaPotencia(e.target.value)}
-              placeholder="Ex: GLMESE"
+              placeholder="Ex: GLMESE ou GOB/SE"
             />
           </FormGroup>
 

@@ -7,6 +7,8 @@ import { OfficersForm } from '../../features/officers/components/OfficersForm';
 import { TroncoInput } from '../../features/session/components/TroncoInput';
 import { PalavraBemDaOrdemPanel } from '../../features/palavra/components/PalavraBemDaOrdemPanel';
 import { FooterActions } from '../ui/FooterActions';
+import { PdfExportAction } from '../../features/preview/components/PdfExportAction';
+import { buildAtaFileName } from '../../services/pdfExport';
 import { LastSaveInfo } from '../ui/LastSaveInfo';
 import { LojaConfigForm } from '../../features/loja-config/components/LojaConfigForm';
 import type { Loja, LojaConfig, LojaConjunta, Visitor } from '../../types/ata';
@@ -41,10 +43,14 @@ type Props = {
   onOfficersChange: (patch: Partial<Officers>) => void;
   tronco: number;
   onTroncoChange: (n: number) => void;
+  troncoSuprimido: boolean;
+  onTroncoSuprimidoChange: (suprimido: boolean) => void;
   ordemDia: string;
   onOrdemDiaChange: (s: string) => void;
   pbo: PalavraBemOrdem;
   onPboChange: (patch: Partial<PalavraBemOrdem>) => void;
+  pboSuprimido: boolean;
+  onPboSuprimidoChange: (suprimido: boolean) => void;
   onPrint: () => void;
   onSave: () => void;
   lastSavedAt: Date | null;
@@ -135,7 +141,12 @@ export function SidebarContent(props: Props) {
         />
       </SidebarDrawer>
       <SidebarDrawer title="Tronco de Beneficência" icon="💰" defaultOpen={false}>
-        <TroncoInput value={props.tronco} onChange={props.onTroncoChange} />
+        <TroncoInput
+          value={props.tronco}
+          onChange={props.onTroncoChange}
+          suprimido={props.troncoSuprimido}
+          onSuprimidoChange={props.onTroncoSuprimidoChange}
+        />
       </SidebarDrawer>
       <SidebarDrawer title="Visitantes" icon="👥" defaultOpen={false}>
         <VisitorsPanel
@@ -148,14 +159,23 @@ export function SidebarContent(props: Props) {
         />
       </SidebarDrawer>
       <SidebarDrawer title="Palavra a Bem da Ordem" icon="🗣" defaultOpen={false}>
-        <PalavraBemDaOrdemPanel value={props.pbo} onChange={props.onPboChange} />
+        <PalavraBemDaOrdemPanel
+          value={props.pbo}
+          onChange={props.onPboChange}
+          suprimido={props.pboSuprimido}
+          onSuprimidoChange={props.onPboSuprimidoChange}
+        />
       </SidebarDrawer>
 
       <SidebarDrawer title="Configuração da Loja" icon="⚙️" defaultOpen>
         <LojaConfigForm value={props.lojaConfig} onChange={props.onLojaConfigChange} />
       </SidebarDrawer>
 
-      <FooterActions onPrint={props.onPrint} onSave={props.onSave} />
+      <FooterActions
+        onPrint={props.onPrint}
+        onSave={props.onSave}
+        pdfAction={<PdfExportAction fileName={buildAtaFileName(props.sessionConfig.numSessao)} />}
+      />
       <LastSaveInfo lastSavedAt={props.lastSavedAt} />
     </>
   );

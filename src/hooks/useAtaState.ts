@@ -33,6 +33,7 @@ const DEFAULT_SESSION_CONFIG: SessionConfig = {
   horaEnc: '',
   numPresenca: 0,
   conjunta: false,
+  numerarLinhas: false,
 };
 
 const DEFAULT_MAGNA_FIELDS: MagnaFields = {
@@ -55,8 +56,10 @@ const DEFAULT_ATA_DRAFT: AtaDraft = {
   visitors: [],
   officers: DEFAULT_OFFICERS,
   tronco: 0,
+  troncoSuprimido: false,
   ordemDia: '',
   pbo: DEFAULT_PBO,
+  pboSuprimido: false,
   lojasConjunta: [],
   lojaConfig: DEFAULT_LOJA_CONFIG,
   balaustreTexto: '',
@@ -75,8 +78,10 @@ export function useAtaState() {
   const [visitors, setVisitors] = useState<Visitor[]>(initialDraft.visitors);
   const [officers, setOfficers] = useState<Officers>(initialDraft.officers);
   const [tronco, setTronco] = useState(initialDraft.tronco);
+  const [troncoSuprimido, setTroncoSuprimido] = useState(initialDraft.troncoSuprimido);
   const [ordemDia, setOrdemDia] = useState(initialDraft.ordemDia);
   const [pbo, setPbo] = useState<PalavraBemOrdem>(initialDraft.pbo);
+  const [pboSuprimido, setPboSuprimido] = useState(initialDraft.pboSuprimido);
   const [lojasConjunta, setLojasConjunta] = useState<LojaConjunta[]>(initialDraft.lojasConjunta);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(new Date());
   const [autoSaveVisible, setAutoSaveVisible] = useState(false);
@@ -94,8 +99,10 @@ export function useAtaState() {
       visitors,
       officers,
       tronco,
+      troncoSuprimido,
       ordemDia,
       pbo,
+      pboSuprimido,
       lojasConjunta,
       lojaConfig,
       balaustreTexto,
@@ -110,8 +117,10 @@ export function useAtaState() {
       visitors,
       officers,
       tronco,
+      troncoSuprimido,
       ordemDia,
       pbo,
+      pboSuprimido,
       lojasConjunta,
       lojaConfig,
       balaustreTexto,
@@ -199,8 +208,10 @@ export function useAtaState() {
       visitors,
       officers,
       tronco,
+      troncoSuprimido,
       ordemDia,
       pbo,
+      pboSuprimido,
       lojasConjunta,
       balaustreTexto,
       atosDecretosTexto,
@@ -215,8 +226,10 @@ export function useAtaState() {
       visitors,
       officers,
       tronco,
+      troncoSuprimido,
       ordemDia,
       pbo,
+      pboSuprimido,
       lojasConjunta,
       balaustreTexto,
       atosDecretosTexto,
@@ -233,8 +246,10 @@ export function useAtaState() {
     visitors,
     officers,
     tronco,
+    troncoSuprimido,
     ordemDia,
     pbo,
+    pboSuprimido,
     lojasConjunta,
     lastSavedAt,
     autoSaveVisible,
@@ -248,6 +263,14 @@ export function useAtaState() {
     setSessionType,
     setTronco: (value: number) => {
       setTronco(value);
+      markChanged();
+    },
+    setTroncoSuprimido: (value: boolean) => {
+      setTroncoSuprimido(value);
+      markChanged();
+    },
+    setPboSuprimido: (value: boolean) => {
+      setPboSuprimido(value);
       markChanged();
     },
     setOrdemDia: (value: string) => {

@@ -41,6 +41,10 @@ function getNumber(value: unknown, fallback: number) {
   return typeof value === 'number' ? value : fallback;
 }
 
+function getBoolean(value: unknown, fallback: boolean) {
+  return typeof value === 'boolean' ? value : fallback;
+}
+
 function getSessionType(value: unknown, fallback: AtaDraft['sessionType']) {
   return value === 'economica' || value === 'magna' ? value : fallback;
 }
@@ -104,6 +108,10 @@ function sanitizeAtaDraft(value: unknown, defaultDraft: AtaDraft): AtaDraft {
         typeof sessionConfig.conjunta === 'boolean'
           ? sessionConfig.conjunta
           : legacyConjunta || defaultDraft.sessionConfig.conjunta,
+      numerarLinhas:
+        typeof sessionConfig.numerarLinhas === 'boolean'
+          ? sessionConfig.numerarLinhas
+          : defaultDraft.sessionConfig.numerarLinhas,
     },
     magnaFields: {
       ...defaultDraft.magnaFields,
@@ -115,11 +123,13 @@ function sanitizeAtaDraft(value: unknown, defaultDraft: AtaDraft): AtaDraft {
       ...officers,
     },
     tronco: getNumber(value.tronco, defaultDraft.tronco),
+    troncoSuprimido: getBoolean(value.troncoSuprimido, defaultDraft.troncoSuprimido),
     ordemDia: getString(value.ordemDia, defaultDraft.ordemDia),
     pbo: {
       ...defaultDraft.pbo,
       ...pbo,
     },
+    pboSuprimido: getBoolean(value.pboSuprimido, defaultDraft.pboSuprimido),
     lojasConjunta: getLojasConjunta(value.lojasConjunta, defaultDraft.lojasConjunta),
     lojaConfig: {
       ...defaultDraft.lojaConfig,

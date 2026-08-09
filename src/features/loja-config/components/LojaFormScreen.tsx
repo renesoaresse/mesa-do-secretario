@@ -57,7 +57,7 @@ export function LojaFormScreen() {
               <TextInput
                 value={potencia}
                 onChange={(e) => setPotencia(e.target.value)}
-                placeholder="Ex: Grande Oriente de Sergipe"
+                placeholder="Ex: GLMESE ou GOB/SE"
               />
             </FormGroup>
 

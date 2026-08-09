@@ -32,7 +32,13 @@ const BrowserWindowMock = vi.hoisted(() =>
 
 const ipcMainMock = vi.hoisted(() => ({
   on: vi.fn(),
+  handle: vi.fn(),
   removeAllListeners: vi.fn(),
+  removeHandler: vi.fn(),
+}));
+
+const dialogMock = vi.hoisted(() => ({
+  showSaveDialog: vi.fn(),
 }));
 
 vi.mock('electron', () => ({
@@ -41,6 +47,7 @@ vi.mock('electron', () => ({
     getAllWindows: vi.fn(() => []),
   }),
   ipcMain: ipcMainMock,
+  dialog: dialogMock,
 }));
 
 describe('electron main security', () => {
@@ -53,7 +60,10 @@ describe('electron main security', () => {
     browserWindowInstance.loadFile.mockClear();
     browserWindowInstance.on.mockClear();
     ipcMainMock.on.mockClear();
+    ipcMainMock.handle.mockClear();
     ipcMainMock.removeAllListeners.mockClear();
+    ipcMainMock.removeHandler.mockClear();
+    dialogMock.showSaveDialog.mockReset();
     appMock.getAppPath.mockReturnValue('/app');
     appMock.getPath.mockReturnValue('/user-data');
     appMock.isPackaged = false;
@@ -141,5 +151,113 @@ describe('electron main security', () => {
 
     loadHandler?.(untrustedEvent, 'officersConfig');
     expect(untrustedEvent.returnValue).toBeNull();
+  });
+
+  it('renderiza o PDF pela mesma folha de estilo da impressao e so para sender confiavel', async () => {
+    const { registerPdfHandlers, PDF_CHANNELS } = await import('./main');
+
+    registerPdfHandlers('/downloads');
+
+    const renderHandler = ipcMainMock.handle.mock.calls.find(
+      ([channel]) => channel === PDF_CHANNELS.render,
+    )?.[1];
+
+    const printToPDF = vi.fn(async () => new Uint8Array([37, 80, 68, 70]));
+    const trustedEvent = {
+      senderFrame: { url: 'http://localhost:5173' },
+      sender: { getURL: vi.fn(() => 'http://localhost:5173'), printToPDF },
+    };
+    const untrustedEvent = {
+      senderFrame: { url: 'https://evil.example' },
+      sender: { getURL: vi.fn(() => 'https://evil.example'), printToPDF },
+    };
+
+    await expect(renderHandler?.(trustedEvent)).resolves.toEqual(new Uint8Array([37, 80, 68, 70]));
+    expect(printToPDF).toHaveBeenCalledWith({
+      printBackground: true,
+      preferCSSPageSize: true,
+      pageSize: 'A4',
+    });
+
+    await expect(renderHandler?.(untrustedEvent)).resolves.toBeNull();
+    expect(printToPDF).toHaveBeenCalledTimes(1);
+  });
+
+  it('grava o PDF cifrado apenas apos o dialogo de salvar ser confirmado', async () => {
+    const { registerPdfHandlers, PDF_CHANNELS } = await import('./main');
+
+    const fileSystem = { writeFileSync: vi.fn() };
+    registerPdfHandlers('/downloads', dialogMock, fileSystem);
+
+    const saveHandler = ipcMainMock.handle.mock.calls.find(
+      ([channel]) => channel === PDF_CHANNELS.save,
+    )?.[1];
+
+    const event = {
+      senderFrame: { url: 'http://localhost:5173' },
+      sender: { getURL: vi.fn(() => 'http://localhost:5173'), printToPDF: vi.fn() },
+    };
+    const data = new Uint8Array([1, 2, 3]);
+
+    dialogMock.showSaveDialog.mockResolvedValueOnce({
+      canceled: false,
+      filePath: '/downloads/ata-sessao-7.pdf',
+    });
+
+    await expect(
+      saveHandler?.(event, { fileName: '../../etc/ata-sessao-7.pdf', data }),
+    ).resolves.toEqual({ saved: true, filePath: '/downloads/ata-sessao-7.pdf' });
+
+    expect(dialogMock.showSaveDialog).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultPath: '/downloads/ata-sessao-7.pdf' }),
+    );
+    expect(fileSystem.writeFileSync).toHaveBeenCalledWith('/downloads/ata-sessao-7.pdf', data);
+
+    dialogMock.showSaveDialog.mockResolvedValueOnce({ canceled: true });
+    await expect(saveHandler?.(event, { fileName: 'ata.pdf', data })).resolves.toEqual({
+      saved: false,
+    });
+    expect(fileSystem.writeFileSync).toHaveBeenCalledTimes(1);
+  });
+
+  it('recusa salvar PDF de sender nao confiavel ou com payload invalido', async () => {
+    const { registerPdfHandlers, PDF_CHANNELS } = await import('./main');
+
+    const fileSystem = { writeFileSync: vi.fn() };
+    registerPdfHandlers('/downloads', dialogMock, fileSystem);
+
+    const saveHandler = ipcMainMock.handle.mock.calls.find(
+      ([channel]) => channel === PDF_CHANNELS.save,
+    )?.[1];
+
+    const untrustedEvent = {
+      senderFrame: { url: 'https://evil.example' },
+      sender: { getURL: vi.fn(() => 'https://evil.example'), printToPDF: vi.fn() },
+    };
+    const trustedEvent = {
+      senderFrame: { url: 'http://localhost:5173' },
+      sender: { getURL: vi.fn(() => 'http://localhost:5173'), printToPDF: vi.fn() },
+    };
+
+    await expect(
+      saveHandler?.(untrustedEvent, { fileName: 'ata.pdf', data: new Uint8Array([1]) }),
+    ).resolves.toEqual({ saved: false });
+
+    await expect(
+      saveHandler?.(trustedEvent, { fileName: 'ata.pdf', data: 'nao-e-binario' }),
+    ).resolves.toEqual({ saved: false });
+
+    expect(dialogMock.showSaveDialog).not.toHaveBeenCalled();
+    expect(fileSystem.writeFileSync).not.toHaveBeenCalled();
+  });
+
+  it('sanitiza o nome do arquivo vindo do renderer', async () => {
+    const { sanitizePdfFileName } = await import('./main');
+
+    expect(sanitizePdfFileName('ata-sessao-7.pdf')).toBe('ata-sessao-7.pdf');
+    expect(sanitizePdfFileName('../../../etc/passwd')).toBe('passwd.pdf');
+    expect(sanitizePdfFileName('C:\\Windows\\system32\\ata.pdf')).toBe('ata.pdf');
+    expect(sanitizePdfFileName('...')).toBe('ata.pdf');
+    expect(sanitizePdfFileName(42)).toBe('ata.pdf');
   });
 });

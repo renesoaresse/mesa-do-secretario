@@ -51,10 +51,14 @@ export function AppEditor() {
               onOfficersChange={state.updateOfficers}
               tronco={state.tronco}
               onTroncoChange={state.setTronco}
+              troncoSuprimido={state.troncoSuprimido}
+              onTroncoSuprimidoChange={state.setTroncoSuprimido}
               ordemDia={state.ordemDia}
               onOrdemDiaChange={state.setOrdemDia}
               pbo={state.pbo}
               onPboChange={state.updatePbo}
+              pboSuprimido={state.pboSuprimido}
+              onPboSuprimidoChange={state.setPboSuprimido}
               onPrint={state.handlePrint}
               onSave={state.handleSave}
               lastSavedAt={state.lastSavedAt}

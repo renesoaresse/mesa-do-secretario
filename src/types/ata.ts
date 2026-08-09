@@ -23,6 +23,7 @@ export type SessionConfig = {
   horaEnc: string; // HH:mm
   numPresenca: number;
   conjunta: boolean; // sessão conjunta? Sim/Não (default Não)
+  numerarLinhas: boolean; // numerar linhas do documento? Sim/Não (default Não)
 };
 
 export type MagnaFields = {
@@ -53,8 +54,10 @@ export type AtaDraft = {
   visitors: Visitor[];
   officers: Officers;
   tronco: number;
+  troncoSuprimido: boolean; // bolsa de beneficência suprimida por ordem do V∴ M∴
   ordemDia: string;
   pbo: PalavraBemOrdem;
+  pboSuprimido: boolean; // palavra a bem da Ordem suprimida por ordem do V∴ M∴
   lojaConfig: LojaConfig;
   lojasConjunta: LojaConjunta[]; // lojas em sessão conjunta + obreiros
   balaustreTexto: string;
@@ -78,8 +81,10 @@ export type PreviewData = {
   visitors: Visitor[];
   officers: Officers;
   tronco: number;
+  troncoSuprimido: boolean;
   ordemDia: string;
   pbo: PalavraBemOrdem;
+  pboSuprimido: boolean;
   lojasConjunta: LojaConjunta[];
   balaustreTexto: string;
   atosDecretosTexto: string;

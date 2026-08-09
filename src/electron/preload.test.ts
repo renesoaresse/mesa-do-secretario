@@ -6,6 +6,7 @@ const contextBridgeMock = vi.hoisted(() => ({
 
 const ipcRendererMock = vi.hoisted(() => ({
   sendSync: vi.fn(),
+  invoke: vi.fn(),
 }));
 
 vi.mock('electron', () => ({
@@ -18,13 +19,29 @@ describe('electron preload', () => {
     vi.resetModules();
     contextBridgeMock.exposeInMainWorld.mockClear();
     ipcRendererMock.sendSync.mockClear();
+    ipcRendererMock.invoke.mockClear();
   });
 
-  it('expõe apenas uma API mínima de storage no renderer', async () => {
+  it('expõe apenas uma API mínima de storage e pdf no renderer', async () => {
     const { electronApi } = await import('./preload');
 
-    expect(Object.keys(electronApi)).toEqual(['storage']);
+    expect(Object.keys(electronApi)).toEqual(['storage', 'pdf']);
     expect(Object.keys(electronApi.storage)).toEqual(['load', 'save', 'remove', 'clear']);
+    expect(Object.keys(electronApi.pdf)).toEqual(['render', 'save']);
+  });
+
+  it('mapeia as chamadas de pdf para canais assíncronos', async () => {
+    const { electronApi, PDF_CHANNELS } = await import('./preload');
+    const data = new Uint8Array([1, 2, 3]);
+
+    void electronApi.pdf.render();
+    void electronApi.pdf.save({ fileName: 'ata-sessao-7.pdf', data });
+
+    expect(ipcRendererMock.invoke).toHaveBeenNthCalledWith(1, PDF_CHANNELS.render);
+    expect(ipcRendererMock.invoke).toHaveBeenNthCalledWith(2, PDF_CHANNELS.save, {
+      fileName: 'ata-sessao-7.pdf',
+      data,
+    });
   });
 
   it('mapeia chamadas de storage para canais síncronos específicos', async () => {

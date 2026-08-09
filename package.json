@@ -1,7 +1,7 @@
 {
   "name": "mesadoscretario",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.5.0",
   "type": "module",
   "main": "dist-electron/main.cjs",
   "author": {
@@ -10,6 +10,12 @@
   "contributors": [
     {
       "name": "Marcio Alves de Andrade"
+    },
+    {
+      "name": "Victor Moura Amado"
+    },
+    {
+      "name": "Jorge Luiz Mendes Gonçalves Junior"
     }
   ],
   "scripts": {
@@ -33,6 +39,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@cantoo/pdf-lib": "^2.8.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "wouter": "^3.9.0"

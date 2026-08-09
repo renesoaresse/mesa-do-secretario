@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -9,6 +9,11 @@ export const STORAGE_CHANNELS = {
   save: 'storage:save',
   remove: 'storage:remove',
   clear: 'storage:clear',
+} as const;
+
+export const PDF_CHANNELS = {
+  render: 'pdf:render',
+  save: 'pdf:save',
 } as const;
 
 export const ALLOWED_STORAGE_KEYS = [
@@ -33,6 +38,32 @@ type SyncEventLike = {
   returnValue: unknown;
 };
 
+type PrintToPdfOptions = {
+  printBackground: boolean;
+  preferCSSPageSize: boolean;
+  pageSize: 'A4';
+};
+
+type InvokeEventLike = {
+  senderFrame?: { url: string } | null;
+  sender: {
+    getURL: () => string;
+    printToPDF: (options: PrintToPdfOptions) => Promise<Uint8Array>;
+  };
+};
+
+type SaveDialogLike = {
+  showSaveDialog: (options: {
+    title: string;
+    defaultPath: string;
+    filters: { name: string; extensions: string[] }[];
+  }) => Promise<{ canceled: boolean; filePath?: string }>;
+};
+
+type PdfFileSystemLike = {
+  writeFileSync: (path: string, data: Uint8Array) => void;
+};
+
 function getPreloadPath() {
   const preloadPath = path.join(app.getAppPath(), 'dist-electron', 'preload.cjs');
   console.log('Preload path:', preloadPath);
@@ -53,7 +84,10 @@ function isAllowedStorageKey(key: string): key is AllowedStorageKey {
   return ALLOWED_STORAGE_KEYS.includes(key as AllowedStorageKey);
 }
 
-function resolveSenderUrl(event: SyncEventLike) {
+function resolveSenderUrl(event: {
+  senderFrame?: { url: string } | null;
+  sender: { getURL: () => string };
+}) {
   return event.senderFrame?.url ?? event.sender.getURL() ?? '';
 }
 
@@ -140,6 +174,83 @@ export function registerStorageHandlers(userDataPath: string, fileSystem: FileSy
   });
 }
 
+const DEFAULT_PDF_FILE_NAME = 'ata.pdf';
+
+/**
+ * O nome vem do renderer, então nunca pode virar caminho: só o basename sobrevive
+ * e a extensão é forçada para `.pdf`.
+ */
+export function sanitizePdfFileName(fileName: unknown) {
+  if (typeof fileName !== 'string') return DEFAULT_PDF_FILE_NAME;
+
+  const base = path
+    .basename(fileName.replace(/\\/g, '/'))
+    // eslint-disable-next-line no-control-regex
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, '')
+    .replace(/^\.+/, '')
+    .trim();
+
+  if (base.length === 0) return DEFAULT_PDF_FILE_NAME;
+
+  return base.toLowerCase().endsWith('.pdf') ? base : `${base}.pdf`;
+}
+
+export function registerPdfHandlers(
+  downloadsPath: string,
+  saveDialog: SaveDialogLike = dialog,
+  fileSystem: PdfFileSystemLike = fs,
+) {
+  const channels = Object.values(PDF_CHANNELS);
+
+  channels.forEach((channel) => {
+    ipcMain.removeHandler(channel);
+  });
+
+  // Renderiza a janela viva com media `print`, então o PDF sai idêntico ao que a
+  // impressão produz (mesmo `print.css`, mesmo `@page`, sem o zoom do preview).
+  ipcMain.handle(PDF_CHANNELS.render, async (event: InvokeEventLike) => {
+    if (!isTrustedAppUrl(resolveSenderUrl(event))) {
+      return null;
+    }
+
+    const data = await event.sender.printToPDF({
+      printBackground: true,
+      preferCSSPageSize: true,
+      pageSize: 'A4',
+    });
+
+    return new Uint8Array(data);
+  });
+
+  ipcMain.handle(
+    PDF_CHANNELS.save,
+    async (event: InvokeEventLike, payload: { fileName?: unknown; data?: unknown }) => {
+      if (!isTrustedAppUrl(resolveSenderUrl(event))) {
+        return { saved: false };
+      }
+
+      const data = payload?.data;
+      if (!(data instanceof Uint8Array) || data.byteLength === 0) {
+        return { saved: false };
+      }
+
+      const fileName = sanitizePdfFileName(payload?.fileName);
+      const result = await saveDialog.showSaveDialog({
+        title: 'Salvar ata em PDF',
+        defaultPath: path.join(downloadsPath, fileName),
+        filters: [{ name: 'PDF', extensions: ['pdf'] }],
+      });
+
+      if (result.canceled || !result.filePath) {
+        return { saved: false };
+      }
+
+      fileSystem.writeFileSync(result.filePath, data);
+      return { saved: true, filePath: result.filePath };
+    },
+  );
+}
+
 export function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -213,11 +324,16 @@ Loja Maçônica Hans Werner Menna Barreto König nº 19
 
 Victor Moura Amado
 Loja Maçônica Segredo dos 33 nº 09
+
+Jorge Luiz Mendes Gonçalves Junior
+Loja Maçônica 7 de Setembro nº 01
+
 `,
       copyright: '© 2026 Mesa do Secretário',
     });
 
     registerStorageHandlers(app.getPath('userData'));
+    registerPdfHandlers(app.getPath('downloads'));
     createMainWindow();
 
     app.on('activate', () => {

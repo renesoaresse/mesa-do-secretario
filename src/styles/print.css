@@ -100,12 +100,6 @@
   text-indent: 0;
 }
 
-#documentPreview .pbo-empty {
-  margin-left: 1.25cm;
-  text-indent: 0;
-  margin-bottom: 12pt;
-}
-
 /* Assinaturas: 2 em cima + 1 embaixo */
 #documentPreview .signatures {
   display: flex;
@@ -183,6 +177,43 @@
 }
 
 /* =========================================================
+   NUMERAÇÃO DE LINHAS (opcional — "Numerar Linhas? Sim")
+   Régua absoluta na margem esquerda; cada número é posicionado
+   na altura medida da linha de texto correspondente.
+========================================================= */
+
+#documentPreview .doc-body {
+  position: relative;
+}
+
+#documentPreview .doc-line-numbers {
+  position: absolute;
+  top: 0;
+  left: -44px;
+  width: 32px;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* As páginas fatiadas só existem na impressão */
+#documentPreview .print-pages {
+  display: none;
+}
+
+#documentPreview .doc-line-numbers span {
+  position: absolute;
+  right: 0;
+  display: block;
+  width: 100%;
+  text-align: right;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 9pt;
+  font-weight: bold;
+  font-style: italic;
+  color: #111827;
+}
+
+/* =========================================================
    PRINT — A4 com respiros corretos (igual preview, sem scale)
 ========================================================= */
 
@@ -208,8 +239,11 @@
     margin: 0 !important;
   }
 
-  /* 2) Esconde UI */
+  /* 2) Esconde UI
+     O modal entra aqui porque o PDF com senha é gerado com ele ainda aberto
+     (printToPDF renderiza a janela viva em media `print`). */
   .sidebar,
+  .modal-overlay,
   .preview-toolbar,
   .preview-actions,
   .autosave-toast,
@@ -263,14 +297,34 @@
     color: #111827 !important;
   }
 
-  /* 6) Quebras de página seguras */
-  #documentPreview p,
+  /* 6) Quebras de página seguras
+     Parágrafos longos (ex.: ORDEM DO DIA) PODEM quebrar entre páginas —
+     travá-los com break-inside: avoid empurrava o bloco inteiro para a
+     próxima página e deixava um vazio enorme no fim da anterior.
+     orphans/widows garantem que a quebra não deixe linha solta. */
+  #documentPreview p {
+    break-inside: auto;
+    page-break-inside: auto;
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Blocos curtos continuam indivisíveis */
+  #documentPreview p.center-italic,
+  #documentPreview .pbo-block,
+  #documentPreview .doc-top,
   #documentPreview .header-center,
   #documentPreview .title-center,
   #documentPreview .signatures,
   #documentPreview .sig-line {
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+
+  /* Título nunca fica sozinho no fim da página */
+  #documentPreview .title-center {
+    break-after: avoid;
+    page-break-after: avoid;
   }
 
   /* 7) Evita que linhas de assinatura quebrem no meio */
@@ -282,5 +336,58 @@
   a {
     color: inherit !important;
     text-decoration: none !important;
+  }
+
+  /* 9) NUMERAÇÃO DE LINHAS
+     A folha do preview é trocada por páginas fatiadas: cada página repete o
+     documento inteiro deslocado e recortado no ponto exato (sempre entre
+     linhas). Como nada é re-fluído, os números medidos na tela continuam
+     alinhados com as linhas no papel — inclusive da 2ª página em diante.
+     Depende de @page { margin: 0 }, injetado pelo DocumentPreview. */
+  #documentPreview.with-line-numbers,
+  .preview-sheet.with-line-numbers {
+    width: 794px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    font-size: 12pt !important;
+    line-height: 1.5 !important;
+  }
+
+  #documentPreview.with-line-numbers .doc-body {
+    display: none !important;
+  }
+
+  #documentPreview.with-line-numbers .print-pages {
+    display: block !important;
+  }
+
+  #documentPreview .print-page {
+    position: relative;
+    width: 794px;
+    height: 1123px; /* A4 a 96dpi */
+    padding: 56px 64px;
+    overflow: hidden;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  #documentPreview .print-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  /* Recorta exatamente a fatia daquela página (altura vem inline), senão o
+     padding de baixo ainda mostraria o começo da linha seguinte.
+     A margem negativa + padding trazem a régua de números para dentro da área
+     recortada, mantendo o texto na mesma posição. */
+  #documentPreview .print-page__clip {
+    margin-left: -44px;
+    padding-left: 44px;
+    overflow: hidden;
+  }
+
+  /* Fluxo deslocado: âncora dos números daquela fatia */
+  #documentPreview .print-page__flow {
+    position: relative;
   }
 }
