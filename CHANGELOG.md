@@ -7,12 +7,85 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [UNRELEASED]
 
+## [0.5.1] - 2026-08-09
+
+### Corrigido
+
+- assinatura de código do macOS refeita durante o empacotamento, corrigindo o erro
+  `"Mesa do Secretario.app" está danificado e não pode ser aberto` em Macs com Apple Silicon.
+  O `.app` era gerado apenas com a assinatura ad hoc residual do linker do Electron, que
+  declara recursos não selados; o Gatekeeper classificava a assinatura como inválida e
+  bloqueava a abertura sem oferecer caminho de liberação pela interface
+- `Identifier` do bundle passou de `Electron` para `com.glmese.mesadosecretario`, e o
+  `Info.plist` passou a ser selado pela assinatura
+- trecho corrompido em `wiki-docs/08-Build-e-Distribuicao.md`, que continha caracteres
+  chineses no meio da frase (`para跳过 assinatura`)
+- blocos de comando do `README.md` que não estavam em code fences e seriam renderizados
+  como parágrafo corrido
+- lista de autores do `README.md`, cujas quebras de linha simples colapsavam no render
+- badge do React no `README.md`, de 18 para 19
+
+### Adicionado
+
+- `scripts/mac-adhoc-sign.cjs`: _hook_ `afterPack` do electron-builder que aplica assinatura
+  ad hoc ao bundle empacotado e verifica o resultado antes da geração do DMG
+- seção **Primeira Abertura no macOS** em `wiki-docs/08-Build-e-Distribuicao.md`, destinada
+  ao usuário final, com passo a passo de liberação para macOS 13 ou superior e para macOS 12
+  ou anterior, alternativa por Terminal e tabela de solução de problemas
+- documentação do caminho de autorização pela Apple (Developer ID) como evolução futura
+
 ### Alterado
 
-- wiki-docs: removida página Contribuição e todas as referências à Constituição do Projeto,
-  mantendo 8 páginas (Home, Instalação, Quickstart, Arquitetura, Padrões de Código,
-  Testes, Build e Distribuição, Changelog)
-- quickstart.md: atualizada lista de arquivos para 8 páginas
+- `target` do macOS passou a fixar `arm64` de forma explícita; antes, sem `arch` declarado,
+  o artefato herdava a arquitetura da máquina que executava o _build_
+- seção **Assinatura de Código** da wiki reescrita, documentando a diferença entre assinatura
+  ausente e assinatura inválida no tratamento do Gatekeeper
+- revisão de gramática e vocabulário do `README.md`, com tradução dos títulos que tinham
+  equivalente consagrado em português e padronização dos estrangeirismos em itálico
+
+### Removido
+
+- suporte a Macs com processador Intel. O DMG passou a ser exclusivo de Apple Silicon
+
+## [0.5.0] - 2026-08-09
+
+### Adicionado
+
+- exportação de PDF com proteção por senha, incluindo `PdfExportAction`, `PdfPasswordModal`
+  e o serviço `src/services/pdfExport.ts`
+- numeração de linhas no preview do documento, via `src/features/preview/hooks/useLineNumbers.ts`
+- componentes de interface `Checkbox` e `PasswordInput`
+- campo de tronco de beneficência com componente dedicado (`TroncoInput`)
+- canal de IPC para exportação de PDF no processo principal do Electron, com testes de
+  `main` e `preload`
+
+### Alterado
+
+- `DocumentPreview` reestruturado para acomodar a numeração de linhas e a exportação
+- estilos de impressão (`print.css`) ajustados para o novo layout do documento
+- painel da Palavra do Bem da Ordem revisado
+- lista de lojas padrão (`defaultLojas.ts`) ampliada
+
+## [0.4.0] - 2026-07-03
+
+### Adicionado
+
+- navegação entre telas com o roteador `wouter`, com a edição da ata movida para `AppEditor`
+- tela inicial (_home_) com cartões de acesso rápido, composta por `HomeScreen`,
+  `LauncherCard` e `WelcomeSection`
+- hook `useHasSavedAta` para detectar rascunho de ata salvo
+- cadastro de lojas, com listagem, formulário e seleção por combobox
+  (`LojasListScreen`, `LojaFormScreen`, `LojaCombobox`, `useLojas`)
+- tela de configurações (`ConfigScreen`) e componente `Modal`
+- suporte a sessão conjunta, via `SessionConjuntaForm`
+- wiki do projeto em `wiki-docs/`, com 8 páginas (Home, Instalação, Quickstart, Arquitetura,
+  Padrões de Código, Testes, Build e Distribuição, Changelog)
+
+### Alterado
+
+- painel e entrada de visitantes reformulados
+- persistência ampliada em `src/services/storage.ts` para acomodar lojas e sessão conjunta
+- layout adaptado às novas telas, com ampliação de `components.css` e criação de `home.css`
 
 ## [0.3.0] - 2026-03-18
 
