@@ -92,6 +92,7 @@
     "appId": "com.glmese.mesadosecretario",
     "productName": "Mesa do Secretario",
     "publish": [],
+    "afterPack": "scripts/mac-adhoc-sign.cjs",
     "directories": {
       "output": "release"
     },
@@ -122,7 +123,14 @@
       "shortcutName": "Mesa do Secretario"
     },
     "mac": {
-      "target": "dmg",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
       "icon": "build/icon.icns",
       "artifactName": "mesa-do-secretario-${version}.${ext}",
       "category": "public.app-category.productivity",
