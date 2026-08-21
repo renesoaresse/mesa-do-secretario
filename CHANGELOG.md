@@ -23,6 +23,9 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - seção **Publicação na Web (Vercel)** em `wiki-docs/08-Build-e-Distribuicao.md`, com configuração,
   roteamento, cabeçalhos, versão do Node.js e as diferenças entre a versão web e a _desktop_
 - seção **Publicação web** no `README.md`
+- favicon do brasão da Grande Loja Maçônica do Estado de Sergipe, derivado de `build/icon.png`
+  (mesma arte do ícone do aplicativo _desktop_): `public/favicon.ico` com 16, 32 e 48 pixels,
+  `public/favicon-96x96.png`, `public/favicon-192x192.png` e `public/apple-touch-icon.png`
 - `.vercel` no `.gitignore`
 
 ### Corrigido
@@ -45,6 +48,12 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
   no servidor de desenvolvimento, onde o HMR depende dela
 - tabelas de _scripts_ de `wiki-docs/02-Instalacao.md` e `wiki-docs/08-Build-e-Distribuicao.md`
   atualizadas com a separação entre os alvos web e _desktop_
+- `index.html` passou a declarar os ícones em `.ico` e `.png`, no lugar do único `link` para
+  `vite.svg`
+
+### Removido
+
+- `public/vite.svg`, o favicon padrão do _template_ do Vite, substituído pelo brasão
 
 ## [0.5.1] - 2026-08-09
 
