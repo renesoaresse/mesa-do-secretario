@@ -44,6 +44,12 @@ AGENTS.md
 specs/
 .specify/
 
+# Textos de apoio para PR e release (nao versionados)
+.release-notes/
+
 # Cache
 .turbo/
 *.tsbuildinfo
+
+# Vercel
+.vercel

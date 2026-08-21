@@ -1,7 +1,7 @@
 {
   "name": "mesadoscretario",
   "private": true,
-  "version": "0.5.1",
+  "version": "0.6.0",
   "type": "module",
   "main": "dist-electron/main.cjs",
   "author": {
@@ -22,9 +22,10 @@
     "dev": "vite",
     "clean": "rimraf dist dist-electron release",
     "electron:tsc": "tsc -p src/electron/tsconfig.json && cd dist-electron && mv main.js main.cjs && mv preload.js preload.cjs",
-    "build:web": "vite build",
+    "build:web": "vite build --mode web",
+    "build:renderer": "vite build --mode desktop",
     "build:electron": "yarn electron:tsc",
-    "build": "yarn clean && yarn build:web && yarn build:electron",
+    "build": "yarn clean && yarn build:renderer && yarn build:electron",
     "electron:dev": "concurrently -k --names \"vite,electron\" --prefix \"[{name}]\" \"vite\" \"wait-on http://localhost:5173 && yarn electron:tsc && electron .\"",
     "dist": "yarn build && electron-builder --win --publish never && electron-builder --mac --publish never",
     "dist:win": "yarn build && electron-builder --win --publish never",
