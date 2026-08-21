@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  makeBolsaPropostas,
   makeDangerousPreviewData,
   makePreviewData,
   makeSessionConfig,
@@ -175,7 +176,7 @@ describe('DocumentPreview', () => {
           balaustreTexto: '',
           atosDecretosTexto: '',
           expedientesTexto: '',
-          bolsaPropostasTexto: '',
+          bolsaPropostas: makeBolsaPropostas({ texto: '' }),
         })}
       />,
     );
@@ -214,7 +215,7 @@ describe('DocumentPreview', () => {
             makeVisitor({ nome: '<Visitante Importado>' }),
             makeVisitor({ nome: '&amp;Outro' }),
           ],
-          bolsaPropostasTexto: '&lt;script&gt;externo&lt;/script&gt;',
+          bolsaPropostas: makeBolsaPropostas({ texto: '&lt;script&gt;externo&lt;/script&gt;' }),
         })}
       />,
     );

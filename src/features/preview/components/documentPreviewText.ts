@@ -1,4 +1,14 @@
-import type { LojaConjunta, PreviewData, SessionType, Visitor } from '../../../types/ata';
+import type {
+  BolsaCertificado,
+  BolsaProposta,
+  BolsaPropostas,
+  LojaConjunta,
+  PreviewData,
+  SessionType,
+  Visitor,
+} from '../../../types/ata';
+import { formatarDataNumericaBR } from '../../../utils/data';
+import { normalizarBusca } from '../../../utils/texto';
 
 type PboKey = 'sul' | 'norte' | 'oriente';
 
@@ -42,6 +52,13 @@ export const TRONCO_SUPRIMIDO_TEXTO = 'Por ordem do V∴ M∴, a bolsa de benefi
 
 export const PBO_SUPRIMIDO_TEXTO =
   'Por ordem do V∴ M∴, a palavra a bem da Ordem e o quadro particular foram suprimidos!';
+
+export const BOLSA_PROPOSTAS_SUPRIMIDA_TEXTO =
+  'Por ordem do V∴ M∴, a Bolsa de proposta e informações foi suprimida!';
+
+// Bolsa girou sem nada a registrar: fica o registro ritualístico dos bons fluidos.
+export const BOLSA_PROPOSTAS_SEM_PRODUCAO =
+  'A bolsa de propostas e informações após seu giro nada produziu, além dos bons fluidos colocados pelos IIr∴.';
 
 // Sem balaústre digitado, registra-se que não houve balaústre na sessão.
 export const BALAUSTRE_PADRAO = 'Não houve balaústre a ser apresentado nesta sessão!';
@@ -131,6 +148,115 @@ export function gerarTextoSaudacao(visitors: Visitor[], orador: string) {
   const visitantesTexto = joinNomes(visitors.map(descreverVisitante));
 
   return `O Ir∴ Or∴ ${primeiroNomeOrador} saudou o ${visitantesTexto}, na forma ritualística.`;
+}
+
+// Uma visita certificada por vez: "Loja X - 08 no dia 25/07/2026".
+function descreverVisitaCertificada(certificado: BolsaProposta['certificados'][number]): string {
+  if (!hasText(certificado.lojaNome)) return '';
+  if (!hasText(certificado.dataISO)) return certificado.lojaNome.trim();
+  return `${certificado.lojaNome.trim()} no dia ${formatarDataNumericaBR(certificado.dataISO)}`;
+}
+
+// Ordem cronológica, da visita mais antiga para a mais nova.
+// Registro antigo sem data vai para o fim da fila.
+function compararDatasISO(a: string, b: string): number {
+  if (!a) return b ? 1 : 0;
+  if (!b) return -1;
+  return a.localeCompare(b);
+}
+
+function ordenarVisitasPorData(certificados: BolsaCertificado[]): BolsaCertificado[] {
+  return [...certificados].sort((a, b) => compararDatasISO(a.dataISO, b.dataISO));
+}
+
+/** Data da visita mais antiga do Ir∴, usada para posicionar a coluna no balaústre. */
+function primeiraVisita(item: BolsaProposta): string {
+  return item.certificados.find((certificado) => hasText(certificado.dataISO))?.dataISO ?? '';
+}
+
+// Um mesmo Ir∴ pode ter certificados lançados em registros separados;
+// no balaústre todos viram uma coluna só, com as lojas enumeradas por data.
+function agruparCertificadosPorObreiro(itens: BolsaProposta[]): BolsaProposta[] {
+  const porObreiro = new Map<string, BolsaProposta>();
+
+  for (const item of itens) {
+    const chave = normalizarBusca(item.obreiroNome);
+    const acumulado = porObreiro.get(chave);
+
+    porObreiro.set(
+      chave,
+      acumulado
+        ? { ...acumulado, certificados: [...acumulado.certificados, ...item.certificados] }
+        : { ...item, certificados: [...item.certificados] },
+    );
+  }
+
+  return [...porObreiro.values()]
+    .map((item) => ({ ...item, certificados: ordenarVisitasPorData(item.certificados) }))
+    .sort((a, b) => compararDatasISO(primeiraVisita(a), primeiraVisita(b)));
+}
+
+// O plural acompanha quantas lojas o Ir∴ visitou, não quantos IIr∴ há na sessão.
+function descreverCertificados(item: BolsaProposta): string {
+  const visitas = item.certificados.map(descreverVisitaCertificada).filter(Boolean);
+  if (visitas.length === 0) return '';
+
+  const plural = visitas.length > 1;
+  const substantivo = plural ? 'certificados' : 'certificado';
+  const complemento = plural ? 'às lojas' : 'à loja';
+
+  return `${substantivo} de visita do Ir∴ ${item.obreiroNome.trim()} ${complemento} ${joinNomes(visitas)}`;
+}
+
+// Todos os aumentos de salário entram numa única coluna, com os IIr∴ enumerados.
+function descreverAumentos(itens: BolsaProposta[]): string {
+  const nomes = itens.map((item) => item.obreiroNome.trim()).filter(Boolean);
+  if (nomes.length === 0) return '';
+
+  const plural = nomes.length > 1;
+  const substantivo = plural ? 'pedidos' : 'pedido';
+  const complemento = plural ? 'dos IIr∴' : 'do Ir∴';
+
+  return `${substantivo} de aumento de salário ${complemento} ${joinNomes(nomes)}`;
+}
+
+// Cada trabalho tem título próprio, então rende uma coluna separada.
+function descreverTrabalho(item: BolsaProposta): string {
+  const base = `trabalho apresentado pelo Ir∴ ${item.obreiroNome.trim()}`;
+  return hasText(item.titulo) ? `${base} intitulado "${item.titulo.trim()}"` : base;
+}
+
+/**
+ * Monta a Bolsa de Propostas e Informações em parágrafos: o primeiro enumera as
+ * colunas gravadas na ordem fixa do balaústre (certificados de visita, aumentos
+ * de salário e trabalhos); o acréscimo livre, quando existe, vira parágrafo próprio.
+ */
+export function gerarTextoBolsaPropostas(bolsa: BolsaPropostas): string[] {
+  if (bolsa.suprimida) return [BOLSA_PROPOSTAS_SUPRIMIDA_TEXTO];
+
+  const itens = bolsa.itens.filter((item) => hasText(item.obreiroNome));
+  const complemento = bolsa.texto.trim();
+
+  const colunas = [
+    ...agruparCertificadosPorObreiro(itens.filter((item) => item.tipo === 'certificado')).map(
+      descreverCertificados,
+    ),
+    descreverAumentos(itens.filter((item) => item.tipo === 'aumento')),
+    ...itens.filter((item) => item.tipo === 'trabalho').map(descreverTrabalho),
+  ].filter((coluna) => coluna.length > 0);
+
+  if (colunas.length === 0 && !complemento) return [BOLSA_PROPOSTAS_SEM_PRODUCAO];
+
+  // Sem total anunciado, cada coluna montada vale por uma.
+  const total =
+    bolsa.totalColunas > 0 ? bolsa.totalColunas : colunas.length + (complemento ? 1 : 0);
+  const gravadas = total > 1 ? `${total} colunas gravadas` : `${total} coluna gravada`;
+  const abertura = `A bolsa de propostas e informações após seu giro produziu ${gravadas}`;
+
+  const paragrafo =
+    colunas.length > 0 ? `${abertura}, sendo: ${joinNomes(colunas)}.` : `${abertura}.`;
+
+  return complemento ? [paragrafo, complemento] : [paragrafo];
 }
 
 export function formatDateBR(iso: string) {

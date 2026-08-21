@@ -34,6 +34,26 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - botão **Voltar** no rodapé da tela de ata, exclusivo da versão _desktop_ (Windows e macOS),
   posicionado antes de Imprimir
 - chaves de armazenamento `obreiros` e `gestoes`, liberadas também na ponte do Electron
+- seção **Bolsa de Propostas e Informações** com registro estruturado no lugar do texto livre:
+  campo **Total de colunas gravadas**, busca do obreiro no quadro da loja e seleção do **Tipo**
+  entre _Certificado de Visitas_, _Trabalhos_ e _Aumento de Salário_, com o tipo em branco até a
+  escolha do Ir∴ Sec∴ (`BolsaPropostasPanel`, `BolsaPropostaInputRow`, `BolsaPropostasList`)
+- busca de obreiros do quadro por nome, com o cargo da gestão vigente ao lado (`ObreiroCombobox`)
+- certificado de visita com **loja** e **data**, ambas obrigatórias; a loja reaproveita o mesmo
+  seletor dos visitantes, incluindo o cadastro de loja nova pela opção _Outros_
+- **título do trabalho** nos registros do tipo _Trabalhos_
+- **acréscimo ao texto padrão** da bolsa, lavrado em parágrafo próprio depois das colunas gravadas
+- supressão da bolsa por ordem do V∴ M∴, que esconde os campos e registra apenas
+  “Por ordem do V∴ M∴, a Bolsa de proposta e informações foi suprimida!”
+- redação automática da bolsa no balaústre (`gerarTextoBolsaPropostas`), sempre na ordem
+  certificados de visita, aumentos de salário e trabalhos, com concordância de número
+  (“1 coluna gravada” / “13 colunas gravadas”, “certificado … à loja” / “certificados … às lojas”,
+  “pedido … do Ir∴” / “pedidos … dos IIr∴”), cifra em toda referência a irmão e agrupamento numa
+  única coluna dos certificados do mesmo Ir∴ lançados em registros separados
+- registro ritualístico quando o giro nada produziu: “A bolsa de propostas e informações após seu
+  giro nada produziu, além dos bons fluidos colocados pelos IIr∴.”
+- utilitários compartilhados `normalizarBusca` (`src/utils/texto.ts`) e `formatarDataNumericaBR`
+  (`src/utils/data.ts`)
 
 ### Alterado
 
@@ -48,6 +68,12 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - seta do `select` passou a ser desenhada por SVG embutido; o `appearance: none` a removia sem
   repor nenhum indicador
 - `Modal` ganhou a opção `dismissible`, que suprime o ✕, o clique fora e o Esc
+- `bolsaPropostasTexto`, até então um texto livre, deu lugar ao `bolsaPropostas` estruturado em
+  `AtaDraft` e `PreviewData` (total de colunas, registros, acréscimo e supressão), persistido no
+  rascunho canônico `ataDraft` tanto no `localStorage` quanto pela ponte do Electron
+- rascunhos gravados por versões anteriores são migrados na leitura: o texto livre antigo passa a
+  alimentar o acréscimo da bolsa, sem perda de conteúdo (`sanitizeAtaDraft`)
+- `LojaCombobox` passou a usar o `normalizarBusca` compartilhado, em vez da normalização local
 
 ### Removido
 

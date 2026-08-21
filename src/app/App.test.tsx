@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { installMockElectronApi, removeMockElectronApi } from '../test/electron';
 import {
+  makeBolsaPropostas,
   makeMagnaFields,
   makeOfficers,
   makePbo,
@@ -28,7 +29,7 @@ const mockState = {
   balaustreTexto: '',
   atosDecretosTexto: '',
   expedientesTexto: '',
-  bolsaPropostasTexto: '',
+  bolsaPropostas: makeBolsaPropostas({ texto: '' }),
   previewData: makePreviewData(),
   autoSaveVisible: true,
   zoom: 1,
@@ -39,12 +40,14 @@ const mockState = {
   setBalaustreTexto: vi.fn(),
   setAtosDecretosTexto: vi.fn(),
   setExpedientesTexto: vi.fn(),
-  setBolsaPropostasTexto: vi.fn(),
   updateSessionConfig: vi.fn(),
   updateMagnaFields: vi.fn(),
   updateOfficers: vi.fn(),
   updateLojaConfig: vi.fn(),
   updatePbo: vi.fn(),
+  updateBolsaPropostas: vi.fn(),
+  addBolsaProposta: vi.fn(),
+  removeBolsaProposta: vi.fn(),
   addVisitor: vi.fn(),
   removeVisitor: vi.fn(),
   handlePrint: vi.fn(),

@@ -1,6 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { makeMagnaFields, makeOfficers, makePbo, makeSessionConfig } from '../../test/factories';
+import {
+  makeBolsaPropostas,
+  makeMagnaFields,
+  makeOfficers,
+  makePbo,
+  makeSessionConfig,
+} from '../../test/factories';
 import { SidebarContent } from './SidebarContent';
 
 vi.mock('../../features/session/components/SessionTypeSelector', () => ({
@@ -35,6 +41,9 @@ vi.mock('../../features/loja-config/components/LojaConfigForm', () => ({
 }));
 vi.mock('../../features/session/components/OpenTextSection', () => ({
   OpenTextSection: () => <div>OpenTextSection</div>,
+}));
+vi.mock('../../features/bolsa', () => ({
+  BolsaPropostasPanel: () => <div>BolsaPropostasPanel</div>,
 }));
 
 const baseProps = {
@@ -73,8 +82,10 @@ const baseProps = {
   onAtosDecretosTextoChange: vi.fn(),
   expedientesTexto: 'E',
   onExpedientesTextoChange: vi.fn(),
-  bolsaPropostasTexto: 'BP',
-  onBolsaPropostasTextoChange: vi.fn(),
+  bolsaPropostas: makeBolsaPropostas(),
+  onBolsaPropostasChange: vi.fn(),
+  onAddBolsaProposta: vi.fn(),
+  onRemoveBolsaProposta: vi.fn(),
 };
 
 describe('SidebarContent', () => {
@@ -85,6 +96,7 @@ describe('SidebarContent', () => {
     expect(screen.getByText('SessionConfigForm')).toBeInTheDocument();
     expect(screen.getByText('OfficersForm')).toBeInTheDocument();
     expect(screen.getByText('VisitorsPanel')).toBeInTheDocument();
+    expect(screen.getByText('BolsaPropostasPanel')).toBeInTheDocument();
     expect(screen.getByText('FooterActions')).toBeInTheDocument();
     expect(screen.getByText('LastSaveInfo')).toBeInTheDocument();
     expect(screen.queryByText(/documentos pdf/i)).not.toBeInTheDocument();

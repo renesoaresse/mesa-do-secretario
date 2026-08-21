@@ -1,7 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { installMockElectronApi, removeMockElectronApi } from '../test/electron';
-import { makeAtaDraft, makeLegacyAtaDraft, makeVisitor } from '../test/factories';
+import {
+  makeAtaDraft,
+  makeBolsaProposta,
+  makeBolsaPropostas,
+  makeLegacyAtaDraft,
+  makeVisitor,
+} from '../test/factories';
 import { seedStorage } from '../test/storage';
 import { storage } from '../services/storage';
 import { DEFAULT_LOJA_CONFIG } from './useAtaState';
@@ -142,6 +148,50 @@ describe('useAtaState', () => {
     );
     expect(stored.ordemDia).toBe('Ordem Persistida');
     expect(stored.balaustreTexto).toBe('Balaustre Persistido');
+  });
+
+  it('deve persistir os registros da bolsa de propostas no draft canonico', () => {
+    const { result } = renderHook(() => useAtaState());
+    const registro = makeBolsaProposta({ id: 'b1', obreiroNome: 'Ir Persistido' });
+
+    act(() => {
+      result.current.updateBolsaPropostas({ totalColunas: 3, texto: 'Acréscimo persistido' });
+      result.current.addBolsaProposta(registro);
+    });
+
+    const stored = JSON.parse(localStorage.getItem('ataDraft') ?? '{}');
+
+    expect(stored.bolsaPropostas.totalColunas).toBe(3);
+    expect(stored.bolsaPropostas.texto).toBe('Acréscimo persistido');
+    expect(stored.bolsaPropostas.itens).toEqual([registro]);
+  });
+
+  it('deve restaurar e remover registros da bolsa de propostas entre sessoes', () => {
+    const registro = makeBolsaProposta({ id: 'b1', obreiroNome: 'Ir Persistido' });
+    seedStorage(
+      'ataDraft',
+      makeAtaDraft({
+        bolsaPropostas: makeBolsaPropostas({
+          totalColunas: 2,
+          itens: [registro],
+          texto: 'Acréscimo persistido',
+          suprimida: true,
+        }),
+      }),
+    );
+
+    const { result } = renderHook(() => useAtaState());
+
+    expect(result.current.bolsaPropostas.totalColunas).toBe(2);
+    expect(result.current.bolsaPropostas.suprimida).toBe(true);
+    expect(result.current.bolsaPropostas.itens).toEqual([registro]);
+    expect(result.current.previewData.bolsaPropostas.texto).toBe('Acréscimo persistido');
+
+    act(() => {
+      result.current.removeBolsaProposta('b1');
+    });
+
+    expect(JSON.parse(localStorage.getItem('ataDraft') ?? '{}').bolsaPropostas.itens).toEqual([]);
   });
 
   it('deve adicionar e remover visitantes', () => {
