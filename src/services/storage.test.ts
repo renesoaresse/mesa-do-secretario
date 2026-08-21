@@ -81,6 +81,44 @@ describe('storage service', () => {
       expect(loaded.officers.vm).toBe('Mestre');
       expect(loaded.lojaConfig.nomeLoja).toBe('Loja Legada');
     });
+
+    it('deve migrar a bolsa de propostas em texto livre para o formato estruturado', () => {
+      seedStorage('ataDraft', {
+        ...makeLegacyAtaDraft(),
+        bolsaPropostas: undefined,
+        bolsaPropostasTexto: 'pedido de dupla filiação do irmão Fulano',
+      });
+
+      const loaded = storage.loadAtaDraft(makeAtaDraft());
+
+      expect(loaded.bolsaPropostas).toEqual({
+        totalColunas: 0,
+        itens: [],
+        texto: 'pedido de dupla filiação do irmão Fulano',
+        suprimida: false,
+      });
+      expect(loaded).not.toHaveProperty('bolsaPropostasTexto');
+    });
+
+    it('deve preservar os registros estruturados da bolsa de propostas', () => {
+      seedStorage('ataDraft', {
+        ...makeAtaDraft(),
+        bolsaPropostas: {
+          totalColunas: 3,
+          itens: [{ id: 'b1', obreiroNome: 'Fulano', tipo: 'aumento' }],
+          texto: 'extra',
+          suprimida: true,
+        },
+      });
+
+      const loaded = storage.loadAtaDraft(makeAtaDraft());
+
+      expect(loaded.bolsaPropostas.totalColunas).toBe(3);
+      expect(loaded.bolsaPropostas.suprimida).toBe(true);
+      expect(loaded.bolsaPropostas.itens).toEqual([
+        { id: 'b1', obreiroNome: 'Fulano', tipo: 'aumento', certificados: [], titulo: '' },
+      ]);
+    });
   });
 
   describe('remove()', () => {

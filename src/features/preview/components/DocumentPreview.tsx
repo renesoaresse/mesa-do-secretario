@@ -12,6 +12,7 @@ import {
   EXPEDIENTE_PADRAO,
   FORMAT,
   formatDateBR,
+  gerarTextoBolsaPropostas,
   formatPalavraBemOrdemEntries,
   gerarSufixoLojasConjunta,
   gerarTextoPresenca,
@@ -126,7 +127,7 @@ function buildPreviewContent(data: PreviewData) {
     balaustreTexto,
     atosDecretosTexto,
     expedientesTexto,
-    bolsaPropostasTexto,
+    bolsaPropostas,
   } = data;
 
   const { dia, mes, ano, anoVLFormatado } = getPreviewDateParts(sessionConfig.dataISO);
@@ -139,6 +140,7 @@ function buildPreviewContent(data: PreviewData) {
   const textoPresenca = gerarTextoPresenca(sessionConfig.numPresenca, visitors, lojasConj);
   const textoSaudacao = gerarTextoSaudacao(visitors, officers.or);
   const pboEntries = formatPalavraBemOrdemEntries(pbo);
+  const [bolsaAbertura, ...bolsaComplementos] = gerarTextoBolsaPropostas(bolsaPropostas);
 
   return (
     <>
@@ -229,8 +231,16 @@ function buildPreviewContent(data: PreviewData) {
         </p>
 
         <p className="no-indent">
-          <strong>BOLSA DE PROPOSTAS E INFORMAÇÕES:</strong> {bolsaPropostasTexto}
+          <strong>BOLSA DE PROPOSTAS E INFORMAÇÕES:</strong> {bolsaAbertura}
         </p>
+
+        {/* O acréscimo livre da bolsa é lavrado em parágrafo próprio, sem recuo,
+            alinhado com as demais seções do balaústre. */}
+        {bolsaComplementos.map((complemento) => (
+          <p className="no-indent" key={complemento}>
+            {complemento}
+          </p>
+        ))}
 
         <p className="no-indent">
           <strong>ORDEM DO DIA:</strong> {ordemDia}

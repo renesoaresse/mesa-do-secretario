@@ -15,6 +15,31 @@ export type Visitor = {
 };
 export type Grau = 'Aprendiz' | 'Companheiro' | 'Mestre';
 
+/** Naturezas registradas na Bolsa de Propostas e Informações. */
+export type BolsaPropostaTipo = 'certificado' | 'aumento' | 'trabalho';
+
+/** Uma visita certificada: a loja visitada e o dia da visita. */
+export type BolsaCertificado = {
+  lojaId: string; // '' quando a loja não veio do cadastro
+  lojaNome: string; // snapshot da loja escolhida
+  dataISO: string; // YYYY-MM-DD
+};
+
+export type BolsaProposta = {
+  id: string;
+  obreiroNome: string;
+  tipo: BolsaPropostaTipo;
+  certificados: BolsaCertificado[]; // só usado quando tipo === 'certificado'
+  titulo: string; // só usado quando tipo === 'trabalho'
+};
+
+export type BolsaPropostas = {
+  totalColunas: number; // colunas gravadas anunciadas pelo V∴ M∴
+  itens: BolsaProposta[];
+  texto: string; // acréscimo livre, montado ao final do texto padrão
+  suprimida: boolean; // bolsa de propostas suprimida por ordem do V∴ M∴
+};
+
 export type Rito =
   | 'Rito Escocês Antigo e Aceito'
   | 'Rito Adonhiramita'
@@ -69,7 +94,7 @@ export type AtaDraft = {
   balaustreTexto: string;
   atosDecretosTexto: string;
   expedientesTexto: string;
-  bolsaPropostasTexto: string;
+  bolsaPropostas: BolsaPropostas;
 };
 
 export type StatusKind = 'success' | 'error' | 'info';
@@ -95,7 +120,7 @@ export type PreviewData = {
   balaustreTexto: string;
   atosDecretosTexto: string;
   expedientesTexto: string;
-  bolsaPropostasTexto: string;
+  bolsaPropostas: BolsaPropostas;
 };
 
 export type LojaConfig = {

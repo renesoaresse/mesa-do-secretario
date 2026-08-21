@@ -7,6 +7,8 @@ import {
 } from '../features/loja-config/data/oficiais';
 import type {
   AtaDraft,
+  BolsaProposta,
+  BolsaPropostas,
   LojaConfig,
   LojaConjunta,
   MagnaFields,
@@ -55,6 +57,13 @@ const DEFAULT_PBO: PalavraBemOrdem = {
   oriente: 'Irmãos do Oriente',
 };
 
+const DEFAULT_BOLSA_PROPOSTAS: BolsaPropostas = {
+  totalColunas: 0,
+  itens: [],
+  texto: '',
+  suprimida: false,
+};
+
 const DEFAULT_ATA_DRAFT: AtaDraft = {
   sessionType: 'economica',
   sessionConfig: DEFAULT_SESSION_CONFIG,
@@ -71,7 +80,7 @@ const DEFAULT_ATA_DRAFT: AtaDraft = {
   balaustreTexto: '',
   atosDecretosTexto: '',
   expedientesTexto: '',
-  bolsaPropostasTexto: '',
+  bolsaPropostas: DEFAULT_BOLSA_PROPOSTAS,
 };
 
 export function useAtaState() {
@@ -110,7 +119,7 @@ export function useAtaState() {
   const [balaustreTexto, setBalaustreTexto] = useState(initialDraft.balaustreTexto);
   const [atosDecretosTexto, setAtosDecretosTexto] = useState(initialDraft.atosDecretosTexto);
   const [expedientesTexto, setExpedientesTexto] = useState(initialDraft.expedientesTexto);
-  const [bolsaPropostasTexto, setBolsaPropostasTexto] = useState(initialDraft.bolsaPropostasTexto);
+  const [bolsaPropostas, setBolsaPropostas] = useState<BolsaPropostas>(initialDraft.bolsaPropostas);
 
   const currentDraft = useMemo<AtaDraft>(
     () => ({
@@ -129,7 +138,7 @@ export function useAtaState() {
       balaustreTexto,
       atosDecretosTexto,
       expedientesTexto,
-      bolsaPropostasTexto,
+      bolsaPropostas,
     }),
     [
       sessionType,
@@ -147,7 +156,7 @@ export function useAtaState() {
       balaustreTexto,
       atosDecretosTexto,
       expedientesTexto,
-      bolsaPropostasTexto,
+      bolsaPropostas,
     ],
   );
 
@@ -188,6 +197,24 @@ export function useAtaState() {
 
   const updateMagnaFields = (patch: Partial<MagnaFields>) => {
     setMagnaFields((state) => ({ ...state, ...patch }));
+    markChanged();
+  };
+
+  const updateBolsaPropostas = (patch: Partial<BolsaPropostas>) => {
+    setBolsaPropostas((state) => ({ ...state, ...patch }));
+    markChanged();
+  };
+
+  const addBolsaProposta = (item: BolsaProposta) => {
+    setBolsaPropostas((state) => ({ ...state, itens: [...state.itens, item] }));
+    markChanged();
+  };
+
+  const removeBolsaProposta = (id: string) => {
+    setBolsaPropostas((state) => ({
+      ...state,
+      itens: state.itens.filter((item) => item.id !== id),
+    }));
     markChanged();
   };
 
@@ -237,7 +264,7 @@ export function useAtaState() {
       balaustreTexto,
       atosDecretosTexto,
       expedientesTexto,
-      bolsaPropostasTexto,
+      bolsaPropostas,
     }),
     [
       titulares,
@@ -256,7 +283,7 @@ export function useAtaState() {
       balaustreTexto,
       atosDecretosTexto,
       expedientesTexto,
-      bolsaPropostasTexto,
+      bolsaPropostas,
     ],
   );
 
@@ -279,7 +306,7 @@ export function useAtaState() {
     balaustreTexto,
     atosDecretosTexto,
     expedientesTexto,
-    bolsaPropostasTexto,
+    bolsaPropostas,
     previewData,
     setZoom,
     setSessionType,
@@ -311,15 +338,14 @@ export function useAtaState() {
       setExpedientesTexto(value);
       markChanged();
     },
-    setBolsaPropostasTexto: (value: string) => {
-      setBolsaPropostasTexto(value);
-      markChanged();
-    },
     updateSessionConfig,
     updateMagnaFields,
     updateOfficers,
     updateLojaConfig,
     updatePbo,
+    updateBolsaPropostas,
+    addBolsaProposta,
+    removeBolsaProposta,
     addLojaConjunta,
     removeLojaConjunta,
     setObreirosConjunta,

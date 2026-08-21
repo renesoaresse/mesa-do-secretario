@@ -10,7 +10,15 @@ import { FooterActions } from '../ui/FooterActions';
 import { PdfExportAction } from '../../features/preview/components/PdfExportAction';
 import { buildAtaFileName } from '../../services/pdfExport';
 import { LastSaveInfo } from '../ui/LastSaveInfo';
-import type { Loja, LojaConfig, LojaConjunta, Visitor } from '../../types/ata';
+import { BolsaPropostasPanel } from '../../features/bolsa';
+import type {
+  BolsaProposta,
+  BolsaPropostas,
+  Loja,
+  LojaConfig,
+  LojaConjunta,
+  Visitor,
+} from '../../types/ata';
 import type { ObreiroComCargo } from '../../features/loja-config/data/oficiais';
 
 import type {
@@ -67,8 +75,10 @@ type Props = {
   onAtosDecretosTextoChange: (s: string) => void;
   expedientesTexto: string;
   onExpedientesTextoChange: (s: string) => void;
-  bolsaPropostasTexto: string;
-  onBolsaPropostasTextoChange: (s: string) => void;
+  bolsaPropostas: BolsaPropostas;
+  onBolsaPropostasChange: (patch: Partial<BolsaPropostas>) => void;
+  onAddBolsaProposta: (item: BolsaProposta) => void;
+  onRemoveBolsaProposta: (id: string) => void;
 };
 
 export function SidebarContent(props: Props) {
@@ -136,10 +146,15 @@ export function SidebarContent(props: Props) {
       </SidebarDrawer>
 
       <SidebarDrawer title="Bolsa de Propostas e Informações" icon="💬" defaultOpen={false}>
-        <OpenTextSection
-          value={props.bolsaPropostasTexto}
-          onChange={props.onBolsaPropostasTextoChange}
-          placeholder="Digite os registros da Bolsa de Propostas e Informações..."
+        <BolsaPropostasPanel
+          value={props.bolsaPropostas}
+          obreiros={props.obreiros}
+          lojas={props.lojas}
+          lojaConfig={props.lojaConfig}
+          onChange={props.onBolsaPropostasChange}
+          onAddItem={props.onAddBolsaProposta}
+          onRemoveItem={props.onRemoveBolsaProposta}
+          onCreateLoja={props.onCreateLoja}
         />
       </SidebarDrawer>
 

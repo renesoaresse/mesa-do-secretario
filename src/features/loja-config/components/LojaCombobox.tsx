@@ -5,6 +5,7 @@ import { FormGroup } from '../../../components/ui/FormGroup';
 import { Button } from '../../../components/ui/Button';
 import { StatusMessage } from '../../../components/ui/StatusMessage';
 import { Modal } from '../../../components/ui/Modal';
+import { normalizarBusca as normalize } from '../../../utils/texto';
 
 type LojaInput = Omit<Loja, 'id'>;
 
@@ -18,15 +19,6 @@ type Props = {
 };
 
 const MIN_SEARCH = 3;
-
-function normalize(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim();
-}
 
 // Loja configurada em "Configuração da Loja" não deve aparecer no select.
 function isConfiguredLoja(loja: Loja, config: LojaConfig): boolean {

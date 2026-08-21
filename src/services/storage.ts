@@ -1,5 +1,9 @@
 import type {
   AtaDraft,
+  BolsaCertificado,
+  BolsaProposta,
+  BolsaPropostas,
+  BolsaPropostaTipo,
   Gestao,
   GrauObreiro,
   Loja,
@@ -107,6 +111,55 @@ function getLojasConjunta(value: unknown, fallback: AtaDraft['lojasConjunta']) {
     }));
 }
 
+const BOLSA_TIPOS: BolsaPropostaTipo[] = ['certificado', 'aumento', 'trabalho'];
+
+function getBolsaTipo(value: unknown): BolsaPropostaTipo {
+  return BOLSA_TIPOS.includes(value as BolsaPropostaTipo)
+    ? (value as BolsaPropostaTipo)
+    : BOLSA_TIPOS[0];
+}
+
+function getBolsaCertificados(value: unknown): BolsaCertificado[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.filter(isRecord).map((item) => ({
+    lojaId: getString(item.lojaId, ''),
+    lojaNome: getString(item.lojaNome, ''),
+    dataISO: getString(item.dataISO, ''),
+  }));
+}
+
+function getBolsaItens(value: unknown): BolsaProposta[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.filter(isRecord).map((item) => ({
+    id: getString(item.id, crypto.randomUUID()),
+    obreiroNome: getString(item.obreiroNome, ''),
+    tipo: getBolsaTipo(item.tipo),
+    certificados: getBolsaCertificados(item.certificados),
+    titulo: getString(item.titulo, ''),
+  }));
+}
+
+// Compat: versões antigas guardavam a bolsa inteira como um texto livre único,
+// que passa a alimentar o acréscimo aberto do novo formato estruturado.
+function getBolsaPropostas(
+  value: unknown,
+  legacyTexto: unknown,
+  fallback: BolsaPropostas,
+): BolsaPropostas {
+  if (!isRecord(value)) {
+    return { ...fallback, texto: getString(legacyTexto, fallback.texto) };
+  }
+
+  return {
+    totalColunas: getNumber(value.totalColunas, fallback.totalColunas),
+    itens: getBolsaItens(value.itens),
+    texto: getString(value.texto, fallback.texto),
+    suprimida: getBoolean(value.suprimida, fallback.suprimida),
+  };
+}
+
 function sanitizeAtaDraft(value: unknown, defaultDraft: AtaDraft): AtaDraft {
   if (!isRecord(value)) {
     return defaultDraft;
@@ -163,7 +216,11 @@ function sanitizeAtaDraft(value: unknown, defaultDraft: AtaDraft): AtaDraft {
     balaustreTexto: getString(value.balaustreTexto, defaultDraft.balaustreTexto),
     atosDecretosTexto: getString(value.atosDecretosTexto, defaultDraft.atosDecretosTexto),
     expedientesTexto: getString(value.expedientesTexto, defaultDraft.expedientesTexto),
-    bolsaPropostasTexto: getString(value.bolsaPropostasTexto, defaultDraft.bolsaPropostasTexto),
+    bolsaPropostas: getBolsaPropostas(
+      value.bolsaPropostas,
+      value.bolsaPropostasTexto,
+      defaultDraft.bolsaPropostas,
+    ),
   };
 }
 

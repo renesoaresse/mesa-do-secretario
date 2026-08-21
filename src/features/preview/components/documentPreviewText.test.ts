@@ -1,9 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { makePbo, makeVisitor } from '../../../test/factories';
 import {
+  makeBolsaProposta,
+  makeBolsaPropostas,
+  makePbo,
+  makeVisitor,
+} from '../../../test/factories';
+import {
+  BOLSA_PROPOSTAS_SEM_PRODUCAO,
+  BOLSA_PROPOSTAS_SUPRIMIDA_TEXTO,
   PBO_SILENCIO,
   formatPalavraBemOrdemEntries,
   gerarSufixoLojasConjunta,
+  gerarTextoBolsaPropostas,
   gerarTextoPresenca,
   gerarTextoSaudacao,
   joinNomes,
@@ -107,5 +115,217 @@ describe('documentPreviewText', () => {
     expect(
       gerarTextoSaudacao([makeVisitor({ nome: '&lt;Visitante&gt;' })], 'Orador Teste'),
     ).toContain('&lt;Visitante&gt;');
+  });
+});
+
+const certificado = (id: string, obreiroNome: string, visitas: Array<[string, string]>) =>
+  makeBolsaProposta({
+    id,
+    obreiroNome,
+    tipo: 'certificado',
+    certificados: visitas.map(([lojaNome, dataISO]) => ({ lojaId: lojaNome, lojaNome, dataISO })),
+  });
+
+describe('gerarTextoBolsaPropostas', () => {
+  it('registra a supressao decidida pelo V M', () => {
+    expect(
+      gerarTextoBolsaPropostas(makeBolsaPropostas({ suprimida: true, texto: 'ignorado' })),
+    ).toEqual([BOLSA_PROPOSTAS_SUPRIMIDA_TEXTO]);
+  });
+
+  it('registra os bons fluidos quando o giro nada produziu', () => {
+    expect(gerarTextoBolsaPropostas(makeBolsaPropostas({ texto: '   ' }))).toEqual([
+      BOLSA_PROPOSTAS_SEM_PRODUCAO,
+    ]);
+  });
+
+  it('usa o singular com uma unica coluna gravada', () => {
+    expect(
+      gerarTextoBolsaPropostas(
+        makeBolsaPropostas({
+          totalColunas: 1,
+          texto: '',
+          itens: [certificado('c1', 'Edinaldo Santos', [['Piauhytinga - 1521', '2026-05-26']])],
+        }),
+      ),
+    ).toEqual([
+      'A bolsa de propostas e informações após seu giro produziu 1 coluna gravada, sendo: ' +
+        'certificado de visita do Ir∴ Edinaldo Santos à loja Piauhytinga - 1521 no dia 26/05/2026.',
+    ]);
+  });
+
+  it('agrupa numa coluna so os certificados lancados em registros separados do mesmo Ir', () => {
+    const [abertura] = gerarTextoBolsaPropostas(
+      makeBolsaPropostas({
+        totalColunas: 2,
+        texto: '',
+        itens: [
+          certificado('c1', 'Ubiratan Pinheiro', [['Luzes do São Francisco - 08', '2026-07-25']]),
+          certificado('c2', 'Ubiratan Pinheiro', [['Luzes da Piedade - 05', '2026-07-18']]),
+        ],
+      }),
+    );
+
+    expect(abertura).toContain(
+      'certificados de visita do Ir∴ Ubiratan Pinheiro às lojas ' +
+        'Luzes da Piedade - 05 no dia 18/07/2026 e Luzes do São Francisco - 08 no dia 25/07/2026',
+    );
+  });
+
+  it('agrupa os aumentos de salario numa coluna so', () => {
+    const [abertura] = gerarTextoBolsaPropostas(
+      makeBolsaPropostas({
+        totalColunas: 2,
+        texto: '',
+        itens: [
+          makeBolsaProposta({
+            id: 'a1',
+            obreiroNome: 'Gustavo Nunes',
+            tipo: 'aumento',
+            certificados: [],
+          }),
+          makeBolsaProposta({
+            id: 'a2',
+            obreiroNome: 'João Silva',
+            tipo: 'aumento',
+            certificados: [],
+          }),
+        ],
+      }),
+    );
+
+    expect(abertura).toContain('pedidos de aumento de salário dos IIr∴ Gustavo Nunes e João Silva');
+  });
+
+  it('mantem a ordem certificados, aumentos e trabalhos e isola o texto aberto em outro paragrafo', () => {
+    const [abertura, complemento, ...resto] = gerarTextoBolsaPropostas(
+      makeBolsaPropostas({
+        totalColunas: 4,
+        texto: 'Pedido de dupla filiação do Ir∴ Fulano de Tal.',
+        itens: [
+          makeBolsaProposta({
+            id: 't1',
+            obreiroNome: 'Jorge Farias Lima',
+            tipo: 'trabalho',
+            certificados: [],
+            titulo: 'A Simbologia do Esquadro',
+          }),
+          makeBolsaProposta({
+            id: 'a1',
+            obreiroNome: 'Gustavo Nunes',
+            tipo: 'aumento',
+            certificados: [],
+          }),
+          certificado('c1', 'Edinaldo Santos', [['Piauhytinga - 1521', '2026-05-26']]),
+        ],
+      }),
+    );
+
+    expect(abertura.indexOf('certificado de visita')).toBeLessThan(
+      abertura.indexOf('aumento de salário'),
+    );
+    expect(abertura.indexOf('aumento de salário')).toBeLessThan(
+      abertura.indexOf('trabalho apresentado'),
+    );
+    expect(abertura).toContain(
+      'trabalho apresentado pelo Ir∴ Jorge Farias Lima intitulado "A Simbologia do Esquadro"',
+    );
+    expect(abertura).not.toContain('dupla filiação');
+    expect(complemento).toBe('Pedido de dupla filiação do Ir∴ Fulano de Tal.');
+    expect(resto).toEqual([]);
+  });
+
+  it('conta o texto aberto como coluna quando nao ha registros estruturados', () => {
+    expect(
+      gerarTextoBolsaPropostas(
+        makeBolsaPropostas({ texto: 'Pedido de dupla filiação do Ir∴ Fulano de Tal.' }),
+      ),
+    ).toEqual([
+      'A bolsa de propostas e informações após seu giro produziu 1 coluna gravada.',
+      'Pedido de dupla filiação do Ir∴ Fulano de Tal.',
+    ]);
+  });
+
+  it('reproduz o modelo de ata com varios certificados', () => {
+    expect(
+      gerarTextoBolsaPropostas(
+        makeBolsaPropostas({
+          totalColunas: 13,
+          texto: 'Pedido de dupla filiação do Ir∴ Gustavo Nunes de Araujo.',
+          itens: [
+            certificado('c1', 'Jorge Farias Lima', [
+              ['Jacques Demolay - 18', '2026-07-24'],
+              ['Estrela de Davi - 4360', '2026-07-27'],
+              ['Segredo dos 33 - 09', '2026-07-29'],
+              ['Luzes do São Francisco - 08', '2026-07-25'],
+            ]),
+            certificado('c2', 'Ubiratan Pinheiro', [
+              ['Luzes do São Francisco - 08', '2026-07-25'],
+              ['Luzes da Piedade - 05', '2026-07-18'],
+            ]),
+            certificado('c3', 'Jorge Gonçalves', [
+              ['Hans Werner Menna Barreto Konig - 19', '2026-06-30'],
+            ]),
+          ],
+        }),
+      ),
+    ).toEqual([
+      'A bolsa de propostas e informações após seu giro produziu 13 colunas gravadas, sendo: ' +
+        'certificado de visita do Ir∴ Jorge Gonçalves à loja Hans Werner Menna Barreto Konig - 19 no dia 30/06/2026, ' +
+        'certificados de visita do Ir∴ Ubiratan Pinheiro às lojas Luzes da Piedade - 05 no dia 18/07/2026 ' +
+        'e Luzes do São Francisco - 08 no dia 25/07/2026 ' +
+        'e certificados de visita do Ir∴ Jorge Farias Lima às lojas Jacques Demolay - 18 no dia 24/07/2026, ' +
+        'Luzes do São Francisco - 08 no dia 25/07/2026, Estrela de Davi - 4360 no dia 27/07/2026 ' +
+        'e Segredo dos 33 - 09 no dia 29/07/2026.',
+      'Pedido de dupla filiação do Ir∴ Gustavo Nunes de Araujo.',
+    ]);
+  });
+
+  it('ordena as visitas de um mesmo Ir da mais antiga para a mais nova', () => {
+    const [abertura] = gerarTextoBolsaPropostas(
+      makeBolsaPropostas({
+        texto: '',
+        itens: [
+          certificado('c1', 'Ubiratan Pinheiro', [['Luzes do São Francisco - 08', '2026-07-25']]),
+          certificado('c2', 'Ubiratan Pinheiro', [['Luzes da Piedade - 05', '2026-07-18']]),
+        ],
+      }),
+    );
+
+    expect(abertura).toContain(
+      'às lojas Luzes da Piedade - 05 no dia 18/07/2026 e Luzes do São Francisco - 08 no dia 25/07/2026',
+    );
+  });
+
+  it('ordena as colunas de certificado pela visita mais antiga de cada Ir', () => {
+    const [abertura] = gerarTextoBolsaPropostas(
+      makeBolsaPropostas({
+        texto: '',
+        itens: [
+          certificado('c1', 'Jorge Farias Lima', [['Jacques Demolay - 18', '2026-07-24']]),
+          certificado('c2', 'Jorge Gonçalves', [['Tiradentes - 06', '2026-06-30']]),
+        ],
+      }),
+    );
+
+    expect(abertura.indexOf('Jorge Gonçalves')).toBeLessThan(abertura.indexOf('Jorge Farias Lima'));
+  });
+
+  it('joga para o fim a visita de registro antigo sem data', () => {
+    const [abertura] = gerarTextoBolsaPropostas(
+      makeBolsaPropostas({
+        texto: '',
+        itens: [
+          certificado('c1', 'Edinaldo Santos', [
+            ['Loja Sem Data - 01', ''],
+            ['Piauhytinga - 1521', '2026-05-26'],
+          ]),
+        ],
+      }),
+    );
+
+    expect(abertura).toContain(
+      'às lojas Piauhytinga - 1521 no dia 26/05/2026 e Loja Sem Data - 01',
+    );
   });
 });

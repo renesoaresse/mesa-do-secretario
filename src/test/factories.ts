@@ -1,5 +1,7 @@
 import type {
   AtaDraft,
+  BolsaProposta,
+  BolsaPropostas,
   MagnaFields,
   Officers,
   PalavraBemOrdem,
@@ -15,6 +17,27 @@ export function makeVisitor(overrides: Partial<Visitor> = {}): Visitor {
     lojaNome: '',
     oriente: '',
     potencia: '',
+    ...overrides,
+  };
+}
+
+export function makeBolsaProposta(overrides: Partial<BolsaProposta> = {}): BolsaProposta {
+  return {
+    id: 'bolsa-1',
+    obreiroNome: 'Jorge Farias Lima',
+    tipo: 'certificado',
+    certificados: [{ lojaId: 'loja-1', lojaNome: 'Jacques Demolay - 18', dataISO: '2026-07-24' }],
+    titulo: '',
+    ...overrides,
+  };
+}
+
+export function makeBolsaPropostas(overrides: Partial<BolsaPropostas> = {}): BolsaPropostas {
+  return {
+    totalColunas: 0,
+    itens: [],
+    texto: 'Bolsa',
+    suprimida: false,
     ...overrides,
   };
 }
@@ -89,7 +112,7 @@ export function makePreviewData(overrides: Partial<PreviewData> = {}): PreviewDa
     balaustreTexto: 'Balaustre',
     atosDecretosTexto: 'Atos',
     expedientesTexto: 'Expedientes',
-    bolsaPropostasTexto: 'Bolsa',
+    bolsaPropostas: makeBolsaPropostas(),
     ...overrides,
   };
 }
@@ -117,7 +140,7 @@ export function makeDangerousPreviewData(overrides: Partial<PreviewData> = {}): 
     balaustreTexto: '<p>Balaustre</p>',
     atosDecretosTexto: '<script>atos</script>',
     expedientesTexto: 'Expediente &lt;seguro&gt;',
-    bolsaPropostasTexto: '<img src=x onerror=alert(2)>',
+    bolsaPropostas: makeBolsaPropostas({ texto: '<img src=x onerror=alert(2)>' }),
     ordemDia: '<div>Ordem</div>',
     pbo: makePbo({
       sul: '<i>Sul</i>',
@@ -145,7 +168,7 @@ export function makeAtaDraft(overrides: Partial<AtaDraft> = {}): AtaDraft {
     balaustreTexto: 'Balaustre',
     atosDecretosTexto: 'Atos',
     expedientesTexto: 'Expedientes',
-    bolsaPropostasTexto: 'Bolsa',
+    bolsaPropostas: makeBolsaPropostas(),
     ...overrides,
   };
 }

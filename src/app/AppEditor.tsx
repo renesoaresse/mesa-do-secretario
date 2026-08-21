@@ -77,8 +77,10 @@ export function AppEditor() {
               onAtosDecretosTextoChange={state.setAtosDecretosTexto}
               expedientesTexto={state.expedientesTexto}
               onExpedientesTextoChange={state.setExpedientesTexto}
-              bolsaPropostasTexto={state.bolsaPropostasTexto}
-              onBolsaPropostasTextoChange={state.setBolsaPropostasTexto}
+              bolsaPropostas={state.bolsaPropostas}
+              onBolsaPropostasChange={state.updateBolsaPropostas}
+              onAddBolsaProposta={state.addBolsaProposta}
+              onRemoveBolsaProposta={state.removeBolsaProposta}
             />
           </Sidebar>
         }
