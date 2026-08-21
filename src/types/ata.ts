@@ -15,6 +15,12 @@ export type Visitor = {
 };
 export type Grau = 'Aprendiz' | 'Companheiro' | 'Mestre';
 
+export type Rito =
+  | 'Rito Escocês Antigo e Aceito'
+  | 'Rito Adonhiramita'
+  | 'Rito de York'
+  | 'Rito de Emulação';
+
 export type SessionConfig = {
   grau: Grau;
   numSessao: number;
@@ -95,11 +101,33 @@ export type PreviewData = {
 export type LojaConfig = {
   logoDataUrl: string | null; // base64 dataURL (offline)
   nomeLoja: string;
+  rito: Rito | ''; // '' = nenhum rito escolhido ainda
   numeroLoja: string;
   dataFundacaoISO: string; // YYYY-MM-DD
   temploNome: string; // "Templo onde se reúnem?"
   enderecoTemplo: string;
   cidadeEstado: string; // "Aracaju/SE"
+};
+
+export type GrauObreiro = 'AP∴M∴' | 'CP∴M∴' | 'M∴M∴' | 'M∴M∴I∴';
+
+export type Obreiro = {
+  id: string;
+  nome: string; // sempre em caixa alta
+  cim: string;
+  grau: GrauObreiro;
+};
+
+export type AtribuicaoCargo = {
+  obreiroId: string;
+  cargo: string; // vazio = obreiro sem cargo na gestão
+};
+
+export type Gestao = {
+  id: string;
+  ano: string;
+  vigente: boolean; // só uma gestão pode estar vigente por vez
+  atribuicoes: AtribuicaoCargo[];
 };
 
 export type Loja = {

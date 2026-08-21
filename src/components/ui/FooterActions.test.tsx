@@ -29,6 +29,24 @@ describe('FooterActions', () => {
     expect(nomes).toEqual(['Imprimir', 'PDF com senha', 'Salvar']);
   });
 
+  it('nao renderiza o botao Voltar quando onBack nao e informado', () => {
+    renderWithUser(<FooterActions onPrint={vi.fn()} onSave={vi.fn()} />);
+    expect(screen.queryByRole('button', { name: /voltar/i })).toBeNull();
+  });
+
+  it('renderiza Voltar antes de Imprimir e dispara onBack', async () => {
+    const onBack = vi.fn();
+    const { user } = renderWithUser(
+      <FooterActions onBack={onBack} onPrint={vi.fn()} onSave={vi.fn()} />,
+    );
+
+    const nomes = screen.getAllByRole('button').map((button) => button.textContent);
+    expect(nomes).toEqual(['Voltar', 'Imprimir', 'Salvar']);
+
+    await user.click(screen.getByRole('button', { name: /voltar/i }));
+    expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
   it('mostra estado salvando e desabilita o botao de salvar', () => {
     renderWithUser(<FooterActions onPrint={vi.fn()} onSave={vi.fn()} saving />);
     const button = screen.getByRole('button', { name: /salvando/i });

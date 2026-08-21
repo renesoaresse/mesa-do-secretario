@@ -12,7 +12,13 @@ export const PDF_CHANNELS = {
   save: 'pdf:save',
 } as const;
 
-type DesktopStorageKey = 'ataDraft' | 'officersConfig' | 'lojaConfig' | 'lojasCadastro';
+type DesktopStorageKey =
+  | 'ataDraft'
+  | 'officersConfig'
+  | 'lojaConfig'
+  | 'lojasCadastro'
+  | 'obreiros'
+  | 'gestoes';
 
 type PdfSaveResult = { saved: boolean; filePath?: string };
 

@@ -68,6 +68,7 @@ export function makePreviewData(overrides: Partial<PreviewData> = {}): PreviewDa
     lojaConfig: {
       logoDataUrl: null,
       nomeLoja: 'Loja Teste',
+      rito: 'Rito Escocês Antigo e Aceito',
       numeroLoja: '29',
       dataFundacaoISO: '2020-01-01',
       temploNome: 'Templo Teste',
@@ -98,6 +99,7 @@ export function makeDangerousPreviewData(overrides: Partial<PreviewData> = {}): 
     lojaConfig: {
       logoDataUrl: null,
       nomeLoja: '<b>Loja</b> & Co',
+      rito: 'Rito Escocês Antigo e Aceito',
       numeroLoja: '29<script>alert(1)</script>',
       dataFundacaoISO: '2020-01-01',
       temploNome: '<script>alert("templo")</script>',

@@ -3,6 +3,8 @@ import { renderHook, act } from '@testing-library/react';
 import { installMockElectronApi, removeMockElectronApi } from '../test/electron';
 import { makeAtaDraft, makeLegacyAtaDraft, makeVisitor } from '../test/factories';
 import { seedStorage } from '../test/storage';
+import { storage } from '../services/storage';
+import { DEFAULT_LOJA_CONFIG } from './useAtaState';
 import { useAtaState } from './useAtaState';
 
 describe('useAtaState', () => {
@@ -166,5 +168,91 @@ describe('useAtaState', () => {
     expect(result.current).not.toHaveProperty('documents');
     expect(result.current).not.toHaveProperty('docStatus');
     expect(result.current.visitors).toEqual([makeVisitor({ nome: 'Visitante 1' })]);
+  });
+});
+
+describe('useAtaState - oficiais da gestão vigente', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    removeMockElectronApi();
+  });
+
+  function seedGestaoVigente() {
+    storage.saveLojaConfig({
+      ...DEFAULT_LOJA_CONFIG,
+      rito: 'Rito Escocês Antigo e Aceito',
+    });
+    storage.saveObreiros([
+      { id: 'a', nome: 'ABEL SANTOS', cim: '1', grau: 'M∴M∴' },
+      { id: 'b', nome: 'BRUNO LIMA', cim: '2', grau: 'M∴M∴' },
+    ]);
+    storage.saveGestoes([
+      {
+        id: 'g1',
+        ano: String(new Date().getFullYear()),
+        vigente: true,
+        atribuicoes: [
+          { obreiroId: 'a', cargo: 'V∴M∴' },
+          { obreiroId: 'b', cargo: 'Secr∴' },
+        ],
+      },
+    ]);
+  }
+
+  it('preenche os oficiais com os titulares da gestão vigente', () => {
+    seedGestaoVigente();
+
+    const { result } = renderHook(() => useAtaState());
+
+    expect(result.current.officers.vm).toBe('ABEL SANTOS');
+    expect(result.current.officers.sec).toBe('BRUNO LIMA');
+    expect(result.current.officers.vig1).toBe('');
+  });
+
+  it('não marca o titular como ad hoc na ata', () => {
+    seedGestaoVigente();
+
+    const { result } = renderHook(() => useAtaState());
+
+    expect(result.current.previewData.officers.vm).toBe('ABEL SANTOS');
+  });
+
+  it('marca com ADHOC quem ocupa o cargo no lugar do titular', () => {
+    seedGestaoVigente();
+
+    const { result } = renderHook(() => useAtaState());
+
+    act(() => {
+      result.current.updateOfficers({ vm: 'BRUNO LIMA' });
+    });
+
+    expect(result.current.officers.vm).toBe('BRUNO LIMA');
+    expect(result.current.previewData.officers.vm).toBe('BRUNO LIMA - ADHOC');
+  });
+
+  it('preenche os cargos vazios mesmo com outro oficial já digitado', () => {
+    seedGestaoVigente();
+    seedStorage('ataDraft', {
+      ...makeAtaDraft(),
+      officers: { vm: 'ALGUEM DE FORA', vig1: '', vig2: '', or: '', sec: '' },
+    });
+
+    const { result } = renderHook(() => useAtaState());
+
+    expect(result.current.officers.vm).toBe('ALGUEM DE FORA');
+    expect(result.current.officers.sec).toBe('BRUNO LIMA');
+    expect(result.current.previewData.officers.vm).toBe('ALGUEM DE FORA - ADHOC');
+  });
+
+  it('não marca cargo sem titular na gestão', () => {
+    seedGestaoVigente();
+
+    const { result } = renderHook(() => useAtaState());
+
+    act(() => {
+      result.current.updateOfficers({ vig1: 'QUALQUER IRMAO' });
+    });
+
+    expect(result.current.previewData.officers.vig1).toBe('QUALQUER IRMAO');
   });
 });

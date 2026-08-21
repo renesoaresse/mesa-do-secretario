@@ -1,7 +1,10 @@
 /* =========================================================
    CONTROLS (Input / Select / Textarea) — PADRÃO
 ========================================================= */
-.sidebar .control {
+/* Mesmo padrão de campo na sidebar, nas telas de configuração e dentro dos modais. */
+.sidebar .control,
+.home-launcher .control,
+.modal-panel .control {
   width: 100%;
   padding: 10px 10px;
   border-radius: 10px;
@@ -13,16 +16,22 @@
   outline: none;
 }
 
-.sidebar .control:hover {
+.sidebar .control:hover,
+.home-launcher .control:hover,
+.modal-panel .control:hover {
   background: var(--input-bg-hover);
   border-color: var(--input-border-strong);
 }
 
-.sidebar .control:focus {
+.sidebar .control:focus,
+.home-launcher .control:focus,
+.modal-panel .control:focus {
   border-color: var(--gold-500);
 }
 
-.sidebar .control::placeholder {
+.sidebar .control::placeholder,
+.home-launcher .control::placeholder,
+.modal-panel .control::placeholder {
   color: var(--text-dim);
 }
 
@@ -33,13 +42,17 @@
   cursor: pointer;
 }
 
-.sidebar .control-textarea {
+.sidebar .control-textarea,
+.home-launcher .control-textarea,
+.modal-panel .control-textarea {
   resize: vertical;
   min-height: 90px;
 }
 
 /* SELECT — seta custom na cor do texto */
-.sidebar .control-select {
+.sidebar .control-select,
+.home-launcher .control-select,
+.modal-panel .control-select {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -47,12 +60,16 @@
   height: 42px;
   padding-right: 42px;
 
+  /* Chevron embutido: o appearance:none acima remove a seta nativa. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23f5f7fa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
   background-size: 16px;
 }
 
-.sidebar .control-select option {
+.sidebar .control-select option,
+.home-launcher .control-select option,
+.modal-panel .control-select option {
   color: #111827;
 }
 

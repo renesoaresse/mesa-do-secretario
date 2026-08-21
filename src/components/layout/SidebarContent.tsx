@@ -10,8 +10,8 @@ import { FooterActions } from '../ui/FooterActions';
 import { PdfExportAction } from '../../features/preview/components/PdfExportAction';
 import { buildAtaFileName } from '../../services/pdfExport';
 import { LastSaveInfo } from '../ui/LastSaveInfo';
-import { LojaConfigForm } from '../../features/loja-config/components/LojaConfigForm';
 import type { Loja, LojaConfig, LojaConjunta, Visitor } from '../../types/ata';
+import type { ObreiroComCargo } from '../../features/loja-config/data/oficiais';
 
 import type {
   MagnaFields,
@@ -51,11 +51,16 @@ type Props = {
   onPboChange: (patch: Partial<PalavraBemOrdem>) => void;
   pboSuprimido: boolean;
   onPboSuprimidoChange: (suprimido: boolean) => void;
+  /** Presente apenas no desktop: volta para a tela principal. */
+  onBack?: () => void;
   onPrint: () => void;
   onSave: () => void;
   lastSavedAt: Date | null;
   lojaConfig: LojaConfig;
-  onLojaConfigChange: (patch: Partial<LojaConfig>) => void;
+  /** Quadro de obreiros anotado com o cargo de cada um na gestão vigente. */
+  obreiros: ObreiroComCargo[];
+  /** Titular de cada cargo segundo a gestão vigente. */
+  titulares: Officers;
   balaustreTexto: string;
   onBalaustreTextoChange: (s: string) => void;
   atosDecretosTexto: string;
@@ -92,7 +97,12 @@ export function SidebarContent(props: Props) {
         </SidebarDrawer>
       )}
       <SidebarDrawer title="Oficiais da Loja" icon="🏛" defaultOpen={false}>
-        <OfficersForm value={props.officers} onChange={props.onOfficersChange} />
+        <OfficersForm
+          value={props.officers}
+          obreiros={props.obreiros}
+          titulares={props.titulares}
+          onChange={props.onOfficersChange}
+        />
       </SidebarDrawer>
 
       {isMagna && (
@@ -167,11 +177,8 @@ export function SidebarContent(props: Props) {
         />
       </SidebarDrawer>
 
-      <SidebarDrawer title="Configuração da Loja" icon="⚙️" defaultOpen>
-        <LojaConfigForm value={props.lojaConfig} onChange={props.onLojaConfigChange} />
-      </SidebarDrawer>
-
       <FooterActions
+        onBack={props.onBack}
         onPrint={props.onPrint}
         onSave={props.onSave}
         pdfAction={<PdfExportAction fileName={buildAtaFileName(props.sessionConfig.numSessao)} />}
