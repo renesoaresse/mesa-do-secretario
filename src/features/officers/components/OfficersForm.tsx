@@ -1,43 +1,38 @@
-import React from 'react';
 import type { Officers } from '../../../types/ata';
-import { FormGroup } from '../../../components/ui/FormGroup';
-import { TextInput } from '../../../components/ui/TextInput';
+import type { ObreiroComCargo } from '../../loja-config/data/oficiais';
+import { OfficerSelect } from './OfficerSelect';
+
+const OFICIAIS: { campo: keyof Officers; label: string }[] = [
+  { campo: 'vm', label: 'Venerável Mestre' },
+  { campo: 'vig1', label: '1º Vigilante' },
+  { campo: 'vig2', label: '2º Vigilante' },
+  { campo: 'or', label: 'Orador' },
+  { campo: 'sec', label: 'Secretário' },
+];
 
 type Props = {
   value: Officers;
+  /** Quadro de obreiros anotado com o cargo de cada um na gestão vigente. */
+  obreiros: ObreiroComCargo[];
+  /** Titular de cada cargo segundo a gestão vigente. */
+  titulares: Officers;
   onChange: (patch: Partial<Officers>) => void;
 };
 
-export function OfficersForm({ value, onChange }: Props) {
+export function OfficersForm({ value, obreiros, titulares, onChange }: Props) {
   return (
     <section>
-      <FormGroup label="Venerável Mestre">
-        <TextInput value={value.vm} onChange={(e) => onChange({ vm: e.target.value })} />
-      </FormGroup>
-
-      <div style={{ height: 10 }} />
-
-      <FormGroup label="1º Vigilante">
-        <TextInput value={value.vig1} onChange={(e) => onChange({ vig1: e.target.value })} />
-      </FormGroup>
-
-      <div style={{ height: 10 }} />
-
-      <FormGroup label="2º Vigilante">
-        <TextInput value={value.vig2} onChange={(e) => onChange({ vig2: e.target.value })} />
-      </FormGroup>
-
-      <div style={{ height: 10 }} />
-
-      <FormGroup label="Orador">
-        <TextInput value={value.or} onChange={(e) => onChange({ or: e.target.value })} />
-      </FormGroup>
-
-      <div style={{ height: 10 }} />
-
-      <FormGroup label="Secretário">
-        <TextInput value={value.sec} onChange={(e) => onChange({ sec: e.target.value })} />
-      </FormGroup>
+      {OFICIAIS.map(({ campo, label }, index) => (
+        <div key={campo} style={index > 0 ? { marginTop: 10 } : undefined}>
+          <OfficerSelect
+            label={label}
+            value={value[campo]}
+            obreiros={obreiros}
+            titular={titulares[campo]}
+            onChange={(nome) => onChange({ [campo]: nome })}
+          />
+        </div>
+      ))}
     </section>
   );
 }

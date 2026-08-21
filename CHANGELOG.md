@@ -7,6 +7,57 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [UNRELEASED]
 
+## [0.7.0] - 2026-08-21
+
+### Adicionado
+
+- tela **Configuração da Loja** (`/config/loja`), acessível pelo primeiro item do menu de
+  Configurações, organizada em três abas: **Geral**, **Gestão** e **Obreiros**
+  (`LojaConfigScreen`, `useLojaConfig`)
+- componente de abas acessível `Tabs`, com `role="tablist"`, navegação pelas setas do teclado
+  e modo controlado
+- campo **Rito** na configuração da loja, com as quatro opções previstas
+  (Escocês Antigo e Aceito, Adonhiramita, York e Emulação) e o texto “Escolha o Rito” enquanto
+  nada estiver selecionado
+- cadastro de **obreiros** (nome sempre em caixa alta, CIM e grau), em modal com Salvar e
+  Cancelar, com listagem em ordem alfabética no formato `Nome - CIM`, grau e botão de edição
+  (`ObreiroFormModal`, `ObreirosList`, `useObreiros`)
+- cadastro de **gestão**, em modal com ano de quatro dígitos, seleção de gestão vigente e um
+  cargo por obreiro, impedindo cargo repetido na mesma gestão
+  (`GestaoFormModal`, `GestoesList`, `useGestoes`)
+- tabela dos 23 cargos do Rito Escocês Antigo e Aceito, com sigla usada na ata e nome completo
+  do cargo (`data/cargos.ts`)
+- modal de boas-vindas ao Irmão Secretário, exibido enquanto faltar algum dado obrigatório da
+  loja, com o único caminho sendo a tela de configuração (`BoasVindasModal`)
+- bloqueio de navegação por URL: sem os dados da loja, qualquer rota volta para a tela
+  principal com o modal aberto
+- botão **Voltar** no rodapé da tela de ata, exclusivo da versão _desktop_ (Windows e macOS),
+  posicionado antes de Imprimir
+- chaves de armazenamento `obreiros` e `gestoes`, liberadas também na ponte do Electron
+
+### Alterado
+
+- campos de **Oficiais da Loja** deixaram de ser entradas de texto simples e passaram a ser
+  seletores alimentados pelo quadro de obreiros, com o titular do cargo no topo da lista e o
+  cargo de cada irmão ao lado do nome; a opção “Outro (digitar nome)” mantém a digitação livre,
+  sempre em caixa alta (`OfficerSelect`)
+- oficiais da ata passam a ser pré-preenchidos com os titulares da gestão vigente, cargo a cargo
+- referências da ata a quem não é o titular do cargo recebem o sufixo ` - ADHOC`
+- estilos de campo (`.control`, `.control-select`, `.control-textarea`) passaram a valer também
+  nas telas de configuração e dentro dos modais, e não só na barra lateral
+- seta do `select` passou a ser desenhada por SVG embutido; o `appearance: none` a removia sem
+  repor nenhum indicador
+- `Modal` ganhou a opção `dismissible`, que suprime o ✕, o clique fora e o Esc
+
+### Removido
+
+- bloco **Configuração da Loja** da barra lateral da tela de ata, agora com tela própria
+
+### Corrigido
+
+- oficiais em branco não eram preenchidos com os titulares da gestão quando algum outro cargo
+  já tinha sido digitado; o preenchimento passou a ser avaliado cargo a cargo
+
 ## [0.6.0] - 2026-08-20
 
 ### Adicionado

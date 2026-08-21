@@ -18,6 +18,19 @@ export function ConfigScreen() {
           <button
             type="button"
             className="home-launcher__btn home-launcher__btn--primary"
+            onClick={() => navigate(ROUTES.LOJA_CONFIG)}
+          >
+            <span className="home-launcher__btn-icon">⚙️</span>
+            <span className="home-launcher__btn-text">
+              <span className="home-launcher__btn-label">Configuração da Loja</span>
+              <span className="home-launcher__btn-hint">Dados e logo da loja</span>
+            </span>
+            <span className="home-launcher__btn-arrow">→</span>
+          </button>
+
+          <button
+            type="button"
+            className="home-launcher__btn"
             onClick={() => navigate(ROUTES.LOJAS)}
           >
             <span className="home-launcher__btn-icon">🏛️</span>

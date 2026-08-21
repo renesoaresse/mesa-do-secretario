@@ -2,6 +2,8 @@ import React from 'react';
 import { Button } from './Button';
 
 type Props = {
+  /** Presente apenas no desktop: volta para a tela principal. */
+  onBack?: () => void;
   onPrint: () => void;
   onSave: () => void;
   saving?: boolean;
@@ -9,9 +11,14 @@ type Props = {
   pdfAction?: React.ReactNode;
 };
 
-export function FooterActions({ onPrint, onSave, saving, pdfAction }: Props) {
+export function FooterActions({ onBack, onPrint, onSave, saving, pdfAction }: Props) {
   return (
     <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+      {onBack && (
+        <Button type="button" onClick={onBack}>
+          Voltar
+        </Button>
+      )}
       <Button type="button" onClick={onPrint}>
         Imprimir
       </Button>

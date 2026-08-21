@@ -1,4 +1,10 @@
-export type DesktopStorageKey = 'ataDraft' | 'officersConfig' | 'lojaConfig' | 'lojasCadastro';
+export type DesktopStorageKey =
+  | 'ataDraft'
+  | 'officersConfig'
+  | 'lojaConfig'
+  | 'lojasCadastro'
+  | 'obreiros'
+  | 'gestoes';
 
 export interface ElectronStorageApi {
   load: <T>(key: DesktopStorageKey) => T | null;

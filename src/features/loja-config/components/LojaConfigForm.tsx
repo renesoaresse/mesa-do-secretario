@@ -1,15 +1,23 @@
 import React, { useRef, useState } from 'react';
-import type { LojaConfig, StatusState } from '../../../types/ata';
+import type { LojaConfig, Rito, StatusState } from '../../../types/ata';
 
 import { FormRow } from '../../../components/ui/FormRow';
 import { FormGroup } from '../../../components/ui/FormGroup';
 import { TextInput } from '../../../components/ui/TextInput';
+import { Select } from '../../../components/ui/Select';
 import { Button } from '../../../components/ui/Button';
 import { StatusMessage } from '../../../components/ui/StatusMessage';
 
 const MAX_LOGO_W = 640;
 const MAX_LOGO_H = 640;
 const MAX_FILE_MB = 3;
+
+const RITOS: Rito[] = [
+  'Rito Escocês Antigo e Aceito',
+  'Rito Adonhiramita',
+  'Rito de York',
+  'Rito de Emulação',
+];
 
 type Props = {
   value: LojaConfig;
@@ -140,6 +148,20 @@ export function LojaConfigForm({ value, onChange }: Props) {
             />
           </FormGroup>
         </FormRow>
+
+        <FormGroup label="Rito">
+          <Select
+            value={value.rito}
+            onChange={(e) => onChange({ rito: e.target.value as Rito | '' })}
+          >
+            <option value="">Escolha o Rito</option>
+            {RITOS.map((rito) => (
+              <option key={rito} value={rito}>
+                {rito}
+              </option>
+            ))}
+          </Select>
+        </FormGroup>
 
         <FormGroup label="Endereço do templo">
           <TextInput

@@ -21,6 +21,8 @@ export const ALLOWED_STORAGE_KEYS = [
   'officersConfig',
   'lojaConfig',
   'lojasCadastro',
+  'obreiros',
+  'gestoes',
 ] as const;
 
 type AllowedStorageKey = (typeof ALLOWED_STORAGE_KEYS)[number];

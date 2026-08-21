@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { storage } from '../services/storage';
+import {
+  aplicarSufixoAdHoc,
+  gestaoVigente,
+  titularesDosOficiais,
+} from '../features/loja-config/data/oficiais';
 import type {
   AtaDraft,
   LojaConfig,
@@ -15,9 +20,10 @@ import type {
 
 const DEFAULT_OFFICERS: Officers = { vm: '', vig1: '', vig2: '', or: '', sec: '' };
 
-const DEFAULT_LOJA_CONFIG: LojaConfig = {
+export const DEFAULT_LOJA_CONFIG: LojaConfig = {
   logoDataUrl: null,
   nomeLoja: '',
+  rito: '',
   numeroLoja: '',
   dataFundacaoISO: '',
   temploNome: '',
@@ -70,13 +76,28 @@ const DEFAULT_ATA_DRAFT: AtaDraft = {
 
 export function useAtaState() {
   const initialDraft = storage.loadAtaDraft(DEFAULT_ATA_DRAFT);
+  const quadroObreiros = storage.loadObreiros();
+  // Titulares da gestão vigente: preenchem os oficiais e definem quem é ad hoc.
+  const titulares = titularesDosOficiais(
+    gestaoVigente(storage.loadGestoes()),
+    quadroObreiros,
+    initialDraft.lojaConfig.rito,
+  );
+  // Cada cargo ainda em branco herda o titular da gestão; o que já foi digitado fica.
+  const officersIniciais = (Object.keys(initialDraft.officers) as (keyof Officers)[]).reduce(
+    (acc, oficial) => {
+      acc[oficial] = initialDraft.officers[oficial] || titulares[oficial];
+      return acc;
+    },
+    { ...initialDraft.officers },
+  );
 
   const [zoom, setZoom] = useState(1);
   const [sessionType, setSessionType] = useState<SessionType>(initialDraft.sessionType);
   const [sessionConfig, setSessionConfig] = useState<SessionConfig>(initialDraft.sessionConfig);
   const [magnaFields, setMagnaFields] = useState<MagnaFields>(initialDraft.magnaFields);
   const [visitors, setVisitors] = useState<Visitor[]>(initialDraft.visitors);
-  const [officers, setOfficers] = useState<Officers>(initialDraft.officers);
+  const [officers, setOfficers] = useState<Officers>(officersIniciais);
   const [tronco, setTronco] = useState(initialDraft.tronco);
   const [troncoSuprimido, setTroncoSuprimido] = useState(initialDraft.troncoSuprimido);
   const [ordemDia, setOrdemDia] = useState(initialDraft.ordemDia);
@@ -206,7 +227,7 @@ export function useAtaState() {
       sessionConfig,
       magnaFields,
       visitors,
-      officers,
+      officers: aplicarSufixoAdHoc(officers, titulares),
       tronco,
       troncoSuprimido,
       ordemDia,
@@ -219,6 +240,7 @@ export function useAtaState() {
       bolsaPropostasTexto,
     }),
     [
+      titulares,
       lojaConfig,
       sessionType,
       sessionConfig,

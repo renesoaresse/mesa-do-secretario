@@ -1,4 +1,12 @@
-import type { AtaDraft, Loja, LojaConfig, Officers } from '../types/ata';
+import type {
+  AtaDraft,
+  Gestao,
+  GrauObreiro,
+  Loja,
+  LojaConfig,
+  Obreiro,
+  Officers,
+} from '../types/ata';
 import type { DesktopStorageKey } from '../types/electron-api';
 
 export const STORAGE_KEYS = {
@@ -6,6 +14,8 @@ export const STORAGE_KEYS = {
   officersConfig: 'officersConfig',
   lojaConfig: 'lojaConfig',
   lojasCadastro: 'lojasCadastro',
+  obreiros: 'obreiros',
+  gestoes: 'gestoes',
 } as const;
 
 function isDesktopStorageKey(key: string): key is DesktopStorageKey {
@@ -13,7 +23,9 @@ function isDesktopStorageKey(key: string): key is DesktopStorageKey {
     key === STORAGE_KEYS.ataDraft ||
     key === STORAGE_KEYS.officersConfig ||
     key === STORAGE_KEYS.lojaConfig ||
-    key === STORAGE_KEYS.lojasCadastro
+    key === STORAGE_KEYS.lojasCadastro ||
+    key === STORAGE_KEYS.obreiros ||
+    key === STORAGE_KEYS.gestoes
   );
 }
 
@@ -43,6 +55,18 @@ function getNumber(value: unknown, fallback: number) {
 
 function getBoolean(value: unknown, fallback: boolean) {
   return typeof value === 'boolean' ? value : fallback;
+}
+
+function getRito(value: unknown, fallback: LojaConfig['rito']): LojaConfig['rito'] {
+  const ritos: LojaConfig['rito'][] = [
+    '',
+    'Rito Escocês Antigo e Aceito',
+    'Rito Adonhiramita',
+    'Rito de York',
+    'Rito de Emulação',
+  ];
+
+  return ritos.includes(value as LojaConfig['rito']) ? (value as LojaConfig['rito']) : fallback;
 }
 
 function getSessionType(value: unknown, fallback: AtaDraft['sessionType']) {
@@ -134,12 +158,53 @@ function sanitizeAtaDraft(value: unknown, defaultDraft: AtaDraft): AtaDraft {
     lojaConfig: {
       ...defaultDraft.lojaConfig,
       ...lojaConfig,
+      rito: getRito(lojaConfig.rito, defaultDraft.lojaConfig.rito),
     },
     balaustreTexto: getString(value.balaustreTexto, defaultDraft.balaustreTexto),
     atosDecretosTexto: getString(value.atosDecretosTexto, defaultDraft.atosDecretosTexto),
     expedientesTexto: getString(value.expedientesTexto, defaultDraft.expedientesTexto),
     bolsaPropostasTexto: getString(value.bolsaPropostasTexto, defaultDraft.bolsaPropostasTexto),
   };
+}
+
+const GRAUS_OBREIRO: GrauObreiro[] = ['AP∴M∴', 'CP∴M∴', 'M∴M∴', 'M∴M∴I∴'];
+
+function getGrauObreiro(value: unknown): GrauObreiro {
+  return GRAUS_OBREIRO.includes(value as GrauObreiro) ? (value as GrauObreiro) : GRAUS_OBREIRO[0];
+}
+
+function sanitizeObreiros(value: unknown): Obreiro[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter(isRecord).map((item) => ({
+    id: getString(item.id, crypto.randomUUID()),
+    nome: getString(item.nome, '').toUpperCase(),
+    cim: getString(item.cim, ''),
+    grau: getGrauObreiro(item.grau),
+  }));
+}
+
+function sanitizeGestoes(value: unknown): Gestao[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter(isRecord).map((item) => ({
+    id: getString(item.id, crypto.randomUUID()),
+    ano: getString(item.ano, '').replace(/\D/g, '').slice(0, 4),
+    vigente: getBoolean(item.vigente, false),
+    atribuicoes: Array.isArray(item.atribuicoes)
+      ? item.atribuicoes
+          .filter(isRecord)
+          .filter((atribuicao) => typeof atribuicao.obreiroId === 'string')
+          .map((atribuicao) => ({
+            obreiroId: atribuicao.obreiroId as string,
+            cargo: getString(atribuicao.cargo, ''),
+          }))
+      : [],
+  }));
 }
 
 function sanitizeLojas(value: unknown): Loja[] {
@@ -253,6 +318,56 @@ export const storage = {
 
   saveLojas(lojas: Loja[]): void {
     this.save<Loja[]>(STORAGE_KEYS.lojasCadastro, sanitizeLojas(lojas));
+  },
+
+  loadObreiros(): Obreiro[] {
+    return sanitizeObreiros(this.load<unknown>(STORAGE_KEYS.obreiros, []));
+  },
+
+  saveObreiros(obreiros: Obreiro[]): void {
+    this.save<Obreiro[]>(STORAGE_KEYS.obreiros, sanitizeObreiros(obreiros));
+  },
+
+  loadGestoes(): Gestao[] {
+    return sanitizeGestoes(this.load<unknown>(STORAGE_KEYS.gestoes, []));
+  },
+
+  saveGestoes(gestoes: Gestao[]): void {
+    this.save<Gestao[]>(STORAGE_KEYS.gestoes, sanitizeGestoes(gestoes));
+  },
+
+  loadLojaConfig(defaultConfig: LojaConfig): LojaConfig {
+    // O rascunho da ata é a fonte da verdade quando existe; a chave avulsa
+    // atende instalações antigas e o primeiro acesso.
+    const storedDraft = this.load<unknown>(STORAGE_KEYS.ataDraft, null);
+    const draftLojaConfig = isRecord(storedDraft) ? getRecord(storedDraft.lojaConfig) : null;
+
+    if (draftLojaConfig) {
+      return {
+        ...defaultConfig,
+        ...draftLojaConfig,
+        rito: getRito(draftLojaConfig.rito, defaultConfig.rito),
+      };
+    }
+
+    const storedLojaConfig = getRecord(this.load<unknown>(STORAGE_KEYS.lojaConfig, null));
+
+    return {
+      ...defaultConfig,
+      ...storedLojaConfig,
+      rito: getRito(storedLojaConfig.rito, defaultConfig.rito),
+    };
+  },
+
+  saveLojaConfig(lojaConfig: LojaConfig): void {
+    this.save<LojaConfig>(STORAGE_KEYS.lojaConfig, lojaConfig);
+
+    // Mantém o rascunho da ata sincronizado para a pré-visualização usar os dados novos.
+    const storedDraft = this.load<unknown>(STORAGE_KEYS.ataDraft, null);
+
+    if (isRecord(storedDraft)) {
+      this.save(STORAGE_KEYS.ataDraft, { ...storedDraft, lojaConfig });
+    }
   },
 
   hasSavedAta(): boolean {

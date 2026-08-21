@@ -137,29 +137,6 @@
   border-color: var(--gold-400);
 }
 
-.home-launcher .control {
-  width: 100%;
-  padding: 10px 10px;
-  border-radius: 10px;
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  color: var(--text-light);
-  outline: none;
-}
-
-.home-launcher .control:hover {
-  background: var(--input-bg-hover);
-  border-color: var(--input-border-strong);
-}
-
-.home-launcher .control:focus {
-  border-color: var(--gold-500);
-}
-
-.home-launcher .control::placeholder {
-  color: var(--text-dim);
-}
-
 .lojas-table {
   width: 100%;
   border-collapse: collapse;
@@ -261,4 +238,49 @@
   .home-launcher {
     padding: 20px;
   }
+}
+
+/* =========================================================
+   TABS
+========================================================= */
+.tabs__list {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  margin-bottom: 14px;
+  overflow-x: auto;
+}
+
+.tabs__tab {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 10px 14px;
+  color: var(--text-muted);
+  font: inherit;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tabs__tab:hover {
+  color: var(--text-light);
+}
+
+.tabs__tab:focus-visible {
+  outline: 2px solid var(--gold-500);
+  outline-offset: -2px;
+  border-radius: 6px 6px 0 0;
+}
+
+.tabs__tab--active {
+  color: var(--gold-400);
+  border-bottom-color: var(--gold-500);
+}
+
+.tabs__panel:focus-visible {
+  outline: 2px solid var(--gold-500);
+  outline-offset: 4px;
+  border-radius: 8px;
 }

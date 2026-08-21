@@ -67,7 +67,6 @@ const baseProps = {
     enderecoTemplo: 'Rua',
     cidadeEstado: 'Aracaju/SE',
   },
-  onLojaConfigChange: vi.fn(),
   balaustreTexto: 'B',
   onBalaustreTextoChange: vi.fn(),
   atosDecretosTexto: 'A',
