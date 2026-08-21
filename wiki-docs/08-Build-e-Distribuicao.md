@@ -6,17 +6,32 @@ Este documento descreve como compilar o Mesa do Secretário e gerar instaladores
 
 ## Visão Geral do Build
 
-O processo de _build_ do Mesa do Secretário é dividido em duas partes:
+O processo de _build_ do Mesa do Secretário é dividido por alvo:
 
-| Parte        | Comando                     | Saída               |
-| ------------ | --------------------------- | ------------------- |
-| **Web**      | `yarn build:web` (via Vite) | `dist/`             |
-| **Electron** | `yarn build:electron`       | `dist-electron/`    |
-| **Completo** | `yarn build`                | Ambos os anteriores |
+| Parte                  | Comando                          | Saída               |
+| ---------------------- | -------------------------------- | ------------------- |
+| **Web (hospedagem)**   | `yarn build:web` (via Vite)      | `dist/`             |
+| **Renderer (desktop)** | `yarn build:renderer` (via Vite) | `dist/`             |
+| **Electron**           | `yarn build:electron`            | `dist-electron/`    |
+| **Completo (desktop)** | `yarn build`                     | Ambos os anteriores |
+
+> **Atenção:** `build:web` e `build:renderer` geram a mesma aplicação React, mas
+> com configurações incompatíveis entre si. Nunca empacote o Electron com o
+> resultado de `build:web`, nem publique o resultado de `build:renderer`.
+
+| Diferença         | `build:web` (`--mode web`)    | `build:renderer` (`--mode desktop`) |
+| ----------------- | ----------------------------- | ----------------------------------- |
+| `base` do Vite    | `/` (raiz do domínio)         | `./` (caminho relativo, `file://`)  |
+| Rotas do `wouter` | History API (`/config/lojas`) | Hash (`#/config/lojas`)             |
+| CSP `connect-src` | `'self'`                      | `'self'`                            |
+
+A base relativa é obrigatória no Electron, que carrega o HTML por `file://`, e
+quebra na web: ao abrir `/config/lojas` diretamente, o navegador procuraria os
+assets em `/config/lojas/assets/…`. Por isso os dois comandos são separados.
 
 ### Build Web (Vite)
 
-O _build_ web gera uma versão otimizada da aplicação React:
+O _build_ web gera uma versão otimizada da aplicação React para hospedagem:
 
 ```bash
 yarn build:web
@@ -54,8 +69,72 @@ yarn build
 Este comando executa sequencialmente:
 
 1. `yarn clean` — Remove `dist/`, `dist-electron/`, `release/`
-2. `yarn build:web` — Gera artefatos web
+2. `yarn build:renderer` — Gera o renderer com base relativa (`file://`)
 3. `yarn build:electron` — Compila TypeScript do Electron
+
+---
+
+## Publicação na Web (Vercel)
+
+A versão web é uma aplicação totalmente estática: não há servidor, banco de dados
+nem chamada de rede para APIs. A Vercel apenas entrega os arquivos de `dist/`.
+
+### Configuração
+
+Todo o comportamento do deploy está versionado em `vercel.json`, na raiz do
+projeto. Não é necessário configurar nada no painel além de importar o
+repositório:
+
+| Item               | Valor definido em `vercel.json`                                          |
+| ------------------ | ------------------------------------------------------------------------ |
+| _Framework Preset_ | `vite`                                                                   |
+| _Install Command_  | `HUSKY=0 ELECTRON_SKIP_BINARY_DOWNLOAD=1 yarn install --frozen-lockfile` |
+| _Build Command_    | `yarn build:web`                                                         |
+| _Output Directory_ | `dist`                                                                   |
+
+As duas variáveis do _install_ existem por motivos concretos:
+
+- `HUSKY=0` — o script `prepare` roda o Husky, que não encontra repositório Git
+  no ambiente de build;
+- `ELECTRON_SKIP_BINARY_DOWNLOAD=1` — o `electron` está em `devDependencies` e
+  baixaria centenas de megabytes de binário inúteis para a web.
+
+### Roteamento
+
+O `rewrites` do `vercel.json` envia qualquer caminho que não seja `/assets/…`
+para o `index.html`, para que as rotas do `wouter` (`/ata`, `/config`,
+`/config/lojas`) funcionem ao serem abertas ou recarregadas diretamente.
+
+### Cabeçalhos de segurança
+
+O `headers` aplica CSP, `X-Content-Type-Options`, `Referrer-Policy`,
+`Permissions-Policy` e `X-Frame-Options`. A CSP também é escrita na `<meta>` do
+`index.html` durante o build (ver `cspPlugin` em `vite.config.ts`), mas
+`frame-ancestors` só tem efeito como cabeçalho HTTP — daí a duplicação.
+
+> Se algum dia o projeto ativar Vercel Analytics ou Speed Insights, será preciso
+> liberar os domínios correspondentes em `script-src` e `connect-src`, senão a
+> CSP bloqueia os scripts injetados.
+
+### Node.js
+
+O projeto não fixa `engines` no `package.json`. Use **Node.js 22.x** nas
+configurações do projeto na Vercel (valor padrão para projetos novos); o Vite 7
+exige Node `^20.19` ou `>=22.12`.
+
+### Diferenças da versão web
+
+| Recurso       | Desktop (Electron)                    | Web (Vercel)                       |
+| ------------- | ------------------------------------- | ---------------------------------- |
+| Armazenamento | Arquivo JSON no `userData`            | `localStorage` do navegador        |
+| PDF com senha | Disponível (`printToPDF` + `pdf-lib`) | Indisponível — o botão não aparece |
+| Impressão     | `window.print()`                      | `window.print()`                   |
+| Rotas         | Hash (`#/ata`)                        | History API (`/ata`)               |
+
+Os dados salvos na web ficam apenas no navegador da máquina que os digitou:
+outro computador, outro navegador ou outro perfil não têm acesso a eles, e nada
+é enviado para a Vercel. Em contrapartida, limpar os dados de navegação apaga
+tudo em definitivo, pois não existe cópia no servidor.
 
 ---
 

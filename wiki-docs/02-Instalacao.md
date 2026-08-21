@@ -89,8 +89,9 @@ O `package.json` define os seguintes scripts:
 
 | Comando               | Descrição                                                             |
 | --------------------- | --------------------------------------------------------------------- |
-| `yarn build`          | Executa _build_ completo: web (Vite) + Electron (TypeScript)          |
-| `yarn build:web`      | Executa apenas o _build_ web (Vite em `dist/`)                        |
+| `yarn build`          | Executa _build_ completo do desktop: renderer (Vite) + Electron (TSC) |
+| `yarn build:web`      | Gera o _build_ web para hospedagem (Vite em `dist/`, base `/`)        |
+| `yarn build:renderer` | Gera o renderer do desktop (Vite em `dist/`, base `./`)               |
 | `yarn build:electron` | Executa apenas o _build_ do Electron (TypeScript em `dist-electron/`) |
 
 ### Distribuição

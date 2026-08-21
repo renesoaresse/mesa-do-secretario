@@ -7,6 +7,45 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [UNRELEASED]
 
+## [0.6.0] - 2026-08-20
+
+### Adicionado
+
+- `vercel.json` na raiz do projeto, versionando toda a configuração de publicação na Vercel:
+  _preset_ Vite, comandos de instalação e de _build_, diretório de saída, reescrita de rotas
+  para a SPA, cache imutável dos _assets_ com _hash_ e cabeçalhos de segurança
+  (`Content-Security-Policy`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`
+  e `X-Frame-Options`)
+- script `build:renderer`, que gera o _renderer_ do Electron com base relativa (`./`), separando-o
+  do _build_ web
+- `cspPlugin` em `vite.config.ts`, que reescreve a meta `Content-Security-Policy` do `index.html`
+  conforme o alvo e interrompe o _build_ caso a meta desapareça do HTML
+- seção **Publicação na Web (Vercel)** em `wiki-docs/08-Build-e-Distribuicao.md`, com configuração,
+  roteamento, cabeçalhos, versão do Node.js e as diferenças entre a versão web e a _desktop_
+- seção **Publicação web** no `README.md`
+- `.vercel` no `.gitignore`
+
+### Corrigido
+
+- navegação da versão web, que ficava inutilizável fora da rota raiz. O `base` relativo, exigido
+  pelo Electron por carregar o HTML via `file://`, fazia com que `/config/lojas` procurasse os
+  _assets_ em `/config/lojas/assets/…`, resultando em 404 e tela branca. O _build_ web passou a
+  usar base absoluta (`/`)
+- abertura direta e recarregamento (F5) de rotas internas (`/ata`, `/config`, `/config/lojas`),
+  que retornavam 404 por não existirem como arquivo no servidor. A reescrita declarada em
+  `vercel.json` passa a entregar o `index.html` e deixar a resolução da rota com o `wouter`
+
+### Alterado
+
+- `build:web` passou a rodar `vite build --mode web`, destinado exclusivamente à hospedagem
+- `build` (_build_ completo do _desktop_) passou a usar `build:renderer` no lugar de `build:web`;
+  `dist`, `dist:win` e `dist:mac` seguem inalterados
+- `Content-Security-Policy` deixou de expor `http://localhost:5173` e `ws://localhost:5173` nos
+  artefatos de produção, tanto na web quanto no _desktop_; a liberação passou a existir apenas
+  no servidor de desenvolvimento, onde o HMR depende dela
+- tabelas de _scripts_ de `wiki-docs/02-Instalacao.md` e `wiki-docs/08-Build-e-Distribuicao.md`
+  atualizadas com a separação entre os alvos web e _desktop_
+
 ## [0.5.1] - 2026-08-09
 
 ### Corrigido
