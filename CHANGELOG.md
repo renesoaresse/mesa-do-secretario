@@ -42,9 +42,11 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - certificado de visita com **loja** e **data**, ambas obrigatórias; a loja reaproveita o mesmo
   seletor dos visitantes, incluindo o cadastro de loja nova pela opção _Outros_
 - **título do trabalho** nos registros do tipo _Trabalhos_
-- **acréscimo ao texto padrão** da bolsa, lavrado em parágrafo próprio depois das colunas gravadas
+- **acréscimo ao texto padrão** da bolsa, lavrado em parágrafo próprio depois das colunas
+  gravadas, sem recuo de primeira linha, alinhado com as demais seções do balaústre
 - supressão da bolsa por ordem do V∴ M∴, que esconde os campos e registra apenas
-  “Por ordem do V∴ M∴, a Bolsa de proposta e informações foi suprimida!”
+  “Por ordem do V∴ M∴, a Bolsa de proposta e informações foi suprimida!”, com o tratamento
+  ajustado ao grau da sessão
 - redação automática da bolsa no balaústre (`gerarTextoBolsaPropostas`), sempre na ordem
   certificados de visita, aumentos de salário e trabalhos, com concordância de número
   (“1 coluna gravada” / “13 colunas gravadas”, “certificado … à loja” / “certificados … às lojas”,
@@ -52,8 +54,17 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
   única coluna dos certificados do mesmo Ir∴ lançados em registros separados
 - registro ritualístico quando o giro nada produziu: “A bolsa de propostas e informações após seu
   giro nada produziu, além dos bons fluidos colocados pelos IIr∴.”
+- ordenação cronológica dos certificados de visita, da data mais antiga para a mais nova, tanto
+  entre as lojas de um mesmo Ir∴ quanto entre as colunas, posicionadas pela visita mais antiga de
+  cada Ir∴; visita de registro antigo sem data vai para o fim da fila
 - utilitários compartilhados `normalizarBusca` (`src/utils/texto.ts`) e `formatarDataNumericaBR`
   (`src/utils/data.ts`)
+- tratamento ritualístico por grau no texto da ata (`tratamentosDoGrau`): em Loj∴ de MM∴ MM∴ o
+  V∴ M∴ passa a ser tratado por Resp∴ M∴, os VVig∴ por VVen∴ IIr∴ VVig∴, os demais IIr∴ por
+  VVen∴ IIr∴ e os cargos por Ven∴ Ir∴ Or∴, Ven∴ Ir∴ Sec∴ e Ven∴ Ir∴ Hosp∴, valendo para presença,
+  oficiais, visitantes, saudação, bolsa de propostas, bolsa de beneficência, supressões,
+  encerramento e o bloco de assinaturas (Respeitável Mestre, Venerável Irmão Orador e
+  Venerável Irmão Secretário)
 
 ### Alterado
 
@@ -74,6 +85,9 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - rascunhos gravados por versões anteriores são migrados na leitura: o texto livre antigo passa a
   alimentar o acréscimo da bolsa, sem perda de conteúdo (`sanitizeAtaDraft`)
 - `LojaCombobox` passou a usar o `normalizarBusca` compartilhado, em vez da normalização local
+- `TRONCO_SUPRIMIDO_TEXTO` e `PBO_SUPRIMIDO_TEXTO` deixaram de ser constantes e viraram as funções
+  `troncoSuprimidoTexto` e `pboSuprimidoTexto`, já que a redação passou a depender do grau da
+  sessão; sem argumento, ambas devolvem o texto de sempre
 
 ### Removido
 

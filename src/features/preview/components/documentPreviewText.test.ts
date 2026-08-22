@@ -6,15 +6,21 @@ import {
   makeVisitor,
 } from '../../../test/factories';
 import {
-  BOLSA_PROPOSTAS_SEM_PRODUCAO,
-  BOLSA_PROPOSTAS_SUPRIMIDA_TEXTO,
   PBO_SILENCIO,
+  TRATAMENTOS_MESTRE,
+  TRATAMENTOS_PADRAO,
+  bolsaPropostasSemProducaoTexto,
+  bolsaPropostasSuprimidaTexto,
   formatPalavraBemOrdemEntries,
   gerarSufixoLojasConjunta,
   gerarTextoBolsaPropostas,
   gerarTextoPresenca,
   gerarTextoSaudacao,
   joinNomes,
+  pboSuprimidoTexto,
+  tratamentosDoGrau,
+  tratarCargo,
+  troncoSuprimidoTexto,
 } from './documentPreviewText';
 
 const loja = (nome: string, obreiros: number) => ({ id: nome, nome, obreiros });
@@ -130,12 +136,12 @@ describe('gerarTextoBolsaPropostas', () => {
   it('registra a supressao decidida pelo V M', () => {
     expect(
       gerarTextoBolsaPropostas(makeBolsaPropostas({ suprimida: true, texto: 'ignorado' })),
-    ).toEqual([BOLSA_PROPOSTAS_SUPRIMIDA_TEXTO]);
+    ).toEqual([bolsaPropostasSuprimidaTexto()]);
   });
 
   it('registra os bons fluidos quando o giro nada produziu', () => {
     expect(gerarTextoBolsaPropostas(makeBolsaPropostas({ texto: '   ' }))).toEqual([
-      BOLSA_PROPOSTAS_SEM_PRODUCAO,
+      bolsaPropostasSemProducaoTexto(),
     ]);
   });
 
@@ -326,6 +332,88 @@ describe('gerarTextoBolsaPropostas', () => {
 
     expect(abertura).toContain(
       'às lojas Piauhytinga - 1521 no dia 26/05/2026 e Loja Sem Data - 01',
+    );
+  });
+});
+
+describe('tratamentos por grau', () => {
+  it('mantem os titulos de Ap e Cp fora da Loj de MM MM', () => {
+    expect(tratamentosDoGrau('Aprendiz')).toEqual(TRATAMENTOS_PADRAO);
+    expect(tratamentosDoGrau('Companheiro')).toEqual(TRATAMENTOS_PADRAO);
+  });
+
+  it('aplica os titulos da Loj de MM MM em sessao de Mestre', () => {
+    expect(tratamentosDoGrau('Mestre')).toEqual(TRATAMENTOS_MESTRE);
+  });
+
+  it('trata o quadro e os visitantes como VVen IIr', () => {
+    expect(gerarTextoPresenca(12, [makeVisitor({ nome: 'A' })], [], TRATAMENTOS_MESTRE)).toBe(
+      'contando com a presença de 12 (doze) VVen∴ IIr∴ do quadro, e 01 (um) Ven∴ Ir∴ visitante que assinaram o Livro de Presença.',
+    );
+  });
+
+  it('trata o Or e os visitantes como Ven Ir na saudacao', () => {
+    expect(
+      gerarTextoSaudacao([makeVisitor({ nome: 'Fulano' })], 'Beltrano Silva', TRATAMENTOS_MESTRE),
+    ).toBe('O Ven∴ Ir∴ Or∴ Beltrano saudou o Ven∴ Ir∴ visitante Fulano, na forma ritualística.');
+  });
+
+  it('trata os IIr da bolsa de propostas conforme o grau', () => {
+    expect(gerarTextoBolsaPropostas(makeBolsaPropostas({ texto: '' }), TRATAMENTOS_MESTRE)).toEqual(
+      [
+        'A bolsa de propostas e informações após seu giro nada produziu, além dos bons fluidos colocados pelos VVen∴ IIr∴.',
+      ],
+    );
+
+    expect(
+      gerarTextoBolsaPropostas(makeBolsaPropostas({ suprimida: true }), TRATAMENTOS_MESTRE),
+    ).toEqual(['Por ordem do Resp∴ M∴, a Bolsa de proposta e informações foi suprimida!']);
+
+    const [abertura] = gerarTextoBolsaPropostas(
+      makeBolsaPropostas({
+        totalColunas: 2,
+        texto: '',
+        itens: [
+          certificado('c1', 'Edinaldo Santos', [['Piauhytinga - 1521', '2026-05-26']]),
+          makeBolsaProposta({
+            id: 'a1',
+            obreiroNome: 'Gustavo Nunes',
+            tipo: 'aumento',
+            certificados: [],
+          }),
+        ],
+      }),
+      TRATAMENTOS_MESTRE,
+    );
+
+    expect(abertura).toContain('certificado de visita do Ven∴ Ir∴ Edinaldo Santos à loja');
+    expect(abertura).toContain('pedido de aumento de salário do Ven∴ Ir∴ Gustavo Nunes');
+  });
+
+  it('trata as supressoes do tronco e da palavra a bem da ordem conforme o grau', () => {
+    expect(troncoSuprimidoTexto(TRATAMENTOS_MESTRE)).toBe(
+      'Por ordem do Resp∴ M∴, a bolsa de beneficência foi suprimida!',
+    );
+    expect(pboSuprimidoTexto(TRATAMENTOS_MESTRE)).toBe(
+      'Por ordem do Resp∴ M∴, a palavra a bem da Ordem e o quadro particular foram suprimidos!',
+    );
+  });
+});
+
+describe('tratarCargo', () => {
+  it('mantem o cargo nu fora da Loj de MM MM', () => {
+    expect(tratarCargo('Sec∴', TRATAMENTOS_PADRAO.prefixoCargo)).toBe('Sec∴');
+    expect(tratarCargo('Orador', TRATAMENTOS_PADRAO.prefixoCargoExtenso)).toBe('Orador');
+  });
+
+  it('prefixa o cargo em sessao de Mestre, cifrado e por extenso', () => {
+    expect(tratarCargo('Or∴', TRATAMENTOS_MESTRE.prefixoCargo)).toBe('Ven∴ Ir∴ Or∴');
+    expect(tratarCargo('Sec∴', TRATAMENTOS_MESTRE.prefixoCargo)).toBe('Ven∴ Ir∴ Sec∴');
+    expect(tratarCargo('Orador', TRATAMENTOS_MESTRE.prefixoCargoExtenso)).toBe(
+      'Venerável Irmão Orador',
+    );
+    expect(tratarCargo('Secretário', TRATAMENTOS_MESTRE.prefixoCargoExtenso)).toBe(
+      'Venerável Irmão Secretário',
     );
   });
 });

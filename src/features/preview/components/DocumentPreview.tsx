@@ -20,8 +20,10 @@ import {
   getPreviewDateParts,
   getSessionTypeMeta,
   hasText,
-  PBO_SUPRIMIDO_TEXTO,
-  TRONCO_SUPRIMIDO_TEXTO,
+  pboSuprimidoTexto,
+  tratamentosDoGrau,
+  tratarCargo,
+  troncoSuprimidoTexto,
 } from './documentPreviewText';
 
 type Props = {
@@ -135,12 +137,21 @@ function buildPreviewContent(data: PreviewData) {
   const isConjunta = sessionConfig.conjunta;
   const sessionTypeMeta = getSessionTypeMeta(sessionType, isConjunta);
 
+  const tratamentos = tratamentosDoGrau(sessionConfig.grau);
   const lojasConj = isConjunta ? lojasConjunta : [];
   const sufixoLojasConjunta = gerarSufixoLojasConjunta(lojasConj);
-  const textoPresenca = gerarTextoPresenca(sessionConfig.numPresenca, visitors, lojasConj);
-  const textoSaudacao = gerarTextoSaudacao(visitors, officers.or);
+  const textoPresenca = gerarTextoPresenca(
+    sessionConfig.numPresenca,
+    visitors,
+    lojasConj,
+    tratamentos,
+  );
+  const textoSaudacao = gerarTextoSaudacao(visitors, officers.or, tratamentos);
   const pboEntries = formatPalavraBemOrdemEntries(pbo);
-  const [bolsaAbertura, ...bolsaComplementos] = gerarTextoBolsaPropostas(bolsaPropostas);
+  const [bolsaAbertura, ...bolsaComplementos] = gerarTextoBolsaPropostas(
+    bolsaPropostas,
+    tratamentos,
+  );
 
   return (
     <>
@@ -198,9 +209,11 @@ function buildPreviewContent(data: PreviewData) {
         </p>
 
         <p>
-          Os trabalhos foram dirigidos pelo V∴ M∴ <strong>{officers.vm}</strong>, 1º Vig∴{' '}
-          <strong>{officers.vig1}</strong>, e 2º Vig∴ <strong>{officers.vig2}</strong>. Tendo como
-          Or∴ <strong>{officers.or}</strong> e Sec∴ <strong>{officers.sec}</strong>.
+          Os trabalhos foram dirigidos pelo {tratamentos.vm} <strong>{officers.vm}</strong>, 1º{' '}
+          {tratamentos.vig} <strong>{officers.vig1}</strong>, e 2º {tratamentos.vig}{' '}
+          <strong>{officers.vig2}</strong>. Tendo como{' '}
+          {tratarCargo('Or∴', tratamentos.prefixoCargo)} <strong>{officers.or}</strong> e{' '}
+          {tratarCargo('Sec∴', tratamentos.prefixoCargo)} <strong>{officers.sec}</strong>.
         </p>
 
         {isMagna && hasText(magnaFields.autoridades) ? (
@@ -211,9 +224,9 @@ function buildPreviewContent(data: PreviewData) {
 
         {isMagna && hasText(magnaFields.oradorConvidado) ? (
           <p className="no-indent">
-            <strong>ORADOR CONVIDADO:</strong> A sessão contou com a presença do ilustre Ir∴{' '}
-            <strong>{magnaFields.oradorConvidado}</strong>, que proferiu brilhante palestra sobre o
-            tema da sessão.
+            <strong>ORADOR CONVIDADO:</strong> A sessão contou com a presença do ilustre{' '}
+            {tratamentos.irmao} <strong>{magnaFields.oradorConvidado}</strong>, que proferiu
+            brilhante palestra sobre o tema da sessão.
           </p>
         ) : null}
 
@@ -255,11 +268,11 @@ function buildPreviewContent(data: PreviewData) {
         <p className="no-indent">
           <strong>BOLSA DE BENEFICÊNCIA:</strong>{' '}
           {troncoSuprimido ? (
-            TRONCO_SUPRIMIDO_TEXTO
+            troncoSuprimidoTexto(tratamentos)
           ) : (
             <>
-              Depois do anúncio feito pelo V∴ M∴ e VVig∴, o Ir∴ Hosp∴ circulou com a Bolsa.
-              Arrecadou{' '}
+              Depois do anúncio feito pelo {tratamentos.vm} e {tratamentos.vigs}, o{' '}
+              {tratamentos.irmao} Hosp∴ circulou com a Bolsa. Arrecadou{' '}
               <strong>
                 {String(tronco)} ({FORMAT.extenso(tronco)}) medalhas cunhadas
               </strong>
@@ -274,7 +287,7 @@ function buildPreviewContent(data: PreviewData) {
 
         <p className="no-indent">
           <strong>PALAVRA A BEM DA ORDEM:</strong>{' '}
-          {pboSuprimido ? PBO_SUPRIMIDO_TEXTO : 'A palavra circulou da seguinte forma:'}
+          {pboSuprimido ? pboSuprimidoTexto(tratamentos) : 'A palavra circulou da seguinte forma:'}
         </p>
 
         {pboSuprimido
@@ -287,9 +300,10 @@ function buildPreviewContent(data: PreviewData) {
 
         <p className="no-indent">
           <strong>ENCERRAMENTO:</strong> O encerramento ocorreu às {sessionConfig.horaEnc}h, na sua
-          forma ritualística, e eu, <strong>{officers.sec}</strong>, Sec∴, lavrei o presente
-          balaústre longe das vistas e indiscrições Profanas, que depois de decifrado e aprovado
-          pela Augusta Assembleia, será assinado por quem de direito.
+          forma ritualística, e eu, <strong>{officers.sec}</strong>,{' '}
+          {tratarCargo('Sec∴', tratamentos.prefixoCargo)}, lavrei o presente balaústre longe das
+          vistas e indiscrições Profanas, que depois de decifrado e aprovado pela Augusta
+          Assembleia, será assinado por quem de direito.
         </p>
       </div>
 
@@ -302,17 +316,17 @@ function buildPreviewContent(data: PreviewData) {
         <div className="sig-line sig-line--half">
           <strong>{officers.vm}</strong>
           <br />
-          Venerável Mestre
+          {tratamentos.vmExtenso}
         </div>
         <div className="sig-line sig-line--half">
           <strong>{officers.or}</strong>
           <br />
-          Orador
+          {tratarCargo('Orador', tratamentos.prefixoCargoExtenso)}
         </div>
         <div className="sig-line sig-line--full">
           <strong>{officers.sec}</strong>
           <br />
-          Secretário
+          {tratarCargo('Secretário', tratamentos.prefixoCargoExtenso)}
         </div>
       </div>
     </>
