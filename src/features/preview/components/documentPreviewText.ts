@@ -2,6 +2,7 @@ import type {
   BolsaCertificado,
   BolsaProposta,
   BolsaPropostas,
+  Grau,
   LojaConjunta,
   PreviewData,
   SessionType,
@@ -47,18 +48,70 @@ export function getSessionTypeMeta(sessionType: SessionType, conjunta = false) {
 
 export const PBO_SILENCIO = 'Reinou silêncio na coluna.';
 
+/** Como a ata se dirige ao V∴ M∴, aos VVig∴ e aos demais IIr∴ da sessão. */
+export type Tratamentos = {
+  vm: string;
+  vmExtenso: string;
+  vig: string;
+  vigs: string;
+  irmao: string;
+  irmaos: string;
+  /** Prefixo dos demais cargos (Or∴, Sec∴): vazio fora da Loj∴ de MM∴ MM∴. */
+  prefixoCargo: string;
+  /** Mesmo prefixo por extenso, usado no bloco de assinaturas. */
+  prefixoCargoExtenso: string;
+};
+
+/** "Or∴" fora da Loj∴ de MM∴ MM∴; "Ven∴ Ir∴ Or∴" dentro dela. */
+export function tratarCargo(cargo: string, prefixo: string): string {
+  return prefixo ? `${prefixo} ${cargo}` : cargo;
+}
+
+export const TRATAMENTOS_PADRAO: Tratamentos = {
+  vm: 'V∴ M∴',
+  vmExtenso: 'Venerável Mestre',
+  vig: 'Vig∴',
+  vigs: 'VVig∴',
+  irmao: 'Ir∴',
+  irmaos: 'IIr∴',
+  prefixoCargo: '',
+  prefixoCargoExtenso: '',
+};
+
+// Em Loj∴ de MM∴ MM∴ os títulos mudam, conforme "DOS TÍTULOS" no ritual:
+// o V∴ M∴ vira Resp∴ M∴, os VVig∴ viram VVen∴ IIr∴ VVig∴ e os MM∴ MM∴, VVen∴ IIr∴.
+export const TRATAMENTOS_MESTRE: Tratamentos = {
+  vm: 'Resp∴ M∴',
+  vmExtenso: 'Respeitável Mestre',
+  vig: 'Ven∴ Ir∴ Vig∴',
+  vigs: 'VVen∴ IIr∴ VVig∴',
+  irmao: 'Ven∴ Ir∴',
+  irmaos: 'VVen∴ IIr∴',
+  prefixoCargo: 'Ven∴ Ir∴',
+  prefixoCargoExtenso: 'Venerável Irmão',
+};
+
+export function tratamentosDoGrau(grau: Grau): Tratamentos {
+  return grau === 'Mestre' ? TRATAMENTOS_MESTRE : TRATAMENTOS_PADRAO;
+}
+
 // Supressões decididas pelo V∴ M∴: substituem todo o conteúdo da sessão no balaústre.
-export const TRONCO_SUPRIMIDO_TEXTO = 'Por ordem do V∴ M∴, a bolsa de beneficência foi suprimida!';
+export function troncoSuprimidoTexto(tratamentos: Tratamentos = TRATAMENTOS_PADRAO) {
+  return `Por ordem do ${tratamentos.vm}, a bolsa de beneficência foi suprimida!`;
+}
 
-export const PBO_SUPRIMIDO_TEXTO =
-  'Por ordem do V∴ M∴, a palavra a bem da Ordem e o quadro particular foram suprimidos!';
+export function pboSuprimidoTexto(tratamentos: Tratamentos = TRATAMENTOS_PADRAO) {
+  return `Por ordem do ${tratamentos.vm}, a palavra a bem da Ordem e o quadro particular foram suprimidos!`;
+}
 
-export const BOLSA_PROPOSTAS_SUPRIMIDA_TEXTO =
-  'Por ordem do V∴ M∴, a Bolsa de proposta e informações foi suprimida!';
+export function bolsaPropostasSuprimidaTexto(tratamentos: Tratamentos = TRATAMENTOS_PADRAO) {
+  return `Por ordem do ${tratamentos.vm}, a Bolsa de proposta e informações foi suprimida!`;
+}
 
 // Bolsa girou sem nada a registrar: fica o registro ritualístico dos bons fluidos.
-export const BOLSA_PROPOSTAS_SEM_PRODUCAO =
-  'A bolsa de propostas e informações após seu giro nada produziu, além dos bons fluidos colocados pelos IIr∴.';
+export function bolsaPropostasSemProducaoTexto(tratamentos: Tratamentos = TRATAMENTOS_PADRAO) {
+  return `A bolsa de propostas e informações após seu giro nada produziu, além dos bons fluidos colocados pelos ${tratamentos.irmaos}.`;
+}
 
 // Sem balaústre digitado, registra-se que não houve balaústre na sessão.
 export const BALAUSTRE_PADRAO = 'Não houve balaústre a ser apresentado nesta sessão!';
@@ -107,11 +160,12 @@ export function gerarTextoPresenca(
   presenca: number,
   visitors: Visitor[],
   lojasConjunta: LojaConjunta[] = [],
+  tratamentos: Tratamentos = TRATAMENTOS_PADRAO,
 ) {
-  const quadro = `${FORMAT.pad(presenca)} (${FORMAT.extenso(presenca)}) IIr∴ do quadro`;
+  const quadro = `${FORMAT.pad(presenca)} (${FORMAT.extenso(presenca)}) ${tratamentos.irmaos} do quadro`;
   const obreirosLojas = lojasConjunta.map(
     (loja) =>
-      `${FORMAT.pad(loja.obreiros)} (${FORMAT.extenso(loja.obreiros)}) IIr∴ da ${loja.nome}`,
+      `${FORMAT.pad(loja.obreiros)} (${FORMAT.extenso(loja.obreiros)}) ${tratamentos.irmaos} da ${loja.nome}`,
   );
   const presencaTexto = joinNomes([quadro, ...obreirosLojas]);
 
@@ -127,27 +181,40 @@ export function gerarTextoPresenca(
 
   const pluralVisitantes = visitors.length > 1;
 
-  return `contando com a presença de ${presencaTexto}, e ${FORMAT.pad(visitors.length)} (${FORMAT.extenso(visitors.length)}) ${pluralVisitantes ? 'IIr∴ visitantes' : 'Ir∴ visitante'} que assinaram o Livro de Presença.`;
+  const visitantes = pluralVisitantes
+    ? `${tratamentos.irmaos} visitantes`
+    : `${tratamentos.irmao} visitante`;
+
+  return `contando com a presença de ${presencaTexto}, e ${FORMAT.pad(visitors.length)} (${FORMAT.extenso(visitors.length)}) ${visitantes} que assinaram o Livro de Presença.`;
 }
 
 // Detalhe de um visitante: "Ir∴ visitante Fulano da Loja X do Oriente de Y filiado à Potência Z".
-export function descreverVisitante(visitor: Visitor): string {
-  let texto = `Ir∴ visitante ${visitor.nome}`;
+export function descreverVisitante(
+  visitor: Visitor,
+  tratamentos: Tratamentos = TRATAMENTOS_PADRAO,
+): string {
+  let texto = `${tratamentos.irmao} visitante ${visitor.nome}`;
   if (hasText(visitor.lojaNome)) texto += ` da ${visitor.lojaNome}`;
   if (hasText(visitor.oriente)) texto += ` do Oriente de ${visitor.oriente}`;
   if (hasText(visitor.potencia)) texto += ` filiado à Potência ${visitor.potencia}`;
   return texto;
 }
 
-export function gerarTextoSaudacao(visitors: Visitor[], orador: string) {
+export function gerarTextoSaudacao(
+  visitors: Visitor[],
+  orador: string,
+  tratamentos: Tratamentos = TRATAMENTOS_PADRAO,
+) {
   if (visitors.length === 0) {
     return 'Foi suprimida em razão da ausência de visitantes.';
   }
 
   const primeiroNomeOrador = (orador || '').trim().split(/\s+/)[0] || 'Orador';
-  const visitantesTexto = joinNomes(visitors.map(descreverVisitante));
+  const visitantesTexto = joinNomes(
+    visitors.map((visitor) => descreverVisitante(visitor, tratamentos)),
+  );
 
-  return `O Ir∴ Or∴ ${primeiroNomeOrador} saudou o ${visitantesTexto}, na forma ritualística.`;
+  return `O ${tratamentos.irmao} Or∴ ${primeiroNomeOrador} saudou o ${visitantesTexto}, na forma ritualística.`;
 }
 
 // Uma visita certificada por vez: "Loja X - 08 no dia 25/07/2026".
@@ -197,7 +264,7 @@ function agruparCertificadosPorObreiro(itens: BolsaProposta[]): BolsaProposta[] 
 }
 
 // O plural acompanha quantas lojas o Ir∴ visitou, não quantos IIr∴ há na sessão.
-function descreverCertificados(item: BolsaProposta): string {
+function descreverCertificados(item: BolsaProposta, tratamentos: Tratamentos): string {
   const visitas = item.certificados.map(descreverVisitaCertificada).filter(Boolean);
   if (visitas.length === 0) return '';
 
@@ -205,24 +272,24 @@ function descreverCertificados(item: BolsaProposta): string {
   const substantivo = plural ? 'certificados' : 'certificado';
   const complemento = plural ? 'às lojas' : 'à loja';
 
-  return `${substantivo} de visita do Ir∴ ${item.obreiroNome.trim()} ${complemento} ${joinNomes(visitas)}`;
+  return `${substantivo} de visita do ${tratamentos.irmao} ${item.obreiroNome.trim()} ${complemento} ${joinNomes(visitas)}`;
 }
 
 // Todos os aumentos de salário entram numa única coluna, com os IIr∴ enumerados.
-function descreverAumentos(itens: BolsaProposta[]): string {
+function descreverAumentos(itens: BolsaProposta[], tratamentos: Tratamentos): string {
   const nomes = itens.map((item) => item.obreiroNome.trim()).filter(Boolean);
   if (nomes.length === 0) return '';
 
   const plural = nomes.length > 1;
   const substantivo = plural ? 'pedidos' : 'pedido';
-  const complemento = plural ? 'dos IIr∴' : 'do Ir∴';
+  const complemento = plural ? `dos ${tratamentos.irmaos}` : `do ${tratamentos.irmao}`;
 
   return `${substantivo} de aumento de salário ${complemento} ${joinNomes(nomes)}`;
 }
 
 // Cada trabalho tem título próprio, então rende uma coluna separada.
-function descreverTrabalho(item: BolsaProposta): string {
-  const base = `trabalho apresentado pelo Ir∴ ${item.obreiroNome.trim()}`;
+function descreverTrabalho(item: BolsaProposta, tratamentos: Tratamentos): string {
+  const base = `trabalho apresentado pelo ${tratamentos.irmao} ${item.obreiroNome.trim()}`;
   return hasText(item.titulo) ? `${base} intitulado "${item.titulo.trim()}"` : base;
 }
 
@@ -231,21 +298,29 @@ function descreverTrabalho(item: BolsaProposta): string {
  * colunas gravadas na ordem fixa do balaústre (certificados de visita, aumentos
  * de salário e trabalhos); o acréscimo livre, quando existe, vira parágrafo próprio.
  */
-export function gerarTextoBolsaPropostas(bolsa: BolsaPropostas): string[] {
-  if (bolsa.suprimida) return [BOLSA_PROPOSTAS_SUPRIMIDA_TEXTO];
+export function gerarTextoBolsaPropostas(
+  bolsa: BolsaPropostas,
+  tratamentos: Tratamentos = TRATAMENTOS_PADRAO,
+): string[] {
+  if (bolsa.suprimida) return [bolsaPropostasSuprimidaTexto(tratamentos)];
 
   const itens = bolsa.itens.filter((item) => hasText(item.obreiroNome));
   const complemento = bolsa.texto.trim();
 
   const colunas = [
     ...agruparCertificadosPorObreiro(itens.filter((item) => item.tipo === 'certificado')).map(
-      descreverCertificados,
+      (item) => descreverCertificados(item, tratamentos),
     ),
-    descreverAumentos(itens.filter((item) => item.tipo === 'aumento')),
-    ...itens.filter((item) => item.tipo === 'trabalho').map(descreverTrabalho),
+    descreverAumentos(
+      itens.filter((item) => item.tipo === 'aumento'),
+      tratamentos,
+    ),
+    ...itens
+      .filter((item) => item.tipo === 'trabalho')
+      .map((item) => descreverTrabalho(item, tratamentos)),
   ].filter((coluna) => coluna.length > 0);
 
-  if (colunas.length === 0 && !complemento) return [BOLSA_PROPOSTAS_SEM_PRODUCAO];
+  if (colunas.length === 0 && !complemento) return [bolsaPropostasSemProducaoTexto(tratamentos)];
 
   // Sem total anunciado, cada coluna montada vale por uma.
   const total =

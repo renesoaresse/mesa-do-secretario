@@ -12,8 +12,8 @@ import {
   ATOS_DECRETOS_PADRAO,
   BALAUSTRE_PADRAO,
   EXPEDIENTE_PADRAO,
-  PBO_SUPRIMIDO_TEXTO,
-  TRONCO_SUPRIMIDO_TEXTO,
+  pboSuprimidoTexto,
+  troncoSuprimidoTexto,
 } from './documentPreviewText';
 
 const toRects = (tops: number[]) => tops.map((top) => ({ top, height: 24, width: 400 }) as DOMRect);
@@ -96,7 +96,7 @@ describe('DocumentPreview', () => {
       <DocumentPreview zoom={1} data={makePreviewData({ tronco: 10, troncoSuprimido: true })} />,
     );
 
-    expect(screen.getByText(new RegExp(TRONCO_SUPRIMIDO_TEXTO))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(troncoSuprimidoTexto()))).toBeInTheDocument();
     expect(screen.queryByText(/medalhas cunhadas/i)).not.toBeInTheDocument();
 
     rerender(
@@ -104,7 +104,7 @@ describe('DocumentPreview', () => {
     );
 
     expect(screen.getByText(/medalhas cunhadas/i)).toBeInTheDocument();
-    expect(screen.queryByText(new RegExp(TRONCO_SUPRIMIDO_TEXTO))).not.toBeInTheDocument();
+    expect(screen.queryByText(new RegExp(troncoSuprimidoTexto()))).not.toBeInTheDocument();
   });
 
   it('registra a supressao da palavra a bem da ordem no lugar das colunas', () => {
@@ -112,7 +112,7 @@ describe('DocumentPreview', () => {
       <DocumentPreview zoom={1} data={makePreviewData({ pboSuprimido: true })} />,
     );
 
-    expect(screen.getByText(new RegExp(PBO_SUPRIMIDO_TEXTO))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(pboSuprimidoTexto()))).toBeInTheDocument();
     expect(screen.queryByText(/Coluna do Sul:/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/A palavra circulou da seguinte forma:/i)).not.toBeInTheDocument();
 
@@ -120,7 +120,7 @@ describe('DocumentPreview', () => {
 
     expect(screen.getByText(/A palavra circulou da seguinte forma:/i)).toBeInTheDocument();
     expect(screen.getByText(/Coluna do Sul:/i)).toBeInTheDocument();
-    expect(screen.queryByText(new RegExp(PBO_SUPRIMIDO_TEXTO))).not.toBeInTheDocument();
+    expect(screen.queryByText(new RegExp(pboSuprimidoTexto()))).not.toBeInTheDocument();
   });
 
   it('usa o texto padrao de expedientes quando a secao esta vazia', () => {
@@ -189,6 +189,45 @@ describe('DocumentPreview', () => {
     expect(screen.getByText(/PALAVRA A BEM DA ORDEM:/i)).toBeInTheDocument();
     expect(screen.getByText(/Coluna do Sul:/i)).toBeInTheDocument();
     expect(screen.getByText(/Oriente:/i)).toBeInTheDocument();
+  });
+
+  it('adapta os titulos da ata quando a sessao e no grau de Mestre', () => {
+    render(
+      <DocumentPreview
+        zoom={1}
+        data={makePreviewData({ sessionConfig: makeSessionConfig({ grau: 'Mestre' }) })}
+      />,
+    );
+
+    const preview = screen.getByLabelText('Pré-visualização do documento');
+
+    expect(preview).toHaveTextContent('dirigidos pelo Resp∴ M∴');
+    expect(preview).toHaveTextContent('1º Ven∴ Ir∴ Vig∴');
+    expect(preview).toHaveTextContent('2º Ven∴ Ir∴ Vig∴');
+    expect(preview).toHaveTextContent('VVen∴ IIr∴ do quadro');
+    expect(preview).toHaveTextContent('Ven∴ Ir∴ visitante');
+    expect(preview).toHaveTextContent('feito pelo Resp∴ M∴ e VVen∴ IIr∴ VVig∴, o Ven∴ Ir∴ Hosp∴');
+    expect(preview).toHaveTextContent('Tendo como Ven∴ Ir∴ Or∴');
+    expect(preview).toHaveTextContent('e Ven∴ Ir∴ Sec∴ Secretario');
+    expect(preview).toHaveTextContent('e eu, Secretario, Ven∴ Ir∴ Sec∴, lavrei');
+    expect(preview).toHaveTextContent('Respeitável Mestre');
+    expect(preview).toHaveTextContent('Venerável Irmão Orador');
+    expect(preview).toHaveTextContent('Venerável Irmão Secretário');
+    expect(preview).not.toHaveTextContent('Venerável Mestre');
+  });
+
+  it('mantem os titulos de Aprendiz fora da Loj de MM MM', () => {
+    render(<DocumentPreview zoom={1} data={makePreviewData()} />);
+
+    const preview = screen.getByLabelText('Pré-visualização do documento');
+
+    expect(preview).toHaveTextContent('dirigidos pelo V∴ M∴');
+    expect(preview).toHaveTextContent('IIr∴ do quadro');
+    expect(preview).toHaveTextContent('Tendo como Or∴ Orador e Sec∴ Secretario');
+    expect(preview).toHaveTextContent('e eu, Secretario, Sec∴, lavrei');
+    expect(preview).toHaveTextContent('Venerável Mestre');
+    expect(preview).not.toHaveTextContent('Resp∴ M∴');
+    expect(preview).not.toHaveTextContent('Venerável Irmão');
   });
 
   it('renderiza secoes magna quando os dados estiverem preenchidos', () => {
