@@ -7,6 +7,9 @@ import './styles/components.css';
 import './styles/home.css';
 import './styles/print.css';
 import App from './app/App.tsx';
+import { instalarProtecaoContraTradutor } from './domTranslationGuard';
+
+instalarProtecaoContraTradutor();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

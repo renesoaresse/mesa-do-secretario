@@ -116,7 +116,14 @@ describe('storage service', () => {
       expect(loaded.bolsaPropostas.totalColunas).toBe(3);
       expect(loaded.bolsaPropostas.suprimida).toBe(true);
       expect(loaded.bolsaPropostas.itens).toEqual([
-        { id: 'b1', obreiroNome: 'Fulano', tipo: 'aumento', certificados: [], titulo: '' },
+        {
+          id: 'b1',
+          obreiroNome: 'Fulano',
+          tipo: 'aumento',
+          certificados: [],
+          titulo: '',
+          descricao: '',
+        },
       ]);
     });
   });

@@ -17,6 +17,7 @@ const TIPOS: Array<{ value: BolsaPropostaTipo; label: string }> = [
   { value: 'certificado', label: 'Certificado de Visitas' },
   { value: 'trabalho', label: 'Trabalhos' },
   { value: 'aumento', label: 'Aumento de Salário' },
+  { value: 'outros', label: 'Outros' },
 ];
 
 type Props = {
@@ -31,6 +32,7 @@ export function BolsaPropostaInputRow({ obreiros, lojas, lojaConfig, onAdd, onCr
   const [obreiroNome, setObreiroNome] = useState('');
   const [tipo, setTipo] = useState<TipoEscolhido>('');
   const [titulo, setTitulo] = useState('');
+  const [descricao, setDescricao] = useState('');
   const [loja, setLoja] = useState<Loja | null>(null);
   const [dataISO, setDataISO] = useState('');
 
@@ -38,14 +40,20 @@ export function BolsaPropostaInputRow({ obreiros, lojas, lojaConfig, onAdd, onCr
     setObreiroNome('');
     setTipo('');
     setTitulo('');
+    setDescricao('');
     setLoja(null);
     setDataISO('');
   };
 
   // Certificado só vira coluna gravada com a loja visitada e o dia da visita.
   const certificadoCompleto = loja !== null && dataISO.length > 0;
+  // 'Outros' não tem forma fixa: a coluna só existe se o Ir∴ Sec∴ descrever o assunto.
+  const outrosCompleto = descricao.trim().length > 0;
   const podeAdicionar =
-    obreiroNome.trim().length > 0 && tipo !== '' && (tipo !== 'certificado' || certificadoCompleto);
+    obreiroNome.trim().length > 0 &&
+    tipo !== '' &&
+    (tipo !== 'certificado' || certificadoCompleto) &&
+    (tipo !== 'outros' || outrosCompleto);
 
   const submit = () => {
     if (!podeAdicionar || tipo === '') return;
@@ -57,6 +65,7 @@ export function BolsaPropostaInputRow({ obreiros, lojas, lojaConfig, onAdd, onCr
       certificados:
         tipo === 'certificado' && loja ? [{ lojaId: loja.id, lojaNome: loja.nome, dataISO }] : [],
       titulo: tipo === 'trabalho' ? titulo.trim() : '',
+      descricao: tipo === 'outros' ? descricao.trim() : '',
     });
 
     reset();
@@ -97,6 +106,16 @@ export function BolsaPropostaInputRow({ obreiros, lojas, lojaConfig, onAdd, onCr
             value={titulo}
             placeholder="Ex: A Simbologia do Esquadro"
             onChange={(e) => setTitulo(e.target.value)}
+          />
+        </FormGroup>
+      )}
+
+      {tipo === 'outros' && (
+        <FormGroup label="Descrição do assunto">
+          <TextInput
+            value={descricao}
+            placeholder="Ex: doação de livros para a biblioteca"
+            onChange={(e) => setDescricao(e.target.value)}
           />
         </FormGroup>
       )}

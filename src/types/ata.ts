@@ -16,7 +16,7 @@ export type Visitor = {
 export type Grau = 'Aprendiz' | 'Companheiro' | 'Mestre';
 
 /** Naturezas registradas na Bolsa de Propostas e Informações. */
-export type BolsaPropostaTipo = 'certificado' | 'aumento' | 'trabalho';
+export type BolsaPropostaTipo = 'certificado' | 'aumento' | 'trabalho' | 'outros';
 
 /** Uma visita certificada: a loja visitada e o dia da visita. */
 export type BolsaCertificado = {
@@ -31,6 +31,7 @@ export type BolsaProposta = {
   tipo: BolsaPropostaTipo;
   certificados: BolsaCertificado[]; // só usado quando tipo === 'certificado'
   titulo: string; // só usado quando tipo === 'trabalho'
+  descricao: string; // só usado quando tipo === 'outros'
 };
 
 export type BolsaPropostas = {

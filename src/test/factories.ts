@@ -28,6 +28,7 @@ export function makeBolsaProposta(overrides: Partial<BolsaProposta> = {}): Bolsa
     tipo: 'certificado',
     certificados: [{ lojaId: 'loja-1', lojaNome: 'Jacques Demolay - 18', dataISO: '2026-07-24' }],
     titulo: '',
+    descricao: '',
     ...overrides,
   };
 }
