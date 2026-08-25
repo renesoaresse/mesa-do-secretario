@@ -16,7 +16,8 @@ import {
   formatPalavraBemOrdemEntries,
   gerarSufixoLojasConjunta,
   gerarTextoPresenca,
-  gerarTextoSaudacao,
+  gerarPartesSaudacao,
+  type PartesSaudacao,
   getPreviewDateParts,
   getSessionTypeMeta,
   hasText,
@@ -112,6 +113,19 @@ function LineNumbers({ lines }: { lines: LineRect[] }) {
   );
 }
 
+// O nome do Orador vai em negrito no meio da frase; a saudação suprimida não tem nome.
+function TextoSaudacao({ saudacao }: { saudacao: PartesSaudacao }) {
+  if (!saudacao.orador) return <>{saudacao.prefixo}</>;
+
+  return (
+    <>
+      {saudacao.prefixo}
+      <strong>{saudacao.orador}</strong>
+      {saudacao.complemento}
+    </>
+  );
+}
+
 function buildPreviewContent(data: PreviewData) {
   const {
     sessionType,
@@ -146,7 +160,7 @@ function buildPreviewContent(data: PreviewData) {
     lojasConj,
     tratamentos,
   );
-  const textoSaudacao = gerarTextoSaudacao(visitors, officers.or, tratamentos);
+  const saudacao = gerarPartesSaudacao(visitors, officers.or, tratamentos);
   const pboEntries = formatPalavraBemOrdemEntries(pbo);
   const [bolsaAbertura, ...bolsaComplementos] = gerarTextoBolsaPropostas(
     bolsaPropostas,
@@ -282,7 +296,7 @@ function buildPreviewContent(data: PreviewData) {
         </p>
 
         <p className="no-indent">
-          <strong>SAUDAÇÃO AOS VISITANTES:</strong> {textoSaudacao}
+          <strong>SAUDAÇÃO AOS VISITANTES:</strong> <TextoSaudacao saudacao={saudacao} />
         </p>
 
         <p className="no-indent">

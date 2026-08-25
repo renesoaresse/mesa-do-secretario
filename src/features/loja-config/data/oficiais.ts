@@ -9,6 +9,9 @@ export type ObreiroComCargo = Obreiro & {
 /** Sufixo aplicado nas referências da ata quando o oficial não é o titular do cargo. */
 export const SUFIXO_AD_HOC = ' - ADHOC';
 
+/** Só Orador e Secretário recebem o sufixo quando não são os titulares da gestão. */
+export const OFICIAIS_COM_AD_HOC: readonly (keyof Officers)[] = ['or', 'sec'];
+
 /**
  * Cargo da gestão que corresponde a cada oficial pedido na ata.
  * Só o REAA foi mapeado até agora; os demais ritos entram quando forem definidos.
@@ -83,17 +86,35 @@ function mesmoNome(a: string, b: string): boolean {
 }
 
 /**
- * Marca com " - ADHOC" quem está ocupando um cargo sem ser o titular da gestão.
- * Sem titular conhecido (gestão ausente ou cargo vago) nada é marcado.
+ * Diz se a gestão informada é base confiável para apontar quem é ad hoc: precisa existir,
+ * ter atribuições e um rito com os cargos mapeados. Sem isso nada é marcado.
  */
-export function aplicarSufixoAdHoc(officers: Officers, titulares: Officers): Officers {
-  const comSufixo = { ...officers };
+export function gestaoDefineOficiais(gestao: Gestao | undefined, rito: Rito | ''): boolean {
+  if (!gestao || !rito || gestao.atribuicoes.length === 0) return false;
 
-  for (const oficial of Object.keys(comSufixo) as (keyof Officers)[]) {
+  const cargoDoOficial = CARGO_DO_OFICIAL[rito];
+
+  return OFICIAIS_COM_AD_HOC.some((oficial) => cargoDoOficial[oficial] !== '');
+}
+
+/**
+ * Marca com " - ADHOC" o Orador e o Secretário que ocupam o cargo sem ser o titular da gestão,
+ * inclusive quando o cargo está vago na gestão. Os demais oficiais nunca recebem o sufixo e,
+ * com `gestaoConhecida` falso (gestão ausente ou rito sem cargos mapeados), nada é marcado.
+ */
+export function aplicarSufixoAdHoc(
+  officers: Officers,
+  titulares: Officers,
+  gestaoConhecida: boolean,
+): Officers {
+  const comSufixo = { ...officers };
+  if (!gestaoConhecida) return comSufixo;
+
+  for (const oficial of OFICIAIS_COM_AD_HOC) {
     const nome = comSufixo[oficial].trim();
     const titular = titulares[oficial].trim();
 
-    if (nome && titular && !mesmoNome(nome, titular)) {
+    if (nome && !mesmoNome(nome, titular)) {
       comSufixo[oficial] = `${nome}${SUFIXO_AD_HOC}`;
     }
   }

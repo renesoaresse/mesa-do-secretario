@@ -264,10 +264,23 @@ describe('useAtaState - oficiais da gestão vigente', () => {
 
     const { result } = renderHook(() => useAtaState());
 
-    expect(result.current.previewData.officers.vm).toBe('ABEL SANTOS');
+    expect(result.current.previewData.officers.sec).toBe('BRUNO LIMA');
   });
 
-  it('marca com ADHOC quem ocupa o cargo no lugar do titular', () => {
+  it('marca com ADHOC quem ocupa a secretaria no lugar do titular', () => {
+    seedGestaoVigente();
+
+    const { result } = renderHook(() => useAtaState());
+
+    act(() => {
+      result.current.updateOfficers({ sec: 'ABEL SANTOS' });
+    });
+
+    expect(result.current.officers.sec).toBe('ABEL SANTOS');
+    expect(result.current.previewData.officers.sec).toBe('ABEL SANTOS - ADHOC');
+  });
+
+  it('não marca com ADHOC os cargos fora de Orador e Secretário', () => {
     seedGestaoVigente();
 
     const { result } = renderHook(() => useAtaState());
@@ -277,32 +290,44 @@ describe('useAtaState - oficiais da gestão vigente', () => {
     });
 
     expect(result.current.officers.vm).toBe('BRUNO LIMA');
-    expect(result.current.previewData.officers.vm).toBe('BRUNO LIMA - ADHOC');
+    expect(result.current.previewData.officers.vm).toBe('BRUNO LIMA');
   });
 
   it('preenche os cargos vazios mesmo com outro oficial já digitado', () => {
     seedGestaoVigente();
     seedStorage('ataDraft', {
       ...makeAtaDraft(),
-      officers: { vm: 'ALGUEM DE FORA', vig1: '', vig2: '', or: '', sec: '' },
+      officers: { vm: '', vig1: '', vig2: '', or: '', sec: 'ALGUEM DE FORA' },
     });
 
     const { result } = renderHook(() => useAtaState());
 
-    expect(result.current.officers.vm).toBe('ALGUEM DE FORA');
-    expect(result.current.officers.sec).toBe('BRUNO LIMA');
-    expect(result.current.previewData.officers.vm).toBe('ALGUEM DE FORA - ADHOC');
+    expect(result.current.officers.sec).toBe('ALGUEM DE FORA');
+    expect(result.current.officers.vm).toBe('ABEL SANTOS');
+    expect(result.current.previewData.officers.sec).toBe('ALGUEM DE FORA - ADHOC');
   });
 
-  it('não marca cargo sem titular na gestão', () => {
+  it('marca ADHOC no cargo vago na gestão', () => {
     seedGestaoVigente();
 
     const { result } = renderHook(() => useAtaState());
 
     act(() => {
-      result.current.updateOfficers({ vig1: 'QUALQUER IRMAO' });
+      result.current.updateOfficers({ or: 'QUALQUER IRMAO' });
     });
 
-    expect(result.current.previewData.officers.vig1).toBe('QUALQUER IRMAO');
+    expect(result.current.previewData.officers.or).toBe('QUALQUER IRMAO - ADHOC');
+  });
+
+  it('não marca ADHOC sem gestão vigente cadastrada', () => {
+    storage.saveLojaConfig({ ...DEFAULT_LOJA_CONFIG, rito: 'Rito Escocês Antigo e Aceito' });
+
+    const { result } = renderHook(() => useAtaState());
+
+    act(() => {
+      result.current.updateOfficers({ sec: 'QUALQUER IRMAO' });
+    });
+
+    expect(result.current.previewData.officers.sec).toBe('QUALQUER IRMAO');
   });
 });

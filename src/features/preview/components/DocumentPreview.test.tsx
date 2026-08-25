@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   makeBolsaPropostas,
   makeDangerousPreviewData,
+  makeOfficers,
   makePreviewData,
   makeSessionConfig,
   makeVisitor,
@@ -52,6 +53,21 @@ describe('DocumentPreview', () => {
     expect(preview).toHaveAttribute('id', 'documentPreview');
     expect(preview).toHaveClass('preview-sheet', 'abnt-page');
     expect(preview).toHaveStyle({ transform: 'scale(1.25)', transformOrigin: 'top center' });
+  });
+
+  it('destaca o nome completo do orador na saudacao aos visitantes', () => {
+    const data = makePreviewData({
+      officers: makeOfficers({ or: 'BELTRANO SILVA - ADHOC' }),
+      visitors: [makeVisitor({ nome: 'Fulano' })],
+    });
+    const { container } = render(<DocumentPreview zoom={1} data={data} />);
+
+    const negritos = [...container.querySelectorAll('strong')].map((el) => el.textContent);
+
+    expect(negritos).toContain('BELTRANO SILVA - ADHOC');
+    expect(container.textContent).toContain(
+      'O Ir∴ Or∴ BELTRANO SILVA - ADHOC saudou o Ir∴ visitante Fulano',
+    );
   });
 
   it('renderiza texto semelhante a html como conteudo literal', () => {
