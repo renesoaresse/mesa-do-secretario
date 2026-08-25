@@ -200,21 +200,51 @@ export function descreverVisitante(
   return texto;
 }
 
+/** Saudação em partes: o nome do Orador sai separado para ser destacado em negrito. */
+export type PartesSaudacao = {
+  prefixo: string;
+  /** Nome completo do Orador, já com o sufixo ad hoc quando houver; vazio na saudação suprimida. */
+  orador: string;
+  complemento: string;
+};
+
+export function gerarPartesSaudacao(
+  visitors: Visitor[],
+  orador: string,
+  tratamentos: Tratamentos = TRATAMENTOS_PADRAO,
+): PartesSaudacao {
+  if (visitors.length === 0) {
+    return {
+      prefixo: 'Foi suprimida em razão da ausência de visitantes.',
+      orador: '',
+      complemento: '',
+    };
+  }
+
+  const nomeOrador = (orador || '').trim() || 'Orador';
+  const visitantesTexto = joinNomes(
+    visitors.map((visitor) => descreverVisitante(visitor, tratamentos)),
+  );
+
+  return {
+    prefixo: `O ${tratamentos.irmao} Or∴ `,
+    orador: nomeOrador,
+    complemento: ` saudou o ${visitantesTexto}, na forma ritualística.`,
+  };
+}
+
 export function gerarTextoSaudacao(
   visitors: Visitor[],
   orador: string,
   tratamentos: Tratamentos = TRATAMENTOS_PADRAO,
 ) {
-  if (visitors.length === 0) {
-    return 'Foi suprimida em razão da ausência de visitantes.';
-  }
+  const {
+    prefixo,
+    orador: nomeOrador,
+    complemento,
+  } = gerarPartesSaudacao(visitors, orador, tratamentos);
 
-  const primeiroNomeOrador = (orador || '').trim().split(/\s+/)[0] || 'Orador';
-  const visitantesTexto = joinNomes(
-    visitors.map((visitor) => descreverVisitante(visitor, tratamentos)),
-  );
-
-  return `O ${tratamentos.irmao} Or∴ ${primeiroNomeOrador} saudou o ${visitantesTexto}, na forma ritualística.`;
+  return `${prefixo}${nomeOrador}${complemento}`;
 }
 
 // Uma visita certificada por vez: "Loja X - 08 no dia 25/07/2026".

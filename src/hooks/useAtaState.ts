@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { storage } from '../services/storage';
 import {
   aplicarSufixoAdHoc,
+  gestaoDefineOficiais,
   gestaoVigente,
   titularesDosOficiais,
 } from '../features/loja-config/data/oficiais';
@@ -87,11 +88,9 @@ export function useAtaState() {
   const initialDraft = storage.loadAtaDraft(DEFAULT_ATA_DRAFT);
   const quadroObreiros = storage.loadObreiros();
   // Titulares da gestão vigente: preenchem os oficiais e definem quem é ad hoc.
-  const titulares = titularesDosOficiais(
-    gestaoVigente(storage.loadGestoes()),
-    quadroObreiros,
-    initialDraft.lojaConfig.rito,
-  );
+  const gestao = gestaoVigente(storage.loadGestoes());
+  const titulares = titularesDosOficiais(gestao, quadroObreiros, initialDraft.lojaConfig.rito);
+  const gestaoConhecida = gestaoDefineOficiais(gestao, initialDraft.lojaConfig.rito);
   // Cada cargo ainda em branco herda o titular da gestão; o que já foi digitado fica.
   const officersIniciais = (Object.keys(initialDraft.officers) as (keyof Officers)[]).reduce(
     (acc, oficial) => {
@@ -254,7 +253,7 @@ export function useAtaState() {
       sessionConfig,
       magnaFields,
       visitors,
-      officers: aplicarSufixoAdHoc(officers, titulares),
+      officers: aplicarSufixoAdHoc(officers, titulares, gestaoConhecida),
       tronco,
       troncoSuprimido,
       ordemDia,
@@ -268,6 +267,7 @@ export function useAtaState() {
     }),
     [
       titulares,
+      gestaoConhecida,
       lojaConfig,
       sessionType,
       sessionConfig,

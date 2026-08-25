@@ -15,6 +15,7 @@ import {
   gerarSufixoLojasConjunta,
   gerarTextoBolsaPropostas,
   gerarTextoPresenca,
+  gerarPartesSaudacao,
   gerarTextoSaudacao,
   joinNomes,
   pboSuprimidoTexto,
@@ -109,6 +110,26 @@ describe('documentPreviewText', () => {
     expect(texto).toContain(
       'Ir∴ visitante Fulano da Loja X do Oriente de Aracaju/SE filiado à Potência GLMESE',
     );
+  });
+
+  it('saudacao usa o nome completo do orador, com o sufixo ad hoc quando houver', () => {
+    expect(gerarTextoSaudacao([makeVisitor({ nome: 'Fulano' })], 'BELTRANO SILVA')).toBe(
+      'O Ir∴ Or∴ BELTRANO SILVA saudou o Ir∴ visitante Fulano, na forma ritualística.',
+    );
+
+    expect(gerarTextoSaudacao([makeVisitor({ nome: 'Fulano' })], 'BELTRANO SILVA - ADHOC')).toBe(
+      'O Ir∴ Or∴ BELTRANO SILVA - ADHOC saudou o Ir∴ visitante Fulano, na forma ritualística.',
+    );
+  });
+
+  it('separa o nome do orador para o negrito da ata', () => {
+    expect(
+      gerarPartesSaudacao([makeVisitor({ nome: 'Fulano' })], 'BELTRANO SILVA - ADHOC'),
+    ).toEqual({
+      prefixo: 'O Ir∴ Or∴ ',
+      orador: 'BELTRANO SILVA - ADHOC',
+      complemento: ' saudou o Ir∴ visitante Fulano, na forma ritualística.',
+    });
   });
 
   it('gera saudacao padrao quando nao houver visitantes', () => {
@@ -420,7 +441,9 @@ describe('tratamentos por grau', () => {
   it('trata o Or e os visitantes como Ven Ir na saudacao', () => {
     expect(
       gerarTextoSaudacao([makeVisitor({ nome: 'Fulano' })], 'Beltrano Silva', TRATAMENTOS_MESTRE),
-    ).toBe('O Ven∴ Ir∴ Or∴ Beltrano saudou o Ven∴ Ir∴ visitante Fulano, na forma ritualística.');
+    ).toBe(
+      'O Ven∴ Ir∴ Or∴ Beltrano Silva saudou o Ven∴ Ir∴ visitante Fulano, na forma ritualística.',
+    );
   });
 
   it('trata os IIr da bolsa de propostas conforme o grau', () => {
