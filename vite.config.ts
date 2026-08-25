@@ -18,7 +18,8 @@ function buildCsp(connectSrc: string) {
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "frame-ancestors 'none'",
+    // `frame-ancestors` so vale como header HTTP — em <meta> o navegador ignora
+    // e ainda registra warning no console. Na web quem entrega e o vercel.json.
   ].join('; ');
 }
 

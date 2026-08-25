@@ -293,10 +293,18 @@ function descreverTrabalho(item: BolsaProposta, tratamentos: Tratamentos): strin
   return hasText(item.titulo) ? `${base} intitulado "${item.titulo.trim()}"` : base;
 }
 
+// 'Outros' cobre o que não cabe nas naturezas fixas: o Ir∴ Sec∴ escreve o assunto
+// e ele entra como coluna própria, atribuída a quem levou o tema à bolsa.
+function descreverOutros(item: BolsaProposta, tratamentos: Tratamentos): string {
+  if (!hasText(item.descricao)) return '';
+  return `${item.descricao.trim()} do ${tratamentos.irmao} ${item.obreiroNome.trim()}`;
+}
+
 /**
  * Monta a Bolsa de Propostas e Informações em parágrafos: o primeiro enumera as
  * colunas gravadas na ordem fixa do balaústre (certificados de visita, aumentos
- * de salário e trabalhos); o acréscimo livre, quando existe, vira parágrafo próprio.
+ * de salário, trabalhos e demais assuntos); o acréscimo livre, quando existe,
+ * vira parágrafo próprio.
  */
 export function gerarTextoBolsaPropostas(
   bolsa: BolsaPropostas,
@@ -318,9 +326,16 @@ export function gerarTextoBolsaPropostas(
     ...itens
       .filter((item) => item.tipo === 'trabalho')
       .map((item) => descreverTrabalho(item, tratamentos)),
+    ...itens
+      .filter((item) => item.tipo === 'outros')
+      .map((item) => descreverOutros(item, tratamentos)),
   ].filter((coluna) => coluna.length > 0);
 
-  if (colunas.length === 0 && !complemento) return [bolsaPropostasSemProducaoTexto(tratamentos)];
+  // O total anunciado pelo V∴ M∴ manda sozinho: o Ir∴ Sec∴ pode registrar quantas
+  // colunas giraram sem detalhar cada uma, e o balaústre ainda assim as conta.
+  if (colunas.length === 0 && !complemento && bolsa.totalColunas === 0) {
+    return [bolsaPropostasSemProducaoTexto(tratamentos)];
+  }
 
   // Sem total anunciado, cada coluna montada vale por uma.
   const total =

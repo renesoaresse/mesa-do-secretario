@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { BolsaProposta, BolsaPropostas, Loja, LojaConfig } from '../../../types/ata';
 import { Checkbox } from '../../../components/ui/Checkbox';
 import { FormGroup } from '../../../components/ui/FormGroup';
@@ -30,6 +31,16 @@ export function BolsaPropostasPanel({
   onRemoveItem,
   onCreateLoja,
 }: Props) {
+  // Acréscimo é exceção: fica fora do caminho até o Ir∴ Sec∴ pedir por ele.
+  // Rascunho retomado com texto salvo reabre o campo já marcado.
+  const [temComplemento, setTemComplemento] = useState(value.texto.trim().length > 0);
+
+  // Desmarcar apaga o acréscimo: texto escondido continuaria entrando no balaústre.
+  function handleComplemento(marcado: boolean) {
+    setTemComplemento(marcado);
+    if (!marcado && value.texto !== '') onChange({ texto: '' });
+  }
+
   return (
     <section>
       <Checkbox
@@ -66,13 +77,21 @@ export function BolsaPropostasPanel({
 
           <div style={{ height: 10 }} />
 
-          <FormGroup label="Acréscimo ao texto padrão">
-            <Textarea
-              value={value.texto}
-              placeholder="Ex: pedido de dupla filiação do irmão Fulano de Tal"
-              onChange={(e) => onChange({ texto: e.target.value })}
-            />
-          </FormGroup>
+          <Checkbox label="Complemento" checked={temComplemento} onChange={handleComplemento} />
+
+          {temComplemento && (
+            <>
+              <div style={{ height: 10 }} />
+
+              <FormGroup label="Acréscimo ao texto padrão">
+                <Textarea
+                  value={value.texto}
+                  placeholder="Ex: pedido de dupla filiação do irmão Fulano de Tal"
+                  onChange={(e) => onChange({ texto: e.target.value })}
+                />
+              </FormGroup>
+            </>
+          )}
         </>
       )}
     </section>

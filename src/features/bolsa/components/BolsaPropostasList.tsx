@@ -10,6 +10,7 @@ const TIPO_LABEL: Record<BolsaProposta['tipo'], string> = {
   certificado: 'Certificado de Visitas',
   trabalho: 'Trabalhos',
   aumento: 'Aumento de Salário',
+  outros: 'Outros',
 };
 
 function resumo(item: BolsaProposta): string {
@@ -25,6 +26,10 @@ function resumo(item: BolsaProposta): string {
 
   if (item.tipo === 'trabalho') {
     return item.titulo;
+  }
+
+  if (item.tipo === 'outros') {
+    return item.descricao;
   }
 
   return '';

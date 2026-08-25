@@ -241,6 +241,71 @@ describe('gerarTextoBolsaPropostas', () => {
     expect(resto).toEqual([]);
   });
 
+  it('registra o tipo Outros como coluna propria, no fim da ordem do balaustre', () => {
+    const [abertura, ...resto] = gerarTextoBolsaPropostas(
+      makeBolsaPropostas({
+        texto: '',
+        itens: [
+          makeBolsaProposta({
+            id: 'o1',
+            obreiroNome: 'Jorge Farias Lima',
+            tipo: 'outros',
+            certificados: [],
+            descricao: 'doação de livros para a biblioteca',
+          }),
+          makeBolsaProposta({
+            id: 'a1',
+            obreiroNome: 'Gustavo Nunes',
+            tipo: 'aumento',
+            certificados: [],
+          }),
+        ],
+      }),
+    );
+
+    expect(abertura).toContain('doação de livros para a biblioteca do Ir∴ Jorge Farias Lima');
+    expect(abertura.indexOf('aumento de salário')).toBeLessThan(
+      abertura.indexOf('doação de livros'),
+    );
+    expect(abertura).toContain('2 colunas gravadas');
+    expect(resto).toEqual([]);
+  });
+
+  it('descarta o registro Outros sem descricao do assunto', () => {
+    expect(
+      gerarTextoBolsaPropostas(
+        makeBolsaPropostas({
+          texto: '',
+          itens: [
+            makeBolsaProposta({
+              id: 'o1',
+              obreiroNome: 'Jorge Farias Lima',
+              tipo: 'outros',
+              certificados: [],
+              descricao: '',
+            }),
+          ],
+        }),
+      ),
+    ).toEqual([bolsaPropostasSemProducaoTexto()]);
+  });
+
+  it('conta o total anunciado pelo V M mesmo sem colunas detalhadas', () => {
+    expect(
+      gerarTextoBolsaPropostas(makeBolsaPropostas({ texto: '', totalColunas: 3, itens: [] })),
+    ).toEqual(['A bolsa de propostas e informações após seu giro produziu 3 colunas gravadas.']);
+
+    expect(
+      gerarTextoBolsaPropostas(makeBolsaPropostas({ texto: '', totalColunas: 1, itens: [] })),
+    ).toEqual(['A bolsa de propostas e informações após seu giro produziu 1 coluna gravada.']);
+  });
+
+  it('so declara que nada foi produzido quando nao ha total, coluna nem acrescimo', () => {
+    expect(
+      gerarTextoBolsaPropostas(makeBolsaPropostas({ texto: '', totalColunas: 0, itens: [] })),
+    ).toEqual([bolsaPropostasSemProducaoTexto()]);
+  });
+
   it('conta o texto aberto como coluna quando nao ha registros estruturados', () => {
     expect(
       gerarTextoBolsaPropostas(

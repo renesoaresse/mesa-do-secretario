@@ -111,7 +111,7 @@ function getLojasConjunta(value: unknown, fallback: AtaDraft['lojasConjunta']) {
     }));
 }
 
-const BOLSA_TIPOS: BolsaPropostaTipo[] = ['certificado', 'aumento', 'trabalho'];
+const BOLSA_TIPOS: BolsaPropostaTipo[] = ['certificado', 'aumento', 'trabalho', 'outros'];
 
 function getBolsaTipo(value: unknown): BolsaPropostaTipo {
   return BOLSA_TIPOS.includes(value as BolsaPropostaTipo)
@@ -138,6 +138,7 @@ function getBolsaItens(value: unknown): BolsaProposta[] {
     tipo: getBolsaTipo(item.tipo),
     certificados: getBolsaCertificados(item.certificados),
     titulo: getString(item.titulo, ''),
+    descricao: getString(item.descricao, ''),
   }));
 }
 

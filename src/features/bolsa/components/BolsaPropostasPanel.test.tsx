@@ -35,6 +35,36 @@ function renderPanel(overrides: Partial<ComponentProps<typeof BolsaPropostasPane
 }
 
 describe('BolsaPropostasPanel', () => {
+  it('so revela o acrescimo ao texto padrao depois de marcar Complemento', async () => {
+    const { user } = renderPanel();
+
+    expect(screen.queryByLabelText(/acréscimo ao texto padrão/i)).not.toBeInTheDocument();
+
+    await user.click(screen.getByLabelText(/^complemento$/i));
+
+    expect(screen.getByLabelText(/acréscimo ao texto padrão/i)).toBeInTheDocument();
+  });
+
+  it('abre o acrescimo ja marcado quando o rascunho tem texto salvo', () => {
+    renderPanel({ value: makeBolsaPropostas({ texto: 'Pedido de dupla filiação.' }) });
+
+    expect(screen.getByLabelText(/^complemento$/i)).toBeChecked();
+    expect(screen.getByLabelText(/acréscimo ao texto padrão/i)).toHaveValue(
+      'Pedido de dupla filiação.',
+    );
+  });
+
+  it('apaga o acrescimo ao desmarcar Complemento', async () => {
+    const { props, user } = renderPanel({
+      value: makeBolsaPropostas({ texto: 'Pedido de dupla filiação.' }),
+    });
+
+    await user.click(screen.getByLabelText(/^complemento$/i));
+
+    expect(props.onChange).toHaveBeenCalledWith({ texto: '' });
+    expect(screen.queryByLabelText(/acréscimo ao texto padrão/i)).not.toBeInTheDocument();
+  });
+
   it('esconde os campos quando a bolsa esta suprimida', () => {
     renderPanel({ value: makeBolsaPropostas({ suprimida: true }) });
 
