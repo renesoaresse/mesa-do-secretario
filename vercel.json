@@ -4,9 +4,8 @@
   "installCommand": "HUSKY=0 ELECTRON_SKIP_BINARY_DOWNLOAD=1 yarn install --frozen-lockfile",
   "buildCommand": "yarn build:web",
   "outputDirectory": "dist",
-  "cleanUrls": true,
   "trailingSlash": false,
-  "rewrites": [{ "source": "/((?!assets/).*)", "destination": "/index.html" }],
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "headers": [
     {
       "source": "/assets/(.*)",
