@@ -65,35 +65,43 @@ Todos os valores de _design_ (cores, espaçamento, tipografia) são definidos co
 
 ```css
 :root {
-  --color-primary: #1a365d;
-  --color-secondary: #2c5282;
-  --color-background: #f7fafc;
-  --color-text: #1a202c;
-  --color-border: #e2e8f0;
+  /* Azuis institucionais */
+  --blue-900: #0b1d3a;
+  --blue-850: #0f2648;
+  --blue-800: #102a52;
+  --blue-700: #163a6b;
 
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
+  /* Dourados do brasão */
+  --gold-500: #c9a24d;
+  --gold-450: #d3ad5c;
+  --gold-400: #e0b866;
 
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
+  /* Texto */
+  --text-light: #f5f7fa;
+  --text-muted: #c7d0dd;
+  --text-dim: #9fb0c6;
+  --text-dark: #1f2937;
 
-  --border-radius-sm: 0.25rem;
-  --border-radius-md: 0.5rem;
-  --border-radius-lg: 0.75rem;
+  /* Superfícies e campos */
+  --bg-app: #eef1f4;
+  --input-bg: rgba(255, 255, 255, 0.08);
+  --input-bg-hover: rgba(255, 255, 255, 0.12);
+  --input-border: rgba(255, 255, 255, 0.22);
+  --input-border-strong: rgba(255, 255, 255, 0.32);
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  /* Bordas e sombras */
+  --border-light: #d6dae1;
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
 ```
 
+Os tokens nomeiam a cor pela escala, não pelo papel (`--blue-900`, e não `--color-primary`).
+Não há tokens de espaçamento, tipografia ou raio de borda: esses valores são escritos direto nas
+regras CSS.
+
 ### Arquivos CSS
 
-O CSS é organizado em 5 arquivos temáticos:
+O CSS é organizado em 6 arquivos temáticos:
 
 | Arquivo          | Propósito                            |
 | ---------------- | ------------------------------------ |
@@ -101,6 +109,7 @@ O CSS é organizado em 5 arquivos temáticos:
 | `reset.css`      | Normalização de estilos do navegador |
 | `layout.css`     | Grid, sidebar, container do preview  |
 | `components.css` | Estilos de componentes reutilizáveis |
+| `home.css`       | Estilos da tela inicial              |
 | `print.css`      | Regras de impressão (`@media print`) |
 
 ### Classes CSS
@@ -116,37 +125,41 @@ O CSS é organizado em 5 arquivos temáticos:
 ### Estrutura de um Componente
 
 ```tsx
-import { type FC } from 'react';
+import React from 'react';
 
-type Props = {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: 'primary' | 'secondary';
 };
 
-export const TextInput: FC<Props> = ({ label, value, onChange }) => {
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(event.target.value);
-  };
+export function Button({ variant = 'secondary', className = '', ...props }: ButtonProps) {
+  const base = 'btn';
+  const v = variant === 'primary' ? 'btn-primary' : 'btn-secondary';
 
-  return (
-    <div className="form-group">
-      <label htmlFor="input">{label}</label>
-      <input id="input" type="text" value={value} onChange={handleChange} className="text-input" />
-    </div>
-  );
-};
+  return <button {...props} className={`${base} ${v} ${className}`.trim()} />;
+}
 ```
 
 ### Regras
 
-- Componentes funcionais com **tipos de `FC<Props>`** — não use `React.FunctionComponent`
-- Extrair _event handlers_ para variáveis com `const handleX = ...`
-- Usar `className` para estilização CSS — nunca _inline styles_
-- Cada componente em seu próprio arquivo, nomeado com **PascalCase**
-- Arquivo de teste ao lado: `TextInput.test.tsx`
+- Componentes são **declarações de função exportadas** (`export function Nome(props: Props)`).
+  Não use `FC<Props>` nem `React.FunctionComponent`: a tipagem vai nos parâmetros, e o retorno é
+  inferido. As 68 declarações de componente do projeto seguem esta forma, e nenhuma usa `FC`.
+- O tipo das _props_ é declarado no próprio arquivo, com o nome do componente mais `Props`.
+- Extrair _event handlers_ para variáveis com `const handleX = ...`.
+- Usar `className` para estilização — ver a regra de estilo em linha abaixo.
+- Cada componente em seu próprio arquivo, nomeado com **PascalCase**.
+- Arquivo de teste ao lado: `Button.test.tsx`.
 
----
+### Estilo em Linha
+
+A estilização pertence ao CSS. Ainda assim, o projeto tem **52 usos de `style={{ … }}`** em 27
+arquivos, concentrados em `features/loja-config/components` (8 arquivos) e
+`features/bolsa/components` (4), quase todos para espaçamento e largura pontuais — por exemplo
+`src/features/bolsa/components/BolsaPropostasList.tsx:41`.
+
+A regra vigente é: **não introduzir novos estilos em linha**. Os existentes são dívida conhecida,
+registrada em [Acoplamento e Dívida Técnica](Acoplamento-e-Divida-Tecnica), e devem migrar para
+`components.css` conforme os arquivos forem tocados.
 
 ## Hooks
 
@@ -209,6 +222,11 @@ import { storage } from '../services/storage';
 import { SessionTypeSelector } from '../session/components/SessionTypeSelector';
 ```
 
+> **Estado da regra**: hoje ela é descumprida em **27 imports**, entre eles um acesso direto de
+> uma _feature_ a dados de outra
+> (`src/features/officers/components/OfficerSelect.tsx:5`), e não existe regra de _lint_ que a
+> imponha. Ver [Acoplamento e Dívida Técnica](Acoplamento-e-Divida-Tecnica).
+
 ### Ordem dos Imports
 
 1. Dependências externas (React, bibliotecas)
@@ -230,7 +248,11 @@ import type { AtaDraft } from '../types/ata';
 
 ## Persistência
 
-**Nunca** chame `localStorage` diretamente fora de `src/services/storage.ts`.
+**Nunca** chame `localStorage` diretamente fora de `src/services/storage.ts`. A regra é cumprida:
+a única ocorrência fora do serviço está no auxiliar de teste `src/test/storage.ts`.
+
+No alvo _desktop_ o mesmo serviço encaminha a chamada para a ponte do Electron, então usar o
+serviço é o que mantém a aplicação funcionando nos dois alvos.
 
 O serviço de armazenamento oferece uma abstração tipada:
 
@@ -287,4 +309,5 @@ O estado da aplicação **deve** usar exclusivamente _hooks_ nativos do React:
 ## Ver Também
 
 - [Arquitetura](Arquitetura) — Visão geral da estrutura do projeto
+- [Acoplamento e Dívida Técnica](Acoplamento-e-Divida-Tecnica) — regras descumpridas e plano
 - [Testes](Testes) — Como escrever testes seguindo os padrões
