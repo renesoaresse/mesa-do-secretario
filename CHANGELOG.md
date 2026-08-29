@@ -7,6 +7,87 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [UNRELEASED]
 
+## [0.8.0] - 2026-08-29
+
+### Adicionado
+
+- **um módulo de ata por rito**: o núcleo (estado da sessão, barra lateral, folha A4, impressão e
+  exportação em PDF) continua compartilhado e cada rito traz o seu documento, as suas seções e os
+  seus oficiais, registrados num mapa Rito → módulo (`features/ata`, `registry.ts`, `ModuloAta`)
+- **ata do Rito de York**, redigida por extenso conforme o modelo da Loja: título
+  `ATA DA SESSÃO DE <GRAU> MAÇOM Nº <n>`, abertura com hora, data na Era Vulgar e na Verdadeira
+  Luz, templo, endereço e Oriente, presença no formato `14 (catorze) Irmãos do Quadro` e
+  `02 (dois) Irmãos visitantes`, direção dos trabalhos nomeando o Tesoureiro no lugar do Orador,
+  saudação apresentada pelo Segundo Diácono a pedido do V∴ M∴ e encerramento assinado pelo
+  Venerável Mestre e pelo Secretário (`DocumentoYork`, `documentoYorkText`)
+- seções próprias da ata do Rito de York, cada uma com campo na barra lateral e texto padrão
+  quando vazia: **Pranchas e Correspondências**, **Atos**, **Decretos** e
+  **Leitura de Atas Anteriores**
+- **Palavra a Bem da Ordem em texto corrido** para os ritos que não dividem a palavra entre as
+  colunas do Sul, do Norte e do Oriente (`PalavraBemDaOrdemLivre`)
+- **Tronco de Beneficência pelo total apurado** na ata do Rito de York:
+  “Foram arrecadados no Tronco de Beneficência o total de 22 (vinte e dois) medalhas cunhadas.”
+- **Tesoureiro** entre os oficiais da ata, pedido pelo Rito de York
+- navegação da ata amarrada ao rito cadastrado na loja: `/ata` reencaminha para o módulo do rito
+  e o endereço de qualquer outro rito — ou um rito inexistente digitado na URL — é trocado pelo
+  endereço certo, sem deixar rastro no histórico (`AtaRedirect`, `AtaRitoScreen`)
+- os 16 cargos do **Rito de York** e os 19 cargos do **Rito de Emulação** na tabela de cargos,
+  com os cargos do York mapeados para os oficiais da ata (`data/cargos.ts`, `CARGO_DO_OFICIAL`)
+
+### Alterado
+
+- os cargos dos **Oficiais da Loja** deixaram de ser nomes fixos no código e passaram a ser
+  buscados no rito da loja, cargo a cargo; cada rito também declara quais oficiais a ata pede,
+  então o Rito de York mostra Tesoureiro e não mostra Orador (`rotuloDoOficial`)
+- a marca de ad hoc deixou de ser colada ao nome dentro do estado da sessão: a pré-visualização
+  passa a levar os nomes crus mais a lista de quem está ad hoc, e cada rito escreve a marca à sua
+  forma — nos dois ritos de hoje, o sufixo ` - ADHOC` depois do nome
+  (`oficiaisAdHocDaSessao`, `comSufixoAdHoc`)
+- quais oficiais podem receber a marca de ad hoc passou a ser decisão de cada rito, em vez de uma
+  lista única para todos
+- o cabeçalho com o timbre da Loja virou componente compartilhado pelos documentos de todos os
+  ritos (`CabecalhoLoja`)
+- a tabela de rotas saiu de `router/index.tsx` para `router/routes.ts`, e os módulos de ata
+  passaram a registrar um só endereço, `/ata/:slug`, em vez de uma rota por rito
+
+### Corrigido
+
+- o sufixo ` - ADHOC` aparecia em cargos que não deviam recebê-lo; passou a valer só para o
+  Orador e o Secretário no Rito Escocês Antigo e Aceito, incluindo o caso do cargo vago na
+  gestão, e nada é marcado quando a gestão não é base confiável (ausente, sem atribuições ou em
+  rito sem cargos mapeados)
+- a saudação aos visitantes trazia apenas o primeiro nome do Orador; passou a trazer o nome
+  completo, com o sufixo de ad hoc quando houver, destacado em negrito
+- cargo de gestão lavrada em outro rito vazava a sigla antiga para os seletores de oficiais e
+  para a ata; agora o cargo só é anotado quando pertence ao rito da loja
+
+### Removido
+
+- `src/router.ts`, arquivo morto que ninguém importava, com imports que não resolviam e um
+  `DEFAULT_ATA_DRAFT` de um modelo de dados que não existe mais
+
+## [0.7.1] - 2026-08-24
+
+### Adicionado
+
+- natureza **Outros** na Bolsa de Propostas e Informações, para o que não cabe nas naturezas
+  fixas: o Ir∴ Sec∴ escreve o assunto e ele entra como coluna própria, atribuída a quem levou o
+  tema à bolsa
+
+### Alterado
+
+- o total de colunas anunciado pelo V∴ M∴ passa a valer sozinho no balaústre: o Ir∴ Sec∴ pode
+  registrar quantas colunas giraram sem detalhar cada uma
+
+### Corrigido
+
+- os tradutores automáticos do navegador trocavam nós de texto por baixo do React e derrubavam a
+  tela inteira com `NotFoundError: Failed to execute 'removeChild' on 'Node'`; o documento passou
+  a declarar `lang="pt-BR"` e `translate="no"` e a aplicação protege as operações de DOM
+  (`domTranslationGuard`)
+- recarregar a página (F5) em qualquer rota interna da versão web devolvia erro; as reescritas do
+  servidor passaram a mandar todas as rotas para o `index.html`
+
 ## [0.7.0] - 2026-08-21
 
 ### Adicionado
