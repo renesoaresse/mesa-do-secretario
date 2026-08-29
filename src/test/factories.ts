@@ -74,6 +74,7 @@ export function makeOfficers(overrides: Partial<Officers> = {}): Officers {
     vig2: 'Segundo',
     or: 'Orador',
     sec: 'Secretario',
+    tes: 'Tesoureiro',
     ...overrides,
   };
 }
@@ -113,7 +114,13 @@ export function makePreviewData(overrides: Partial<PreviewData> = {}): PreviewDa
     balaustreTexto: 'Balaustre',
     atosDecretosTexto: 'Atos',
     expedientesTexto: 'Expedientes',
+    pranchasTexto: 'Pranchas',
+    atosTexto: 'Atos do rito',
+    decretosTexto: 'Decretos do rito',
+    leituraAtasTexto: 'Leitura de atas',
+    pboTexto: 'Palavra livre',
     bolsaPropostas: makeBolsaPropostas(),
+    oficiaisAdHoc: [],
     ...overrides,
   };
 }
@@ -169,6 +176,11 @@ export function makeAtaDraft(overrides: Partial<AtaDraft> = {}): AtaDraft {
     balaustreTexto: 'Balaustre',
     atosDecretosTexto: 'Atos',
     expedientesTexto: 'Expedientes',
+    pranchasTexto: 'Pranchas',
+    atosTexto: 'Atos do rito',
+    decretosTexto: 'Decretos do rito',
+    leituraAtasTexto: 'Leitura de atas',
+    pboTexto: 'Palavra livre',
     bolsaPropostas: makeBolsaPropostas(),
     ...overrides,
   };

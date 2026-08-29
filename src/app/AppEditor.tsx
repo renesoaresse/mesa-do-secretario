@@ -9,9 +9,15 @@ import { SidebarContent } from '../components/layout/SidebarContent';
 import { useAtaState } from '../hooks/useAtaState';
 import { useLojas } from '../features/loja-config';
 import { useQuadroDaGestao } from '../features/loja-config/hooks/useQuadroDaGestao';
-import { ROUTES } from '../router/index';
+import { ROUTES } from '../router/routes';
+import type { ModuloAta } from '../features/ata';
 
-export function AppEditor() {
+type Props = {
+  /** Módulo do rito cadastrado na loja: define a forma da ata. */
+  modulo: ModuloAta;
+};
+
+export function AppEditor({ modulo }: Props) {
   const state = useAtaState();
   const { lojas, addLoja } = useLojas();
   const { obreiros, titulares } = useQuadroDaGestao(state.lojaConfig.rito);
@@ -28,12 +34,13 @@ export function AppEditor() {
               <SidebarHeader
                 title="Gerador de Ata"
                 badgeText={<SessionIndicator sessionType={state.sessionType} />}
-                counterText={`Contador: ${state.sessionConfig.numSessao} - v${__APP_VERSION__}`}
+                counterText={`${modulo.label} · Contador: ${state.sessionConfig.numSessao} - v${__APP_VERSION__}`}
               />
             }
             footer={<AutoSaveToast visible={state.autoSaveVisible} />}
           >
             <SidebarContent
+              modulo={modulo}
               onBack={isDesktop ? () => navigate(ROUTES.HOME) : undefined}
               sessionType={state.sessionType}
               onSessionTypeChange={(t) => {
@@ -77,6 +84,16 @@ export function AppEditor() {
               onAtosDecretosTextoChange={state.setAtosDecretosTexto}
               expedientesTexto={state.expedientesTexto}
               onExpedientesTextoChange={state.setExpedientesTexto}
+              pranchasTexto={state.pranchasTexto}
+              onPranchasTextoChange={state.setPranchasTexto}
+              atosTexto={state.atosTexto}
+              onAtosTextoChange={state.setAtosTexto}
+              decretosTexto={state.decretosTexto}
+              onDecretosTextoChange={state.setDecretosTexto}
+              leituraAtasTexto={state.leituraAtasTexto}
+              onLeituraAtasTextoChange={state.setLeituraAtasTexto}
+              pboTexto={state.pboTexto}
+              onPboTextoChange={state.setPboTexto}
               bolsaPropostas={state.bolsaPropostas}
               onBolsaPropostasChange={state.updateBolsaPropostas}
               onAddBolsaProposta={state.addBolsaProposta}
@@ -90,6 +107,7 @@ export function AppEditor() {
             zoom={state.zoom}
             onZoomChange={state.setZoom}
             dataDocument={state.previewData}
+            documento={modulo.Documento}
           />
         }
       />

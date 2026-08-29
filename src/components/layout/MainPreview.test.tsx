@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { installMockElectronApi, removeMockElectronApi } from '../../test/electron';
 import { makePreviewData } from '../../test/factories';
+import { MODULO_ESCOCES } from '../../features/ata';
 import { MainPreview } from './MainPreview';
 
 describe('MainPreview', () => {
@@ -14,6 +15,7 @@ describe('MainPreview', () => {
         zoom={1}
         onZoomChange={vi.fn()}
         dataDocument={makePreviewData()}
+        documento={MODULO_ESCOCES.Documento}
       />,
     );
 
@@ -30,6 +32,7 @@ describe('MainPreview', () => {
         zoom={1}
         onZoomChange={vi.fn()}
         dataDocument={makePreviewData()}
+        documento={MODULO_ESCOCES.Documento}
       />,
     );
 
@@ -43,6 +46,7 @@ describe('MainPreview', () => {
         zoom={1}
         onZoomChange={vi.fn()}
         dataDocument={makePreviewData()}
+        documento={MODULO_ESCOCES.Documento}
       />,
     );
 

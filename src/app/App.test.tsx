@@ -9,6 +9,7 @@ import {
   makePreviewData,
   makeSessionConfig,
 } from '../test/factories';
+import { MODULO_ESCOCES } from '../features/ata';
 import { AppEditor } from './AppEditor';
 
 const sidebarContentSpy = vi.hoisted(() =>
@@ -78,7 +79,7 @@ describe('App', () => {
 
   it('renderiza composicao principal com header, content e preview', () => {
     removeMockElectronApi();
-    render(<AppEditor />);
+    render(<AppEditor modulo={MODULO_ESCOCES} />);
 
     expect(document.querySelector('[data-runtime="web"]')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /gerador de ata/i })).toBeInTheDocument();
@@ -96,7 +97,7 @@ describe('App', () => {
   it('permanece funcional quando a API segura do Electron esta disponivel', () => {
     installMockElectronApi();
 
-    render(<AppEditor />);
+    render(<AppEditor modulo={MODULO_ESCOCES} />);
 
     expect(document.querySelector('[data-runtime="desktop-secure"]')).toBeInTheDocument();
     expect(screen.getByText('SidebarContent economica')).toBeInTheDocument();

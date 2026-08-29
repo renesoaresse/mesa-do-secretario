@@ -5,7 +5,7 @@ import { FormGroup } from '../../../components/ui/FormGroup';
 import { TextInput } from '../../../components/ui/TextInput';
 import { Button } from '../../../components/ui/Button';
 import { StatusMessage } from '../../../components/ui/StatusMessage';
-import { ROUTES } from '../../../router/index';
+import { ROUTES } from '../../../router/routes';
 import { useLojas } from '../hooks/useLojas';
 import type { StatusState } from '../../../types/ata';
 

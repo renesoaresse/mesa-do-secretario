@@ -6,19 +6,12 @@ import { ConfigScreen } from '../features/config/components/ConfigScreen';
 import { LojasListScreen } from '../features/loja-config/components/LojasListScreen';
 import { LojaFormScreen } from '../features/loja-config/components/LojaFormScreen';
 import { LojaConfigScreen } from '../features/loja-config/components/LojaConfigScreen';
-import { AppEditor } from '../app/AppEditor';
+import { ROUTES } from './routes';
+import { AtaRedirect } from '../features/ata/components/AtaRedirect';
+import { AtaRitoScreen } from '../features/ata/components/AtaRitoScreen';
 import { isLojaConfigCompleta } from '../features/loja-config/data/camposObrigatorios';
 import { storage } from '../services/storage';
 import { DEFAULT_LOJA_CONFIG } from '../hooks/useAtaState';
-
-export const ROUTES = {
-  HOME: '/',
-  ATA: '/ata',
-  CONFIG: '/config',
-  LOJAS: '/config/lojas',
-  LOJA_NOVA: '/config/lojas/nova',
-  LOJA_CONFIG: '/config/loja',
-} as const;
 
 function lojaConfigPendente(): boolean {
   return !isLojaConfigCompleta(storage.loadLojaConfig(DEFAULT_LOJA_CONFIG));
@@ -41,7 +34,13 @@ export function AppRoutes() {
     <>
       <Route path={ROUTES.HOME} component={HomeScreen} />
       <Route path={ROUTES.ATA}>
-        <RotaBloqueada component={AppEditor} />
+        <RotaBloqueada component={AtaRedirect} />
+      </Route>
+
+      {/* Um só endereço para todos os ritos: o cadastro da loja decide qual
+          módulo abre, e qualquer outro slug é reencaminhado para ele. */}
+      <Route path={ROUTES.ATA_RITO}>
+        {(params) => <RotaBloqueada component={() => <AtaRitoScreen slug={params.slug ?? ''} />} />}
       </Route>
       <Route path={ROUTES.CONFIG}>
         <RotaBloqueada component={ConfigScreen} />

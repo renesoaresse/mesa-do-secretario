@@ -265,6 +265,7 @@ describe('useAtaState - oficiais da gestão vigente', () => {
     const { result } = renderHook(() => useAtaState());
 
     expect(result.current.previewData.officers.sec).toBe('BRUNO LIMA');
+    expect(result.current.previewData.oficiaisAdHoc).toEqual([]);
   });
 
   it('marca com ADHOC quem ocupa a secretaria no lugar do titular', () => {
@@ -277,7 +278,9 @@ describe('useAtaState - oficiais da gestão vigente', () => {
     });
 
     expect(result.current.officers.sec).toBe('ABEL SANTOS');
-    expect(result.current.previewData.officers.sec).toBe('ABEL SANTOS - ADHOC');
+    // O nome sai cru: quem cola o " - ADHOC" é o documento do rito.
+    expect(result.current.previewData.officers.sec).toBe('ABEL SANTOS');
+    expect(result.current.previewData.oficiaisAdHoc).toContain('sec');
   });
 
   it('não marca com ADHOC os cargos fora de Orador e Secretário', () => {
@@ -290,7 +293,7 @@ describe('useAtaState - oficiais da gestão vigente', () => {
     });
 
     expect(result.current.officers.vm).toBe('BRUNO LIMA');
-    expect(result.current.previewData.officers.vm).toBe('BRUNO LIMA');
+    expect(result.current.previewData.oficiaisAdHoc).not.toContain('vm');
   });
 
   it('preenche os cargos vazios mesmo com outro oficial já digitado', () => {
@@ -304,7 +307,7 @@ describe('useAtaState - oficiais da gestão vigente', () => {
 
     expect(result.current.officers.sec).toBe('ALGUEM DE FORA');
     expect(result.current.officers.vm).toBe('ABEL SANTOS');
-    expect(result.current.previewData.officers.sec).toBe('ALGUEM DE FORA - ADHOC');
+    expect(result.current.previewData.oficiaisAdHoc).toContain('sec');
   });
 
   it('marca ADHOC no cargo vago na gestão', () => {
@@ -316,7 +319,7 @@ describe('useAtaState - oficiais da gestão vigente', () => {
       result.current.updateOfficers({ or: 'QUALQUER IRMAO' });
     });
 
-    expect(result.current.previewData.officers.or).toBe('QUALQUER IRMAO - ADHOC');
+    expect(result.current.previewData.oficiaisAdHoc).toContain('or');
   });
 
   it('não marca ADHOC sem gestão vigente cadastrada', () => {

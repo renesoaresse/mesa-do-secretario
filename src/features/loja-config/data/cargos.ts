@@ -82,6 +82,11 @@ export function cargosDoRito(rito: Rito | ''): CargoRito[] {
   return rito ? CARGOS_POR_RITO[rito] : [];
 }
 
+/** Diz se a sigla é um cargo do rito informado. */
+export function cargoDoRito(sigla: string, rito: Rito | ''): boolean {
+  return cargosDoRito(rito).some((cargo) => cargo.sigla === sigla);
+}
+
 /** Nome completo do cargo; devolve a própria sigla quando não houver correspondência. */
 export function nomeDoCargo(sigla: string, rito: Rito | ''): string {
   return cargosDoRito(rito).find((cargo) => cargo.sigla === sigla)?.nome ?? sigla;

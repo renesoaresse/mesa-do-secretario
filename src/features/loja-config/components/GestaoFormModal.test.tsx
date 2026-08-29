@@ -196,7 +196,7 @@ describe('GestaoFormModal', () => {
     renderWithUser(
       <GestaoFormModal
         open
-        rito="Rito de York"
+        rito="Rito Adonhiramita"
         obreiros={obreiros}
         onSubmit={vi.fn()}
         onCancel={vi.fn()}
@@ -204,7 +204,7 @@ describe('GestaoFormModal', () => {
     );
 
     expect(
-      screen.getByText('Os cargos do Rito de York ainda não foram cadastrados.'),
+      screen.getByText('Os cargos do Rito Adonhiramita ainda não foram cadastrados.'),
     ).toBeInTheDocument();
   });
 
