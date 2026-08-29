@@ -7,21 +7,6 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [UNRELEASED]
 
-### Adicionado
-
-- páginas de **Dependências**, **Acoplamento e Dívida Técnica**, **Evolução Arquitetural** e
-  **Diagramas** na wiki, cobrindo o que estava instalado sem estar documentado, os pontos de
-  acoplamento do código, a leitura do histórico versão a versão e os desenhos de estrutura e de
-  fluxo (`wiki-docs/07`, `10`, `11` e `12`)
-
-### Alterado
-
-- páginas de **Home**, **Quickstart**, **Arquitetura**, **Padrões de Código** e **Testes**
-  atualizadas para a estrutura atual do projeto, com o índice lateral e o README acompanhando
-- a página **Changelog** da wiki deixou de reproduzir o histórico de versões e passou a descrever
-  apenas o formato e a política; a cópia que existia lá tinha parado na 0.3.0, sete versões atrás
-  do arquivo da raiz, que é a fonte autoritativa
-
 ## [0.8.0] - 2026-08-29
 
 ### Adicionado
@@ -48,6 +33,10 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
   endereço certo, sem deixar rastro no histórico (`AtaRedirect`, `AtaRitoScreen`)
 - os 16 cargos do **Rito de York** e os 19 cargos do **Rito de Emulação** na tabela de cargos,
   com os cargos do York mapeados para os oficiais da ata (`data/cargos.ts`, `CARGO_DO_OFICIAL`)
+- páginas de **Dependências**, **Acoplamento e Dívida Técnica**, **Evolução Arquitetural** e
+  **Diagramas** na wiki, cobrindo o que estava instalado sem estar documentado, os pontos de
+  acoplamento do código, a leitura do histórico versão a versão e os desenhos de estrutura e de
+  fluxo (`wiki-docs/07`, `10`, `11` e `12`)
 
 ### Alterado
 
@@ -64,6 +53,11 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
   ritos (`CabecalhoLoja`)
 - a tabela de rotas saiu de `router/index.tsx` para `router/routes.ts`, e os módulos de ata
   passaram a registrar um só endereço, `/ata/:slug`, em vez de uma rota por rito
+- páginas de **Home**, **Quickstart**, **Arquitetura**, **Padrões de Código** e **Testes**
+  atualizadas para a estrutura atual do projeto, com o índice lateral e o README acompanhando
+- a página **Changelog** da wiki deixou de reproduzir o histórico de versões e passou a descrever
+  apenas o formato e a política; a cópia que existia lá tinha parado na 0.3.0, sete versões atrás
+  do arquivo da raiz, que é a fonte autoritativa
 
 ### Corrigido
 
