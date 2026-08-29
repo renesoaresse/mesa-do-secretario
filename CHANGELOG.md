@@ -7,6 +7,21 @@ e o versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [UNRELEASED]
 
+### Adicionado
+
+- páginas de **Dependências**, **Acoplamento e Dívida Técnica**, **Evolução Arquitetural** e
+  **Diagramas** na wiki, cobrindo o que estava instalado sem estar documentado, os pontos de
+  acoplamento do código, a leitura do histórico versão a versão e os desenhos de estrutura e de
+  fluxo (`wiki-docs/07`, `10`, `11` e `12`)
+
+### Alterado
+
+- páginas de **Home**, **Quickstart**, **Arquitetura**, **Padrões de Código** e **Testes**
+  atualizadas para a estrutura atual do projeto, com o índice lateral e o README acompanhando
+- a página **Changelog** da wiki deixou de reproduzir o histórico de versões e passou a descrever
+  apenas o formato e a política; a cópia que existia lá tinha parado na 0.3.0, sete versões atrás
+  do arquivo da raiz, que é a fonte autoritativa
+
 ## [0.8.0] - 2026-08-29
 
 ### Adicionado
