@@ -1,7 +1,7 @@
 import { useLocation } from 'wouter';
 import { HomeLayout } from '../../../components/layout/HomeLayout';
 import { Button } from '../../../components/ui/Button';
-import { ROUTES } from '../../../router/index';
+import { ROUTES } from '../../../router/routes';
 import { useLojas, isDefaultLoja } from '../hooks/useLojas';
 
 export function LojasListScreen() {

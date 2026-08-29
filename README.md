@@ -13,19 +13,22 @@ e também publicável como aplicação web estática.
 
 ## ✨ Funcionalidades
 
-- Geração automática de atas
-- Pré-visualização em tempo real
+- Geração de atas conforme o rito da loja — Escocês Antigo e Aceito, Adonhiramita, York e Emulação
+- Cadastro da loja, dos obreiros e das gestões, com os cargos do rito escolhido
+- Oficiais da sessão preenchidos a partir do quadro da gestão vigente
+- Pré-visualização em tempo real, no formato A4, com numeração de linhas
 - Exportação para impressão
 - Exportação de PDF protegido por senha (exclusivo da versão _desktop_)
-- Configuração da loja
 - Distribuição como aplicativo _desktop_ ou como aplicação web
 
 ## 🧱 Tecnologias
 
-- React
+- React 19
+- TypeScript, em modo estrito
 - Vite
+- wouter — roteamento por histórico na web e por _hash_ no _desktop_
 - Electron
-- TypeScript
+- `@cantoo/pdf-lib` — geração e criptografia do PDF
 
 ## 📦 Instalação
 
@@ -106,6 +109,16 @@ Duas diferenças importam ao usuário final na versão web:
 
 Os detalhes de configuração estão em
 [Build e Distribuição — Publicação na Web (Vercel)](wiki-docs/08-Build-e-Distribuicao.md#publicação-na-web-vercel).
+
+## Documentação
+
+A documentação técnica do projeto está na pasta [`wiki-docs/`](wiki-docs/), publicada como wiki do
+repositório: [Arquitetura](wiki-docs/04-Arquitetura.md), [Diagramas](wiki-docs/12-Diagramas.md),
+[Padrões de Código](wiki-docs/05-Padroes-de-Codigo.md),
+[Dependências](wiki-docs/07-Dependencias.md) e
+[Acoplamento e Dívida Técnica](wiki-docs/10-Acoplamento-e-Divida-Tecnica.md).
+
+O histórico de mudanças fica em [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Autores
 

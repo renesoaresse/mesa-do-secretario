@@ -2,15 +2,24 @@ import React from 'react';
 import type { PreviewData, SessionType } from '../../types/ata';
 import { PreviewActions } from '../../features/preview/components/PreviewActions';
 import { DocumentPreview } from '../../features/preview/components/DocumentPreview';
+import type { DocumentoAta } from '../../features/ata';
 
 type MainPreviewProps = {
   sessionType: SessionType;
   zoom: number;
   onZoomChange: (next: number) => void;
   dataDocument: PreviewData;
+  /** Documento do rito da loja. */
+  documento: DocumentoAta;
 };
 
-export function MainPreview({ sessionType, zoom, onZoomChange, dataDocument }: MainPreviewProps) {
+export function MainPreview({
+  sessionType,
+  zoom,
+  onZoomChange,
+  dataDocument,
+  documento,
+}: MainPreviewProps) {
   const handleBlockedNavigation = (event: React.MouseEvent<HTMLElement>) => {
     const target = event.target;
 
@@ -38,7 +47,7 @@ export function MainPreview({ sessionType, zoom, onZoomChange, dataDocument }: M
     <main className="main" onClickCapture={handleBlockedNavigation}>
       <PreviewActions sessionType={sessionType} zoom={zoom} onZoomChange={onZoomChange} />
 
-      <DocumentPreview zoom={zoom} data={dataDocument} />
+      <DocumentPreview zoom={zoom} data={dataDocument} documento={documento} />
     </main>
   );
 }

@@ -7,6 +7,7 @@ import {
   makePbo,
   makeSessionConfig,
 } from '../../test/factories';
+import { MODULO_ESCOCES, MODULO_YORK } from '../../features/ata';
 import { SidebarContent } from './SidebarContent';
 
 vi.mock('../../features/session/components/SessionTypeSelector', () => ({
@@ -47,7 +48,20 @@ vi.mock('../../features/bolsa', () => ({
 }));
 
 const baseProps = {
+  modulo: MODULO_ESCOCES,
   sessionType: 'economica' as const,
+  lojas: [],
+  lojasConjunta: [],
+  onAddLojaConjunta: vi.fn(),
+  onRemoveLojaConjunta: vi.fn(),
+  onSetObreirosConjunta: vi.fn(),
+  onCreateLoja: vi.fn(),
+  obreiros: [],
+  titulares: makeOfficers(),
+  troncoSuprimido: false,
+  onTroncoSuprimidoChange: vi.fn(),
+  pboSuprimido: false,
+  onPboSuprimidoChange: vi.fn(),
   onSessionTypeChange: vi.fn(),
   sessionConfig: makeSessionConfig(),
   onSessionConfigChange: vi.fn(),
@@ -70,6 +84,7 @@ const baseProps = {
   lojaConfig: {
     logoDataUrl: null,
     nomeLoja: 'Loja',
+    rito: 'Rito Escocês Antigo e Aceito' as const,
     numeroLoja: '29',
     dataFundacaoISO: '2020-01-01',
     temploNome: 'Templo',
@@ -82,6 +97,16 @@ const baseProps = {
   onAtosDecretosTextoChange: vi.fn(),
   expedientesTexto: 'E',
   onExpedientesTextoChange: vi.fn(),
+  pranchasTexto: 'P',
+  onPranchasTextoChange: vi.fn(),
+  atosTexto: 'AT',
+  onAtosTextoChange: vi.fn(),
+  decretosTexto: 'D',
+  onDecretosTextoChange: vi.fn(),
+  leituraAtasTexto: 'L',
+  onLeituraAtasTextoChange: vi.fn(),
+  pboTexto: 'PBO',
+  onPboTextoChange: vi.fn(),
   bolsaPropostas: makeBolsaPropostas(),
   onBolsaPropostasChange: vi.fn(),
   onAddBolsaProposta: vi.fn(),
@@ -108,5 +133,20 @@ describe('SidebarContent', () => {
 
     rerender(<SidebarContent {...baseProps} sessionType="magna" />);
     expect(screen.getByText('MagnaFieldsForm')).toBeInTheDocument();
+  });
+
+  it('abre as secoes que o rito da loja pede, na ordem dele', () => {
+    const { rerender } = render(<SidebarContent {...baseProps} />);
+
+    expect(screen.getByText('Balaústre')).toBeInTheDocument();
+    expect(screen.getByText('Bolsa de Propostas e Informações')).toBeInTheDocument();
+    expect(screen.queryByText('Pranchas e Correspondências')).not.toBeInTheDocument();
+
+    rerender(<SidebarContent {...baseProps} modulo={MODULO_YORK} />);
+
+    expect(screen.getByText('Pranchas e Correspondências')).toBeInTheDocument();
+    expect(screen.getByText('Leitura de Atas Anteriores')).toBeInTheDocument();
+    expect(screen.queryByText('Balaústre')).not.toBeInTheDocument();
+    expect(screen.queryByText('Bolsa de Propostas e Informações')).not.toBeInTheDocument();
   });
 });

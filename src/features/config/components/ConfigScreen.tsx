@@ -1,6 +1,6 @@
 import { useLocation } from 'wouter';
 import { HomeLayout } from '../../../components/layout/HomeLayout';
-import { ROUTES } from '../../../router/index';
+import { ROUTES } from '../../../router/routes';
 
 export function ConfigScreen() {
   const [, navigate] = useLocation();

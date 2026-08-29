@@ -217,6 +217,11 @@ function sanitizeAtaDraft(value: unknown, defaultDraft: AtaDraft): AtaDraft {
     balaustreTexto: getString(value.balaustreTexto, defaultDraft.balaustreTexto),
     atosDecretosTexto: getString(value.atosDecretosTexto, defaultDraft.atosDecretosTexto),
     expedientesTexto: getString(value.expedientesTexto, defaultDraft.expedientesTexto),
+    pranchasTexto: getString(value.pranchasTexto, defaultDraft.pranchasTexto),
+    atosTexto: getString(value.atosTexto, defaultDraft.atosTexto),
+    decretosTexto: getString(value.decretosTexto, defaultDraft.decretosTexto),
+    leituraAtasTexto: getString(value.leituraAtasTexto, defaultDraft.leituraAtasTexto),
+    pboTexto: getString(value.pboTexto, defaultDraft.pboTexto),
     bolsaPropostas: getBolsaPropostas(
       value.bolsaPropostas,
       value.bolsaPropostasTexto,

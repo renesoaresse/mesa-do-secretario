@@ -1,5 +1,5 @@
 import { useLocation } from 'wouter';
-import { ROUTES } from '../../../router/index';
+import { ROUTES } from '../../../router/routes';
 
 export function LauncherCard() {
   const [, navigate] = useLocation();

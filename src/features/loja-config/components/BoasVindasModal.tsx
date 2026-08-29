@@ -1,7 +1,7 @@
 import { useLocation } from 'wouter';
 import { Modal } from '../../../components/ui/Modal';
 import { Button } from '../../../components/ui/Button';
-import { ROUTES } from '../../../router/index';
+import { ROUTES } from '../../../router/routes';
 
 type Props = {
   open: boolean;

@@ -74,80 +74,11 @@ O projeto segue [Semantic Versioning](https://semver.org/lang/pt-BR/):
 
 ## Histórico de Versões
 
-### v0.3.0 — 2026-03-18
+O histórico completo, versão a versão, vive em **[`CHANGELOG.md`](https://github.com/renesoaresse/mesa-do-secretario/blob/main/CHANGELOG.md) na raiz do repositório**, e apenas lá.
 
-**Adicionado**
+Esta página descreve o formato e a política; ela não reproduz o histórico. A cópia que existia aqui parou na versão 0.3.0 e ficou sete versões atrás do arquivo da raiz, o que é o argumento contra manter duas cópias do mesmo conteúdo.
 
-- 34 novos arquivos de teste unitário cobrindo componentes reutilizáveis, formulários, listas, painéis, layout e composição principal da aplicação
-- _Helpers_ reutilizáveis de teste em `src/test/render.tsx` e `src/test/factories.ts`
-- Suíte de testes para o preview seguro cobrindo texto malicioso, entidades escapadas, blocos condicionais, estabilidade durante edição e _helpers_ textuais reutilizáveis
-- Suíte de testes para o _shell_ Electron cobrindo preload seguro, regras de navegação, bloqueio de novas janelas e persistência mediada por IPC
-- _Helper_ de testes para _seed_ e leitura do _storage_ em `src/test/storage.ts`
-- Cenários E2E cobrindo restauração dos campos persistidos e limpeza de dados legados
-
-**Alterado**
-
-- Escopo do _coverage_ alinhado ao valor real da _feature_, excluindo barrels, arquivos de tipos, `src/app/providers.tsx`, `src/features/preview/components/DocumentPreview.tsx` e `src/features/loja-config/components/LojaConfigForm.tsx`
-- Cobertura total da suíte unitária elevada para 93,90%
-- Preview do documento migrado de HTML injetado para renderização declarativa em React, preservando `#documentPreview`, classes, `aria-label` e comportamento de zoom
-- Lógica textual do preview centralizada em `src/features/preview/components/documentPreviewText.ts` para reduzir regressões
-- `MainPreview` passou a ser validado com o `DocumentPreview` real em teste de integração
-- `DocumentPreview.tsx` voltou ao escopo de _coverage_ do Vitest
-- `src/electron/main.ts` passou a explicitar `sandbox`, preload dedicado e bloqueios padrão para navegação externa
-- `src/services/storage.ts` agora usa a ponte segura do Electron quando disponível, mantendo _fallback_ para `localStorage` no ambiente web
-- Persistência da ata migrada para um _draft_ canônico com restauração dos campos principais restantes em `src/hooks/useAtaState.ts` e `src/services/storage.ts`
-- Compatibilidade mantida com `officersConfig` e `lojaConfig` durante a migração do estado
-- `src/app/App.tsx` e `src/components/layout/SidebarContent.tsx` foram simplificados após a remoção completa do fluxo de documentos
-
-**Segurança**
-
-- Removido o uso de `dangerouslySetInnerHTML` no preview de atas
-- Todos os campos textuais do preview agora são exibidos como texto literal, sem interpretar HTML
-- Adicionada API mínima no preload com superfície tipada e sem canal genérico
-- Operações privilegiadas de persistência centralizadas no processo principal
-- Adicionada política de conteúdo restritiva em `index.html`
-
-**Removido**
-
-- Módulo de documentos, incluindo tipos, componentes, lógica de estado e testes em `src/features/documents/`
-
----
-
-### v0.2.0 — 2026-03-18
-
-**Adicionado**
-
-- Arquitetura Feature-Sliced com 7 _feature slices_ verticais autocontidas (`session`, `documents`, `officers`, `visitors`, `preview`, `loja-config`, `palavra`)
-- Barrel exports (`index.ts`) para cada _feature_, controlando a API pública
-- Serviço de _storage_ (`src/services/storage.ts`) encapsulando `localStorage`
-- _Hook_ global `useAtaState` (`src/hooks/useAtaState.ts`) centralizando o estado da aplicação
-- Placeholder de providers (`src/app/providers.tsx`) para expansão futura
-- Pipeline de qualidade de código: Prettier, ESLint, Husky com _hooks_ `pre-commit` e `commit-msg`, Commitlint com Conventional Commits
-- Testes unitários com Vitest + React Testing Library + jsdom (8 testes para `storage.ts`, 8 para `useAtaState`, 5 para `Button`)
-- Cobertura de testes com `@vitest/coverage-v8`
-- Testes E2E com Playwright + Chromium + Page Object Model (3 _smoke tests_)
-- `.gitignore` expandido
-
-**Alterado**
-
-- `App.tsx` simplificado — usa `useAtaState` em vez de 18 `useState` locais
-- CSS fatiado de 1 arquivo para 5 arquivos temáticos
-- 37 componentes migrados para `src/features/<domínio>/`
-- Componentes de layout consolidados em `src/components/layout/`
-
----
-
-### v0.1.0 — 2025-02-08
-
-**Adicionado**
-
-- Versão inicial da aplicação Mesa do Secretário
-- Geração de atas para sessões maçônicas (Econômica, Magna, Conjunta)
-- Preview em tempo real com HTML simulando folha A4 padrão ABNT
-- Configuração da loja e oficiais com persistência em `localStorage`
-- Empacotamento Electron para Windows (NSIS) e macOS (DMG)
-
----
+Para a leitura arquitetural do histórico — quais versões mudaram estrutura, fronteira ou alvo de execução — consulte [Evolução Arquitetural](Evolucao-Arquitetural).
 
 ## Adicionando Entradas ao Changelog
 

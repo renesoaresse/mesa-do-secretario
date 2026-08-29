@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { SessionTypeSelector } from '../../features/session/components/SessionTypeSelector';
 import { SessionConfigForm } from '../../features/session/components/SessionConfigForm';
 import { SessionConjuntaForm } from '../../features/session/components/SessionConjuntaForm';
@@ -6,11 +7,13 @@ import { VisitorsPanel } from '../../features/visitors/components/VisitorsPanel'
 import { OfficersForm } from '../../features/officers/components/OfficersForm';
 import { TroncoInput } from '../../features/session/components/TroncoInput';
 import { PalavraBemDaOrdemPanel } from '../../features/palavra/components/PalavraBemDaOrdemPanel';
+import { PalavraBemDaOrdemLivre } from '../../features/palavra/components/PalavraBemDaOrdemLivre';
 import { FooterActions } from '../ui/FooterActions';
 import { PdfExportAction } from '../../features/preview/components/PdfExportAction';
 import { buildAtaFileName } from '../../services/pdfExport';
 import { LastSaveInfo } from '../ui/LastSaveInfo';
 import { BolsaPropostasPanel } from '../../features/bolsa';
+import type { ModuloAta, SecaoAta } from '../../features/ata';
 import type {
   BolsaProposta,
   BolsaPropostas,
@@ -32,6 +35,8 @@ import { SidebarDrawer } from './SidebarDrawer';
 import { OpenTextSection } from '../../features/session/components/OpenTextSection';
 
 type Props = {
+  /** Módulo do rito da loja: define quais seções aparecem e em que ordem. */
+  modulo: ModuloAta;
   sessionType: SessionType;
   onSessionTypeChange: (t: SessionType) => void;
   sessionConfig: SessionConfig;
@@ -75,15 +80,202 @@ type Props = {
   onAtosDecretosTextoChange: (s: string) => void;
   expedientesTexto: string;
   onExpedientesTextoChange: (s: string) => void;
+  pranchasTexto: string;
+  onPranchasTextoChange: (s: string) => void;
+  atosTexto: string;
+  onAtosTextoChange: (s: string) => void;
+  decretosTexto: string;
+  onDecretosTextoChange: (s: string) => void;
+  leituraAtasTexto: string;
+  onLeituraAtasTextoChange: (s: string) => void;
+  pboTexto: string;
+  onPboTextoChange: (s: string) => void;
   bolsaPropostas: BolsaPropostas;
   onBolsaPropostasChange: (patch: Partial<BolsaPropostas>) => void;
   onAddBolsaProposta: (item: BolsaProposta) => void;
   onRemoveBolsaProposta: (id: string) => void;
 };
 
+type Secao = {
+  title: string;
+  icon: string;
+  content: ReactNode;
+};
+
 export function SidebarContent(props: Props) {
   const isMagna = props.sessionType === 'magna';
   const isConjunta = props.sessionConfig.conjunta;
+
+  const secoes: Record<SecaoAta, Secao> = {
+    oficiais: {
+      title: 'Oficiais da Loja',
+      icon: '🏛',
+      content: (
+        <OfficersForm
+          value={props.officers}
+          oficiais={props.modulo.oficiais}
+          rito={props.lojaConfig.rito}
+          obreiros={props.obreiros}
+          titulares={props.titulares}
+          onChange={props.onOfficersChange}
+        />
+      ),
+    },
+    balaustre: {
+      title: 'Balaústre',
+      icon: '📝',
+      content: (
+        <OpenTextSection
+          value={props.balaustreTexto}
+          onChange={props.onBalaustreTextoChange}
+          placeholder="Digite o texto do Balaústre..."
+        />
+      ),
+    },
+    atosDecretos: {
+      title: 'Atos e Decretos',
+      icon: '📜',
+      content: (
+        <OpenTextSection
+          value={props.atosDecretosTexto}
+          onChange={props.onAtosDecretosTextoChange}
+          placeholder="Liste atos e decretos (um por linha, se quiser)..."
+        />
+      ),
+    },
+    pranchas: {
+      title: 'Pranchas e Correspondências',
+      icon: '✉️',
+      content: (
+        <OpenTextSection
+          value={props.pranchasTexto}
+          onChange={props.onPranchasTextoChange}
+          placeholder="Ex.: Prancha nº 200 - assunto da prancha"
+        />
+      ),
+    },
+    atos: {
+      title: 'Atos',
+      icon: '📜',
+      content: (
+        <OpenTextSection
+          value={props.atosTexto}
+          onChange={props.onAtosTextoChange}
+          placeholder="Digite os atos apresentados na sessão..."
+        />
+      ),
+    },
+    decretos: {
+      title: 'Decretos',
+      icon: '⚖️',
+      content: (
+        <OpenTextSection
+          value={props.decretosTexto}
+          onChange={props.onDecretosTextoChange}
+          placeholder="Digite os decretos apresentados na sessão..."
+        />
+      ),
+    },
+    leituraAtas: {
+      title: 'Leitura de Atas Anteriores',
+      icon: '📖',
+      content: (
+        <OpenTextSection
+          value={props.leituraAtasTexto}
+          onChange={props.onLeituraAtasTextoChange}
+          placeholder="Registre a leitura das atas anteriores..."
+        />
+      ),
+    },
+    expedientes: {
+      title: 'Expedientes',
+      icon: '📌',
+      content: (
+        <OpenTextSection
+          value={props.expedientesTexto}
+          onChange={props.onExpedientesTextoChange}
+          placeholder="Digite os expedientes..."
+        />
+      ),
+    },
+    bolsaPropostas: {
+      title: 'Bolsa de Propostas e Informações',
+      icon: '💬',
+      content: (
+        <BolsaPropostasPanel
+          value={props.bolsaPropostas}
+          obreiros={props.obreiros}
+          lojas={props.lojas}
+          lojaConfig={props.lojaConfig}
+          onChange={props.onBolsaPropostasChange}
+          onAddItem={props.onAddBolsaProposta}
+          onRemoveItem={props.onRemoveBolsaProposta}
+          onCreateLoja={props.onCreateLoja}
+        />
+      ),
+    },
+    ordemDia: {
+      title: 'Ordem do Dia',
+      icon: '📋',
+      content: (
+        <OpenTextSection
+          value={props.ordemDia}
+          onChange={props.onOrdemDiaChange}
+          placeholder="Digite o texto da Ordem do dia..."
+        />
+      ),
+    },
+    tronco: {
+      title: 'Tronco de Beneficência',
+      icon: '💰',
+      content: (
+        <TroncoInput
+          value={props.tronco}
+          onChange={props.onTroncoChange}
+          suprimido={props.troncoSuprimido}
+          onSuprimidoChange={props.onTroncoSuprimidoChange}
+        />
+      ),
+    },
+    visitantes: {
+      title: 'Visitantes',
+      icon: '👥',
+      content: (
+        <VisitorsPanel
+          items={props.visitors}
+          lojas={props.lojas}
+          lojaConfig={props.lojaConfig}
+          onAdd={props.onAddVisitor}
+          onRemove={props.onRemoveVisitor}
+          onCreateLoja={props.onCreateLoja}
+        />
+      ),
+    },
+    pbo: {
+      title: 'Palavra a Bem da Ordem',
+      icon: '🗣',
+      content: (
+        <PalavraBemDaOrdemPanel
+          value={props.pbo}
+          onChange={props.onPboChange}
+          suprimido={props.pboSuprimido}
+          onSuprimidoChange={props.onPboSuprimidoChange}
+        />
+      ),
+    },
+    pboLivre: {
+      title: 'Palavra a Bem da Ordem',
+      icon: '🗣',
+      content: (
+        <PalavraBemDaOrdemLivre
+          value={props.pboTexto}
+          onChange={props.onPboTextoChange}
+          suprimida={props.pboSuprimido}
+          onSuprimidaChange={props.onPboSuprimidoChange}
+        />
+      ),
+    },
+  };
 
   return (
     <>
@@ -106,14 +298,6 @@ export function SidebarContent(props: Props) {
           />
         </SidebarDrawer>
       )}
-      <SidebarDrawer title="Oficiais da Loja" icon="🏛" defaultOpen={false}>
-        <OfficersForm
-          value={props.officers}
-          obreiros={props.obreiros}
-          titulares={props.titulares}
-          onChange={props.onOfficersChange}
-        />
-      </SidebarDrawer>
 
       {isMagna && (
         <SidebarDrawer title="Campos da Sessão Magna" icon="👑" defaultOpen={false}>
@@ -121,76 +305,16 @@ export function SidebarContent(props: Props) {
         </SidebarDrawer>
       )}
 
-      <SidebarDrawer title="Balaústre" icon="📝" defaultOpen={false}>
-        <OpenTextSection
-          value={props.balaustreTexto}
-          onChange={props.onBalaustreTextoChange}
-          placeholder="Digite o texto do Balaústre..."
-        />
-      </SidebarDrawer>
+      {/* Da abertura ao fecho, na ordem em que o rito da loja pede as seções. */}
+      {props.modulo.secoes.map((chave) => {
+        const secao = secoes[chave];
 
-      <SidebarDrawer title="Atos e Decretos" icon="📜" defaultOpen={false}>
-        <OpenTextSection
-          value={props.atosDecretosTexto}
-          onChange={props.onAtosDecretosTextoChange}
-          placeholder="Liste atos e decretos (um por linha, se quiser)..."
-        />
-      </SidebarDrawer>
-
-      <SidebarDrawer title="Expedientes" icon="📌" defaultOpen={false}>
-        <OpenTextSection
-          value={props.expedientesTexto}
-          onChange={props.onExpedientesTextoChange}
-          placeholder="Digite os expedientes..."
-        />
-      </SidebarDrawer>
-
-      <SidebarDrawer title="Bolsa de Propostas e Informações" icon="💬" defaultOpen={false}>
-        <BolsaPropostasPanel
-          value={props.bolsaPropostas}
-          obreiros={props.obreiros}
-          lojas={props.lojas}
-          lojaConfig={props.lojaConfig}
-          onChange={props.onBolsaPropostasChange}
-          onAddItem={props.onAddBolsaProposta}
-          onRemoveItem={props.onRemoveBolsaProposta}
-          onCreateLoja={props.onCreateLoja}
-        />
-      </SidebarDrawer>
-
-      <SidebarDrawer title="Ordem do Dia" icon="📋" defaultOpen={false}>
-        <OpenTextSection
-          value={props.ordemDia}
-          onChange={props.onOrdemDiaChange}
-          placeholder="Digite o texto da Ordem do dia..."
-        />
-      </SidebarDrawer>
-      <SidebarDrawer title="Tronco de Beneficência" icon="💰" defaultOpen={false}>
-        <TroncoInput
-          value={props.tronco}
-          onChange={props.onTroncoChange}
-          suprimido={props.troncoSuprimido}
-          onSuprimidoChange={props.onTroncoSuprimidoChange}
-        />
-      </SidebarDrawer>
-      <SidebarDrawer title="Visitantes" icon="👥" defaultOpen={false}>
-        <VisitorsPanel
-          items={props.visitors}
-          lojas={props.lojas}
-          lojaConfig={props.lojaConfig}
-          onAdd={props.onAddVisitor}
-          onRemove={props.onRemoveVisitor}
-          onCreateLoja={props.onCreateLoja}
-        />
-      </SidebarDrawer>
-      <SidebarDrawer title="Palavra a Bem da Ordem" icon="🗣" defaultOpen={false}>
-        <PalavraBemDaOrdemPanel
-          value={props.pbo}
-          onChange={props.onPboChange}
-          suprimido={props.pboSuprimido}
-          onSuprimidoChange={props.onPboSuprimidoChange}
-        />
-      </SidebarDrawer>
+        return (
+          <SidebarDrawer key={chave} title={secao.title} icon={secao.icon} defaultOpen={false}>
+            {secao.content}
+          </SidebarDrawer>
+        );
+      })}
 
       <FooterActions
         onBack={props.onBack}

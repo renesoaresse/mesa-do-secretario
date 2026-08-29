@@ -1,17 +1,13 @@
-import type { Officers } from '../../../types/ata';
-import type { ObreiroComCargo } from '../../loja-config/data/oficiais';
+import type { Officers, Rito } from '../../../types/ata';
+import { rotuloDoOficial, type ObreiroComCargo } from '../../loja-config/data/oficiais';
 import { OfficerSelect } from './OfficerSelect';
-
-const OFICIAIS: { campo: keyof Officers; label: string }[] = [
-  { campo: 'vm', label: 'Venerável Mestre' },
-  { campo: 'vig1', label: '1º Vigilante' },
-  { campo: 'vig2', label: '2º Vigilante' },
-  { campo: 'or', label: 'Orador' },
-  { campo: 'sec', label: 'Secretário' },
-];
 
 type Props = {
   value: Officers;
+  /** Oficiais que o rito da loja pede, na ordem do formulário. */
+  oficiais: readonly (keyof Officers)[];
+  /** Rito da loja: é ele quem dá nome a cada cargo. */
+  rito: Rito | '';
   /** Quadro de obreiros anotado com o cargo de cada um na gestão vigente. */
   obreiros: ObreiroComCargo[];
   /** Titular de cada cargo segundo a gestão vigente. */
@@ -19,13 +15,13 @@ type Props = {
   onChange: (patch: Partial<Officers>) => void;
 };
 
-export function OfficersForm({ value, obreiros, titulares, onChange }: Props) {
+export function OfficersForm({ value, oficiais, rito, obreiros, titulares, onChange }: Props) {
   return (
     <section>
-      {OFICIAIS.map(({ campo, label }, index) => (
+      {oficiais.map((campo, index) => (
         <div key={campo} style={index > 0 ? { marginTop: 10 } : undefined}>
           <OfficerSelect
-            label={label}
+            label={rotuloDoOficial(campo, rito)}
             value={value[campo]}
             obreiros={obreiros}
             titular={titulares[campo]}

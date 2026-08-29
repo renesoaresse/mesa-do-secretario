@@ -1,5 +1,5 @@
-import type { Gestao, Obreiro, Officers, Rito } from '../../../types/ata';
-import { nomeDoCargo } from './cargos';
+import type { Gestao, Obreiro, OficiaisAdHoc, Officers, Rito } from '../../../types/ata';
+import { cargoDoRito, nomeDoCargo } from './cargos';
 
 export type ObreiroComCargo = Obreiro & {
   /** Nome completo do cargo na gestão vigente; vazio quando o irmão não ocupa cargo. */
@@ -9,27 +9,52 @@ export type ObreiroComCargo = Obreiro & {
 /** Sufixo aplicado nas referências da ata quando o oficial não é o titular do cargo. */
 export const SUFIXO_AD_HOC = ' - ADHOC';
 
-/** Só Orador e Secretário recebem o sufixo quando não são os titulares da gestão. */
-export const OFICIAIS_COM_AD_HOC: readonly (keyof Officers)[] = ['or', 'sec'];
+const SEM_CARGO: Record<keyof Officers, string> = {
+  vm: '',
+  vig1: '',
+  vig2: '',
+  or: '',
+  sec: '',
+  tes: '',
+};
 
 /**
  * Cargo da gestão que corresponde a cada oficial pedido na ata.
- * Só o REAA foi mapeado até agora; os demais ritos entram quando forem definidos.
+ * Os ritos ainda sem ritual próprio herdam a ata do REAA e ficam sem mapa.
  */
 export const CARGO_DO_OFICIAL: Record<Rito, Record<keyof Officers, string>> = {
   'Rito Escocês Antigo e Aceito': {
+    ...SEM_CARGO,
     vm: 'V∴M∴',
     vig1: '1º Vig∴',
     vig2: '2º Vig∴',
     or: 'Orad∴',
     sec: 'Secr∴',
   },
-  'Rito Adonhiramita': { vm: '', vig1: '', vig2: '', or: '', sec: '' },
-  'Rito de York': { vm: '', vig1: '', vig2: '', or: '', sec: '' },
-  'Rito de Emulação': { vm: '', vig1: '', vig2: '', or: '', sec: '' },
+  'Rito Adonhiramita': { ...SEM_CARGO },
+  // No Rito de York a sigla do cargo é o próprio nome e não há Orador.
+  'Rito de York': {
+    ...SEM_CARGO,
+    vm: 'Venerável Mestre',
+    vig1: '1º Vigilante',
+    vig2: '2º Vigilante',
+    sec: 'Secretário',
+    tes: 'Tesoureiro',
+  },
+  'Rito de Emulação': { ...SEM_CARGO },
 };
 
-const OFICIAIS_VAZIOS: Officers = { vm: '', vig1: '', vig2: '', or: '', sec: '' };
+const OFICIAIS_VAZIOS: Officers = { ...SEM_CARGO };
+
+/** Nome do cargo usado enquanto o rito não mapeia os seus. */
+const ROTULO_PADRAO: Record<keyof Officers, string> = {
+  vm: 'Venerável Mestre',
+  vig1: '1º Vigilante',
+  vig2: '2º Vigilante',
+  or: 'Orador',
+  sec: 'Secretário',
+  tes: 'Tesoureiro',
+};
 
 /** A gestão marcada como vigente; sem nenhuma marcada, a mais recente cadastrada. */
 export function gestaoVigente(gestoes: Gestao[]): Gestao | undefined {
@@ -73,12 +98,22 @@ export function obreirosComCargo(
 ): ObreiroComCargo[] {
   return obreiros.map((obreiro) => {
     const atribuicao = gestao?.atribuicoes.find((item) => item.obreiroId === obreiro.id);
+    // Gestão lavrada em outro rito: o cargo não existe aqui e some do quadro,
+    // em vez de vazar a sigla do rito antigo para dentro da ata.
+    const doRito = atribuicao ? cargoDoRito(atribuicao.cargo, rito) : false;
 
     return {
       ...obreiro,
-      cargo: atribuicao ? nomeDoCargo(atribuicao.cargo, rito) : '',
+      cargo: doRito && atribuicao ? nomeDoCargo(atribuicao.cargo, rito) : '',
     };
   });
+}
+
+/** Como o rito nomeia o cargo de cada oficial pedido na ata. */
+export function rotuloDoOficial(oficial: keyof Officers, rito: Rito | ''): string {
+  const sigla = rito ? CARGO_DO_OFICIAL[rito][oficial] : '';
+
+  return sigla ? nomeDoCargo(sigla, rito) : ROTULO_PADRAO[oficial];
 }
 
 function mesmoNome(a: string, b: string): boolean {
@@ -89,35 +124,40 @@ function mesmoNome(a: string, b: string): boolean {
  * Diz se a gestão informada é base confiável para apontar quem é ad hoc: precisa existir,
  * ter atribuições e um rito com os cargos mapeados. Sem isso nada é marcado.
  */
-export function gestaoDefineOficiais(gestao: Gestao | undefined, rito: Rito | ''): boolean {
+export function gestaoDefineOficiais(
+  gestao: Gestao | undefined,
+  rito: Rito | '',
+  oficiaisMarcados: OficiaisAdHoc,
+): boolean {
   if (!gestao || !rito || gestao.atribuicoes.length === 0) return false;
 
   const cargoDoOficial = CARGO_DO_OFICIAL[rito];
 
-  return OFICIAIS_COM_AD_HOC.some((oficial) => cargoDoOficial[oficial] !== '');
+  return oficiaisMarcados.some((oficial) => cargoDoOficial[oficial] !== '');
 }
 
 /**
- * Marca com " - ADHOC" o Orador e o Secretário que ocupam o cargo sem ser o titular da gestão,
- * inclusive quando o cargo está vago na gestão. Os demais oficiais nunca recebem o sufixo e,
- * com `gestaoConhecida` falso (gestão ausente ou rito sem cargos mapeados), nada é marcado.
+ * Quais dos oficiais marcados pelo rito ocupam o cargo sem ser o titular da gestão,
+ * inclusive quando o cargo está vago nela. Com `gestaoConhecida` falso (gestão ausente
+ * ou rito sem cargos mapeados) ninguém é apontado. Como cada rito escreve o ad hoc de
+ * um jeito, aqui só sai a lista: quem redige é o documento.
  */
-export function aplicarSufixoAdHoc(
+export function oficiaisAdHocDaSessao(
   officers: Officers,
   titulares: Officers,
   gestaoConhecida: boolean,
-): Officers {
-  const comSufixo = { ...officers };
-  if (!gestaoConhecida) return comSufixo;
+  oficiaisMarcados: OficiaisAdHoc,
+): OficiaisAdHoc {
+  if (!gestaoConhecida) return [];
 
-  for (const oficial of OFICIAIS_COM_AD_HOC) {
-    const nome = comSufixo[oficial].trim();
-    const titular = titulares[oficial].trim();
+  return oficiaisMarcados.filter((oficial) => {
+    const nome = officers[oficial].trim();
 
-    if (nome && !mesmoNome(nome, titular)) {
-      comSufixo[oficial] = `${nome}${SUFIXO_AD_HOC}`;
-    }
-  }
+    return Boolean(nome) && !mesmoNome(nome, titulares[oficial].trim());
+  });
+}
 
-  return comSufixo;
+/** "FULANO" + " - ADHOC" quando o oficial não é o titular; é a forma do REAA. */
+export function comSufixoAdHoc(nome: string, ehAdHoc: boolean): string {
+  return ehAdHoc && nome.trim() ? `${nome}${SUFIXO_AD_HOC}` : nome;
 }

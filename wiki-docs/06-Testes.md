@@ -16,6 +16,17 @@ A suíte de testes é organizada em três camadas:
 | **Componente** | Vitest + RTL + userEvent       | Componentes React isolados     |
 | **E2E**        | Playwright + Chromium          | Fluxos completos do usuário    |
 
+Números de 29 de agosto de 2026, na versão 0.8.0:
+
+| Medida                                     | Valor |
+| ------------------------------------------ | ----- |
+| Arquivos de teste unitário e de componente | 61    |
+| Testes executados                          | 325   |
+| Testes passando                            | 325   |
+| Arquivos de teste de ponta a ponta         | 2     |
+
+Os números acima envelhecem a cada versão. O comando `yarn test:coverage` produz sempre o retrato do momento; em caso de divergência, o comando manda.
+
 ---
 
 ## Configuração do Ambiente
@@ -351,6 +362,18 @@ O relatório HTML é gerado em `coverage/` e pode ser aberto no navegador:
 open coverage/index.html
 ```
 
+Medição de 29 de agosto de 2026, na versão 0.8.0:
+
+| Métrica | Cobertura |
+| ------- | --------- |
+| Linhas  | 89,26%    |
+| Ramos   | 87,47%    |
+| Funções | 83,00%    |
+
+Ficam fora da medição, por decisão registrada em `vitest.config.ts`: o shell do Electron (coberto por suíte própria), os _barrels_, os arquivos de tipos, `src/app/providers.tsx` e `src/features/loja-config/components/LojaConfigForm.tsx`. A última exclusão não tem justificativa registrada e está aberta como item em [Acoplamento e Dívida Técnica](Acoplamento-e-Divida-Tecnica).
+
+Os pontos de menor cobertura hoje são `useAtaState.ts` (87,39% de linhas, 46,66% de funções), `storage.ts` (87,53%) e os componentes `SessionConjuntaForm.tsx` e `OrdemDiaTextarea.tsx`, ainda sem teste próprio.
+
 ---
 
 ## Adicionando Novos Testes
@@ -376,5 +399,6 @@ open coverage/index.html
 
 - [Padrões de Código](Padroes-de-Codigo) — Convenções de implementação
 - [Arquitetura](Arquitetura) — Estrutura do projeto
+- [Acoplamento e Dívida Técnica](Acoplamento-e-Divida-Tecnica) — Exclusões de cobertura em aberto
 
 - [Build e Distribuição](Build-e-Distribuicao) — Como gerar builds e instaladores

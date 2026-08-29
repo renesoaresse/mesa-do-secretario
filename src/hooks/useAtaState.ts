@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { storage } from '../services/storage';
 import {
-  aplicarSufixoAdHoc,
   gestaoDefineOficiais,
   gestaoVigente,
+  oficiaisAdHocDaSessao,
   titularesDosOficiais,
 } from '../features/loja-config/data/oficiais';
+import { MODULO_ESCOCES, moduloAtaDoRito } from '../features/ata';
 import type {
   AtaDraft,
   BolsaProposta,
@@ -21,7 +22,7 @@ import type {
   Visitor,
 } from '../types/ata';
 
-const DEFAULT_OFFICERS: Officers = { vm: '', vig1: '', vig2: '', or: '', sec: '' };
+const DEFAULT_OFFICERS: Officers = { vm: '', vig1: '', vig2: '', or: '', sec: '', tes: '' };
 
 export const DEFAULT_LOJA_CONFIG: LojaConfig = {
   logoDataUrl: null,
@@ -81,6 +82,11 @@ const DEFAULT_ATA_DRAFT: AtaDraft = {
   balaustreTexto: '',
   atosDecretosTexto: '',
   expedientesTexto: '',
+  pranchasTexto: '',
+  atosTexto: '',
+  decretosTexto: '',
+  leituraAtasTexto: '',
+  pboTexto: '',
   bolsaPropostas: DEFAULT_BOLSA_PROPOSTAS,
 };
 
@@ -89,8 +95,14 @@ export function useAtaState() {
   const quadroObreiros = storage.loadObreiros();
   // Titulares da gestão vigente: preenchem os oficiais e definem quem é ad hoc.
   const gestao = gestaoVigente(storage.loadGestoes());
+  // O rito da loja decide quais oficiais a ata pede e quais podem ser ad hoc.
+  const modulo = moduloAtaDoRito(initialDraft.lojaConfig.rito) ?? MODULO_ESCOCES;
   const titulares = titularesDosOficiais(gestao, quadroObreiros, initialDraft.lojaConfig.rito);
-  const gestaoConhecida = gestaoDefineOficiais(gestao, initialDraft.lojaConfig.rito);
+  const gestaoConhecida = gestaoDefineOficiais(
+    gestao,
+    initialDraft.lojaConfig.rito,
+    modulo.oficiaisAdHoc,
+  );
   // Cada cargo ainda em branco herda o titular da gestão; o que já foi digitado fica.
   const officersIniciais = (Object.keys(initialDraft.officers) as (keyof Officers)[]).reduce(
     (acc, oficial) => {
@@ -118,6 +130,11 @@ export function useAtaState() {
   const [balaustreTexto, setBalaustreTexto] = useState(initialDraft.balaustreTexto);
   const [atosDecretosTexto, setAtosDecretosTexto] = useState(initialDraft.atosDecretosTexto);
   const [expedientesTexto, setExpedientesTexto] = useState(initialDraft.expedientesTexto);
+  const [pranchasTexto, setPranchasTexto] = useState(initialDraft.pranchasTexto);
+  const [atosTexto, setAtosTexto] = useState(initialDraft.atosTexto);
+  const [decretosTexto, setDecretosTexto] = useState(initialDraft.decretosTexto);
+  const [leituraAtasTexto, setLeituraAtasTexto] = useState(initialDraft.leituraAtasTexto);
+  const [pboTexto, setPboTexto] = useState(initialDraft.pboTexto);
   const [bolsaPropostas, setBolsaPropostas] = useState<BolsaPropostas>(initialDraft.bolsaPropostas);
 
   const currentDraft = useMemo<AtaDraft>(
@@ -137,6 +154,11 @@ export function useAtaState() {
       balaustreTexto,
       atosDecretosTexto,
       expedientesTexto,
+      pranchasTexto,
+      atosTexto,
+      decretosTexto,
+      leituraAtasTexto,
+      pboTexto,
       bolsaPropostas,
     }),
     [
@@ -155,6 +177,11 @@ export function useAtaState() {
       balaustreTexto,
       atosDecretosTexto,
       expedientesTexto,
+      pranchasTexto,
+      atosTexto,
+      decretosTexto,
+      leituraAtasTexto,
+      pboTexto,
       bolsaPropostas,
     ],
   );
@@ -246,6 +273,12 @@ export function useAtaState() {
     markChanged();
   };
 
+  // Quem está ad hoc é apurado uma vez; cada rito escreve essa marca à sua forma.
+  const oficiaisAdHoc = useMemo(
+    () => oficiaisAdHocDaSessao(officers, titulares, gestaoConhecida, modulo.oficiaisAdHoc),
+    [officers, titulares, gestaoConhecida, modulo.oficiaisAdHoc],
+  );
+
   const previewData: PreviewData = useMemo(
     () => ({
       lojaConfig,
@@ -253,7 +286,8 @@ export function useAtaState() {
       sessionConfig,
       magnaFields,
       visitors,
-      officers: aplicarSufixoAdHoc(officers, titulares, gestaoConhecida),
+      officers,
+      oficiaisAdHoc,
       tronco,
       troncoSuprimido,
       ordemDia,
@@ -263,11 +297,15 @@ export function useAtaState() {
       balaustreTexto,
       atosDecretosTexto,
       expedientesTexto,
+      pranchasTexto,
+      atosTexto,
+      decretosTexto,
+      leituraAtasTexto,
+      pboTexto,
       bolsaPropostas,
     }),
     [
-      titulares,
-      gestaoConhecida,
+      oficiaisAdHoc,
       lojaConfig,
       sessionType,
       sessionConfig,
@@ -283,6 +321,11 @@ export function useAtaState() {
       balaustreTexto,
       atosDecretosTexto,
       expedientesTexto,
+      pranchasTexto,
+      atosTexto,
+      decretosTexto,
+      leituraAtasTexto,
+      pboTexto,
       bolsaPropostas,
     ],
   );
@@ -306,6 +349,11 @@ export function useAtaState() {
     balaustreTexto,
     atosDecretosTexto,
     expedientesTexto,
+    pranchasTexto,
+    atosTexto,
+    decretosTexto,
+    leituraAtasTexto,
+    pboTexto,
     bolsaPropostas,
     previewData,
     setZoom,
@@ -336,6 +384,26 @@ export function useAtaState() {
     },
     setExpedientesTexto: (value: string) => {
       setExpedientesTexto(value);
+      markChanged();
+    },
+    setPranchasTexto: (value: string) => {
+      setPranchasTexto(value);
+      markChanged();
+    },
+    setAtosTexto: (value: string) => {
+      setAtosTexto(value);
+      markChanged();
+    },
+    setDecretosTexto: (value: string) => {
+      setDecretosTexto(value);
+      markChanged();
+    },
+    setLeituraAtasTexto: (value: string) => {
+      setLeituraAtasTexto(value);
+      markChanged();
+    },
+    setPboTexto: (value: string) => {
+      setPboTexto(value);
       markChanged();
     },
     updateSessionConfig,

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { Route, Router } from 'wouter';
 import { useHashLocation } from 'wouter/use-hash-location';
 import { BoasVindasModal } from './BoasVindasModal';
-import { ROUTES } from '../../../router/index';
+import { ROUTES } from '../../../router/routes';
 
 function renderModal() {
   render(

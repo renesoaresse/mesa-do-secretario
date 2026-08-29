@@ -5,7 +5,9 @@ import { renderWithUser } from '../../../test/render';
 import { OfficersForm } from './OfficersForm';
 import type { ObreiroComCargo } from '../../loja-config/data/oficiais';
 
-const SEM_TITULARES = { vm: '', vig1: '', vig2: '', or: '', sec: '' };
+const SEM_TITULARES = { vm: '', vig1: '', vig2: '', or: '', sec: '', tes: '' };
+const OFICIAIS_REAA = ['vm', 'vig1', 'vig2', 'or', 'sec'] as const;
+const REAA = 'Rito Escocês Antigo e Aceito' as const;
 
 const obreiros: ObreiroComCargo[] = [
   { id: 'a', nome: 'ABEL SANTOS', cim: '1', grau: 'M∴M∴', cargo: 'Venerável Mestre' },
@@ -16,6 +18,8 @@ describe('OfficersForm', () => {
   it('oferece o quadro de obreiros em cada cargo', () => {
     renderWithUser(
       <OfficersForm
+        oficiais={OFICIAIS_REAA}
+        rito={REAA}
         value={makeOfficers()}
         obreiros={obreiros}
         titulares={SEM_TITULARES}
@@ -39,7 +43,9 @@ describe('OfficersForm', () => {
     const onChange = vi.fn();
     const { user } = renderWithUser(
       <OfficersForm
-        value={{ vm: '', vig1: '', vig2: '', or: '', sec: '' }}
+        oficiais={OFICIAIS_REAA}
+        rito={REAA}
+        value={{ vm: '', vig1: '', vig2: '', or: '', sec: '', tes: '' }}
         obreiros={obreiros}
         titulares={SEM_TITULARES}
         onChange={onChange}
@@ -55,7 +61,9 @@ describe('OfficersForm', () => {
     const onChange = vi.fn();
     const { user } = renderWithUser(
       <OfficersForm
-        value={{ vm: '', vig1: '', vig2: '', or: '', sec: '' }}
+        oficiais={OFICIAIS_REAA}
+        rito={REAA}
+        value={{ vm: '', vig1: '', vig2: '', or: '', sec: '', tes: '' }}
         obreiros={obreiros}
         titulares={SEM_TITULARES}
         onChange={onChange}
@@ -73,7 +81,9 @@ describe('OfficersForm', () => {
   it('coloca o titular do cargo no topo e o identifica', () => {
     renderWithUser(
       <OfficersForm
-        value={{ vm: '', vig1: '', vig2: '', or: '', sec: '' }}
+        oficiais={OFICIAIS_REAA}
+        rito={REAA}
+        value={{ vm: '', vig1: '', vig2: '', or: '', sec: '', tes: '' }}
         obreiros={obreiros}
         titulares={{ ...SEM_TITULARES, vm: 'BRUNO LIMA' }}
         onChange={vi.fn()}
@@ -86,10 +96,30 @@ describe('OfficersForm', () => {
     expect(opcoes[1]).toBe('BRUNO LIMA — Titular do Cargo');
   });
 
+  it('rotula cada cargo como o rito da loja o nomeia', () => {
+    renderWithUser(
+      <OfficersForm
+        oficiais={['vm', 'vig1', 'vig2', 'tes', 'sec']}
+        rito="Rito de York"
+        value={makeOfficers()}
+        obreiros={obreiros}
+        titulares={SEM_TITULARES}
+        onChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText('Tesoureiro')).toBeInTheDocument();
+    expect(screen.getByLabelText('1º Vigilante')).toBeInTheDocument();
+    // O Rito de York não nomeia Orador na ata.
+    expect(screen.queryByLabelText('Orador')).not.toBeInTheDocument();
+  });
+
   it('mantem o campo livre aberto quando o nome salvo nao esta no quadro', () => {
     renderWithUser(
       <OfficersForm
-        value={{ vm: 'IRMAO VISITANTE', vig1: '', vig2: '', or: '', sec: '' }}
+        oficiais={OFICIAIS_REAA}
+        rito={REAA}
+        value={{ vm: 'IRMAO VISITANTE', vig1: '', vig2: '', or: '', sec: '', tes: '' }}
         obreiros={obreiros}
         titulares={SEM_TITULARES}
         onChange={vi.fn()}

@@ -8,6 +8,7 @@ import {
   makeSessionConfig,
   makeVisitor,
 } from '../../../test/factories';
+import { DocumentoEscoces } from '../../ata/ritos/escoces/DocumentoEscoces';
 import { DocumentPreview } from './DocumentPreview';
 import {
   ATOS_DECRETOS_PADRAO,
@@ -46,7 +47,7 @@ describe('DocumentPreview', () => {
   });
 
   it('mantem o contrato externo do preview', () => {
-    render(<DocumentPreview zoom={1.25} data={makePreviewData()} />);
+    render(<DocumentPreview documento={DocumentoEscoces} zoom={1.25} data={makePreviewData()} />);
 
     const preview = screen.getByLabelText('Pré-visualização do documento');
 
@@ -60,7 +61,9 @@ describe('DocumentPreview', () => {
       officers: makeOfficers({ or: 'BELTRANO SILVA - ADHOC' }),
       visitors: [makeVisitor({ nome: 'Fulano' })],
     });
-    const { container } = render(<DocumentPreview zoom={1} data={data} />);
+    const { container } = render(
+      <DocumentPreview documento={DocumentoEscoces} zoom={1} data={data} />,
+    );
 
     const negritos = [...container.querySelectorAll('strong')].map((el) => el.textContent);
 
@@ -70,9 +73,29 @@ describe('DocumentPreview', () => {
     );
   });
 
+  // No REAA a marca de ad hoc é colada ao nome; quem a escreve é o documento.
+  it('cola o sufixo ADHOC no orador e no secretario apontados pela sessao', () => {
+    const data = makePreviewData({
+      officers: makeOfficers({ or: 'BELTRANO SILVA', sec: 'CICRANO SOUZA' }),
+      oficiaisAdHoc: ['or', 'sec'],
+    });
+    const { container } = render(
+      <DocumentPreview documento={DocumentoEscoces} zoom={1} data={data} />,
+    );
+
+    const negritos = [...container.querySelectorAll('strong')].map((el) => el.textContent);
+
+    expect(negritos).toContain('BELTRANO SILVA - ADHOC');
+    expect(negritos).toContain('CICRANO SOUZA - ADHOC');
+    // O V∴ M∴ não está na lista, então segue sem a marca.
+    expect(negritos).toContain('Veneravel');
+  });
+
   it('renderiza texto semelhante a html como conteudo literal', () => {
     const data = makeDangerousPreviewData();
-    const { container } = render(<DocumentPreview zoom={1} data={data} />);
+    const { container } = render(
+      <DocumentPreview documento={DocumentoEscoces} zoom={1} data={data} />,
+    );
     const preview = screen.getByLabelText('Pré-visualização do documento');
 
     expect(preview).toHaveTextContent('<script>alert("templo")</script>');
@@ -87,6 +110,7 @@ describe('DocumentPreview', () => {
   it('omite secoes opcionais vazias e registra silencio nas colunas sem palavra', () => {
     render(
       <DocumentPreview
+        documento={DocumentoEscoces}
         zoom={1}
         data={makePreviewData({
           sessionType: 'magna',
@@ -109,14 +133,22 @@ describe('DocumentPreview', () => {
 
   it('registra a supressao da bolsa de beneficencia no lugar do valor arrecadado', () => {
     const { rerender } = render(
-      <DocumentPreview zoom={1} data={makePreviewData({ tronco: 10, troncoSuprimido: true })} />,
+      <DocumentPreview
+        documento={DocumentoEscoces}
+        zoom={1}
+        data={makePreviewData({ tronco: 10, troncoSuprimido: true })}
+      />,
     );
 
     expect(screen.getByText(new RegExp(troncoSuprimidoTexto()))).toBeInTheDocument();
     expect(screen.queryByText(/medalhas cunhadas/i)).not.toBeInTheDocument();
 
     rerender(
-      <DocumentPreview zoom={1} data={makePreviewData({ tronco: 10, troncoSuprimido: false })} />,
+      <DocumentPreview
+        documento={DocumentoEscoces}
+        zoom={1}
+        data={makePreviewData({ tronco: 10, troncoSuprimido: false })}
+      />,
     );
 
     expect(screen.getByText(/medalhas cunhadas/i)).toBeInTheDocument();
@@ -125,14 +157,24 @@ describe('DocumentPreview', () => {
 
   it('registra a supressao da palavra a bem da ordem no lugar das colunas', () => {
     const { rerender } = render(
-      <DocumentPreview zoom={1} data={makePreviewData({ pboSuprimido: true })} />,
+      <DocumentPreview
+        documento={DocumentoEscoces}
+        zoom={1}
+        data={makePreviewData({ pboSuprimido: true })}
+      />,
     );
 
     expect(screen.getByText(new RegExp(pboSuprimidoTexto()))).toBeInTheDocument();
     expect(screen.queryByText(/Coluna do Sul:/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/A palavra circulou da seguinte forma:/i)).not.toBeInTheDocument();
 
-    rerender(<DocumentPreview zoom={1} data={makePreviewData({ pboSuprimido: false })} />);
+    rerender(
+      <DocumentPreview
+        documento={DocumentoEscoces}
+        zoom={1}
+        data={makePreviewData({ pboSuprimido: false })}
+      />,
+    );
 
     expect(screen.getByText(/A palavra circulou da seguinte forma:/i)).toBeInTheDocument();
     expect(screen.getByText(/Coluna do Sul:/i)).toBeInTheDocument();
@@ -141,13 +183,21 @@ describe('DocumentPreview', () => {
 
   it('usa o texto padrao de expedientes quando a secao esta vazia', () => {
     const { rerender } = render(
-      <DocumentPreview zoom={1} data={makePreviewData({ expedientesTexto: '   ' })} />,
+      <DocumentPreview
+        documento={DocumentoEscoces}
+        zoom={1}
+        data={makePreviewData({ expedientesTexto: '   ' })}
+      />,
     );
 
     expect(screen.getByText(new RegExp(EXPEDIENTE_PADRAO.slice(0, 40), 'i'))).toBeInTheDocument();
 
     rerender(
-      <DocumentPreview zoom={1} data={makePreviewData({ expedientesTexto: 'Prancha lida' })} />,
+      <DocumentPreview
+        documento={DocumentoEscoces}
+        zoom={1}
+        data={makePreviewData({ expedientesTexto: 'Prancha lida' })}
+      />,
     );
 
     expect(screen.getByText(/Prancha lida/i)).toBeInTheDocument();
@@ -159,6 +209,7 @@ describe('DocumentPreview', () => {
   it('usa os textos padrao de balaustre e atos e decretos quando as secoes estao vazias', () => {
     const { rerender } = render(
       <DocumentPreview
+        documento={DocumentoEscoces}
         zoom={1}
         data={makePreviewData({ balaustreTexto: '   ', atosDecretosTexto: '' })}
       />,
@@ -169,6 +220,7 @@ describe('DocumentPreview', () => {
 
     rerender(
       <DocumentPreview
+        documento={DocumentoEscoces}
         zoom={1}
         data={makePreviewData({
           balaustreTexto: 'Balaustre lido e aprovado',
@@ -186,6 +238,7 @@ describe('DocumentPreview', () => {
   it('permanece estavel ao alternar entre dados vazios e preenchidos', () => {
     const { rerender } = render(
       <DocumentPreview
+        documento={DocumentoEscoces}
         zoom={1}
         data={makePreviewData({
           pbo: { sul: '', norte: '', oriente: '' },
@@ -200,7 +253,9 @@ describe('DocumentPreview', () => {
     expect(screen.getByText(/BALAÚSTRE:/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Reinou silêncio na coluna\./i)).toHaveLength(3);
 
-    rerender(<DocumentPreview zoom={1} data={makeDangerousPreviewData()} />);
+    rerender(
+      <DocumentPreview documento={DocumentoEscoces} zoom={1} data={makeDangerousPreviewData()} />,
+    );
 
     expect(screen.getByText(/PALAVRA A BEM DA ORDEM:/i)).toBeInTheDocument();
     expect(screen.getByText(/Coluna do Sul:/i)).toBeInTheDocument();
@@ -210,6 +265,7 @@ describe('DocumentPreview', () => {
   it('adapta os titulos da ata quando a sessao e no grau de Mestre', () => {
     render(
       <DocumentPreview
+        documento={DocumentoEscoces}
         zoom={1}
         data={makePreviewData({ sessionConfig: makeSessionConfig({ grau: 'Mestre' }) })}
       />,
@@ -233,7 +289,7 @@ describe('DocumentPreview', () => {
   });
 
   it('mantem os titulos de Aprendiz fora da Loj de MM MM', () => {
-    render(<DocumentPreview zoom={1} data={makePreviewData()} />);
+    render(<DocumentPreview documento={DocumentoEscoces} zoom={1} data={makePreviewData()} />);
 
     const preview = screen.getByLabelText('Pré-visualização do documento');
 
@@ -249,6 +305,7 @@ describe('DocumentPreview', () => {
   it('renderiza secoes magna quando os dados estiverem preenchidos', () => {
     render(
       <DocumentPreview
+        documento={DocumentoEscoces}
         zoom={1}
         data={makePreviewData({
           sessionType: 'magna',
@@ -264,6 +321,7 @@ describe('DocumentPreview', () => {
   it('mantem dados simulados de importacao e entidades escapadas como texto seguro', () => {
     render(
       <DocumentPreview
+        documento={DocumentoEscoces}
         zoom={1}
         data={makeDangerousPreviewData({
           visitors: [
@@ -284,7 +342,9 @@ describe('DocumentPreview', () => {
 
   it('nao numera linhas quando a opcao esta desligada', () => {
     stubTextLineRects([0, 24, 48]);
-    const { container } = render(<DocumentPreview zoom={1} data={makePreviewData()} />);
+    const { container } = render(
+      <DocumentPreview documento={DocumentoEscoces} zoom={1} data={makePreviewData()} />,
+    );
 
     expect(screen.getByLabelText('Pré-visualização do documento')).not.toHaveClass(
       'with-line-numbers',
@@ -299,6 +359,7 @@ describe('DocumentPreview', () => {
 
     const { container } = render(
       <DocumentPreview
+        documento={DocumentoEscoces}
         zoom={1}
         data={makePreviewData({
           sessionConfig: makeSessionConfig({ numerarLinhas: true }),

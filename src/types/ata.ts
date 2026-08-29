@@ -71,7 +71,12 @@ export type Officers = {
   vig2: string;
   or: string;
   sec: string;
+  /** Nomeado na direção dos trabalhos do Rito de York. */
+  tes: string;
 };
+
+/** Oficiais que ocupam o cargo sem ser o titular da gestão vigente. */
+export type OficiaisAdHoc = readonly (keyof Officers)[];
 
 export type PalavraBemOrdem = {
   sul: string;
@@ -95,6 +100,16 @@ export type AtaDraft = {
   balaustreTexto: string;
   atosDecretosTexto: string;
   expedientesTexto: string;
+  /** Pranchas e correspondências lidas na sessão (Rito de York). */
+  pranchasTexto: string;
+  /** Atos, em seção própria (Rito de York). */
+  atosTexto: string;
+  /** Decretos, em seção própria (Rito de York). */
+  decretosTexto: string;
+  /** Leitura de atas anteriores (Rito de York). */
+  leituraAtasTexto: string;
+  /** Palavra a bem da Ordem em texto corrido, sem colunas (Rito de York). */
+  pboTexto: string;
   bolsaPropostas: BolsaPropostas;
 };
 
@@ -121,7 +136,19 @@ export type PreviewData = {
   balaustreTexto: string;
   atosDecretosTexto: string;
   expedientesTexto: string;
+  /** Pranchas e correspondências lidas na sessão (Rito de York). */
+  pranchasTexto: string;
+  /** Atos, em seção própria (Rito de York). */
+  atosTexto: string;
+  /** Decretos, em seção própria (Rito de York). */
+  decretosTexto: string;
+  /** Leitura de atas anteriores (Rito de York). */
+  leituraAtasTexto: string;
+  /** Palavra a bem da Ordem em texto corrido, sem colunas (Rito de York). */
+  pboTexto: string;
   bolsaPropostas: BolsaPropostas;
+  /** Quem está ad hoc nesta sessão; cada rito marca isso na ata à sua forma. */
+  oficiaisAdHoc: OficiaisAdHoc;
 };
 
 export type LojaConfig = {

@@ -5,7 +5,7 @@ import { Button } from '../../../components/ui/Button';
 import { StatusMessage } from '../../../components/ui/StatusMessage';
 import { Tabs } from '../../../components/ui/Tabs';
 import type { TabItem } from '../../../components/ui/Tabs';
-import { ROUTES } from '../../../router/index';
+import { ROUTES } from '../../../router/routes';
 import { LojaConfigForm } from './LojaConfigForm';
 import { ObreiroFormModal } from './ObreiroFormModal';
 import { ObreirosList } from './ObreirosList';

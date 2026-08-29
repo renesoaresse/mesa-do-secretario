@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
-  aplicarSufixoAdHoc,
+  comSufixoAdHoc,
+  rotuloDoOficial,
   gestaoDefineOficiais,
+  oficiaisAdHocDaSessao,
   gestaoVigente,
   obreirosComCargo,
   titularesDosOficiais,
@@ -52,6 +54,7 @@ describe('gestaoVigente', () => {
 describe('titularesDosOficiais', () => {
   it('mapeia os cargos do REAA para os oficiais da ata', () => {
     expect(titularesDosOficiais(gestao, obreiros, REAA)).toEqual({
+      tes: '',
       vm: 'ABEL SANTOS',
       vig1: '',
       vig2: '',
@@ -61,69 +64,89 @@ describe('titularesDosOficiais', () => {
   });
 
   it('devolve tudo vazio sem gestao ou sem rito', () => {
-    const vazio = { vm: '', vig1: '', vig2: '', or: '', sec: '' };
+    const vazio = { vm: '', vig1: '', vig2: '', or: '', sec: '', tes: '' };
 
     expect(titularesDosOficiais(undefined, obreiros, REAA)).toEqual(vazio);
     expect(titularesDosOficiais(gestao, obreiros, '')).toEqual(vazio);
   });
 });
 
-describe('aplicarSufixoAdHoc', () => {
+describe('oficiaisAdHocDaSessao', () => {
+  const OFICIAIS_REAA = ['or', 'sec'] as const;
+
   const titulares = {
     vm: 'ABEL SANTOS',
     vig1: '',
     vig2: '',
     or: 'DANIEL ROCHA',
     sec: 'BRUNO LIMA',
+    tes: '',
   };
 
-  it('nao marca quem e o titular do cargo', () => {
+  it('nao aponta quem e o titular do cargo', () => {
     const officers = {
       vm: 'ABEL SANTOS',
       vig1: '',
       vig2: '',
       or: 'DANIEL ROCHA',
       sec: 'BRUNO LIMA',
+      tes: '',
     };
 
-    expect(aplicarSufixoAdHoc(officers, titulares, true)).toEqual(officers);
+    expect(oficiaisAdHocDaSessao(officers, titulares, true, OFICIAIS_REAA)).toEqual([]);
   });
 
-  it('marca o orador e o secretario que estao substituindo o titular', () => {
-    const officers = { vm: '', vig1: '', vig2: '', or: 'CARLOS', sec: 'ELIAS' };
-    const comSufixo = aplicarSufixoAdHoc(officers, titulares, true);
+  it('aponta o orador e o secretario que estao substituindo o titular', () => {
+    const officers = { vm: '', vig1: '', vig2: '', or: 'CARLOS', sec: 'ELIAS', tes: '' };
 
-    expect(comSufixo.or).toBe('CARLOS - ADHOC');
-    expect(comSufixo.sec).toBe('ELIAS - ADHOC');
+    expect(oficiaisAdHocDaSessao(officers, titulares, true, OFICIAIS_REAA)).toEqual(['or', 'sec']);
   });
 
-  it('nao marca os demais oficiais fora do cargo', () => {
-    const officers = { vm: 'CARLOS', vig1: 'FABIO', vig2: 'GABRIEL', or: '', sec: '' };
-    const comSufixo = aplicarSufixoAdHoc(officers, titulares, true);
+  it('so aponta os oficiais que o rito manda marcar', () => {
+    const officers = { vm: 'CARLOS', vig1: 'FABIO', vig2: 'GABRIEL', or: '', sec: '', tes: '' };
 
-    expect(comSufixo.vm).toBe('CARLOS');
-    expect(comSufixo.vig1).toBe('FABIO');
-    expect(comSufixo.vig2).toBe('GABRIEL');
+    expect(oficiaisAdHocDaSessao(officers, titulares, true, OFICIAIS_REAA)).toEqual([]);
+  });
+
+  it('marca os demais oficiais quando o rito os inclui', () => {
+    const officers = { vm: 'CARLOS', vig1: 'FABIO', vig2: '', or: '', sec: '', tes: 'HELIO' };
+    const oficiaisYork = ['vm', 'vig1', 'vig2', 'tes', 'sec'] as const;
+
+    expect(oficiaisAdHocDaSessao(officers, titulares, true, oficiaisYork)).toEqual([
+      'vm',
+      'vig1',
+      'tes',
+    ]);
   });
 
   it('ignora diferenca de caixa e espacos', () => {
-    const officers = { vm: '', vig1: '', vig2: '', or: '', sec: '  bruno lima ' };
+    const officers = { vm: '', vig1: '', vig2: '', or: '', sec: '  bruno lima ', tes: '' };
 
-    // Reconhecido como titular: segue sem sufixo, com o texto original preservado.
-    expect(aplicarSufixoAdHoc(officers, titulares, true).sec).toBe('  bruno lima ');
+    expect(oficiaisAdHocDaSessao(officers, titulares, true, OFICIAIS_REAA)).toEqual([]);
   });
 
   it('marca o cargo vago na gestao, porque ninguem e titular dele', () => {
     const semTitularOr = { ...titulares, or: '' };
-    const officers = { vm: '', vig1: '', vig2: '', or: 'QUALQUER UM', sec: '' };
+    const officers = { vm: '', vig1: '', vig2: '', or: 'QUALQUER UM', sec: '', tes: '' };
 
-    expect(aplicarSufixoAdHoc(officers, semTitularOr, true).or).toBe('QUALQUER UM - ADHOC');
+    expect(oficiaisAdHocDaSessao(officers, semTitularOr, true, OFICIAIS_REAA)).toEqual(['or']);
   });
 
-  it('nao marca nada quando a gestao nao e base confiavel', () => {
-    const officers = { vm: '', vig1: '', vig2: '', or: 'CARLOS', sec: 'ELIAS' };
+  it('nao aponta ninguem quando a gestao nao e base confiavel', () => {
+    const officers = { vm: '', vig1: '', vig2: '', or: 'CARLOS', sec: 'ELIAS', tes: '' };
 
-    expect(aplicarSufixoAdHoc(officers, titulares, false)).toEqual(officers);
+    expect(oficiaisAdHocDaSessao(officers, titulares, false, OFICIAIS_REAA)).toEqual([]);
+  });
+});
+
+describe('comSufixoAdHoc', () => {
+  it('cola o sufixo no nome de quem esta ad hoc', () => {
+    expect(comSufixoAdHoc('CARLOS', true)).toBe('CARLOS - ADHOC');
+  });
+
+  it('devolve o nome intacto fora do ad hoc e no cargo vazio', () => {
+    expect(comSufixoAdHoc('CARLOS', false)).toBe('CARLOS');
+    expect(comSufixoAdHoc('', true)).toBe('');
   });
 });
 
@@ -135,15 +158,33 @@ describe('gestaoDefineOficiais', () => {
     atribuicoes: [{ obreiroId: 'a', cargo: 'V∴M∴' }],
   };
 
+  const OFICIAIS_REAA = ['or', 'sec'] as const;
+
   it('aceita gestao com atribuicoes em rito com cargos mapeados', () => {
-    expect(gestaoDefineOficiais(gestao, REAA)).toBe(true);
+    expect(gestaoDefineOficiais(gestao, REAA, OFICIAIS_REAA)).toBe(true);
   });
 
   it('recusa gestao ausente, sem atribuicoes ou rito sem cargos mapeados', () => {
-    expect(gestaoDefineOficiais(undefined, REAA)).toBe(false);
-    expect(gestaoDefineOficiais({ ...gestao, atribuicoes: [] }, REAA)).toBe(false);
-    expect(gestaoDefineOficiais(gestao, '')).toBe(false);
-    expect(gestaoDefineOficiais(gestao, 'Rito de York')).toBe(false);
+    expect(gestaoDefineOficiais(undefined, REAA, OFICIAIS_REAA)).toBe(false);
+    expect(gestaoDefineOficiais({ ...gestao, atribuicoes: [] }, REAA, OFICIAIS_REAA)).toBe(false);
+    expect(gestaoDefineOficiais(gestao, '', OFICIAIS_REAA)).toBe(false);
+    expect(gestaoDefineOficiais(gestao, 'Rito Adonhiramita', OFICIAIS_REAA)).toBe(false);
+  });
+});
+
+describe('rotuloDoOficial', () => {
+  it('nomeia o cargo como o rito o nomeia', () => {
+    expect(rotuloDoOficial('vm', REAA)).toBe('Venerável Mestre');
+    expect(rotuloDoOficial('or', REAA)).toBe('Orador');
+    expect(rotuloDoOficial('tes', 'Rito de York')).toBe('Tesoureiro');
+    expect(rotuloDoOficial('vig1', 'Rito de York')).toBe('1º Vigilante');
+  });
+
+  it('cai no rotulo padrao onde o rito ainda nao mapeia o cargo', () => {
+    // O Rito de York não tem Orador; o REAA não nomeia Tesoureiro na ata.
+    expect(rotuloDoOficial('or', 'Rito de York')).toBe('Orador');
+    expect(rotuloDoOficial('tes', REAA)).toBe('Tesoureiro');
+    expect(rotuloDoOficial('vm', '')).toBe('Venerável Mestre');
   });
 });
 
@@ -167,5 +208,25 @@ describe('obreirosComCargo', () => {
 
   it('mantem o quadro completo sem gestao cadastrada', () => {
     expect(obreirosComCargo(undefined, obreiros, REAA)).toHaveLength(2);
+  });
+
+  it('ignora cargo de gestao lavrada em outro rito', () => {
+    // A gestão guarda siglas do REAA; sob o Rito de York elas não existem.
+    const noYork = obreirosComCargo(gestao, obreiros, 'Rito de York');
+
+    expect(noYork.map((obreiro) => obreiro.cargo)).toEqual(['', '']);
+  });
+
+  it('anota o cargo quando a gestao e do mesmo rito', () => {
+    const gestaoYork: Gestao = {
+      id: 'g3',
+      ano: '2026',
+      vigente: true,
+      atribuicoes: [{ obreiroId: 'a', cargo: 'Venerável Mestre' }],
+    };
+
+    expect(obreirosComCargo(gestaoYork, obreiros, 'Rito de York')[0].cargo).toBe(
+      'Venerável Mestre',
+    );
   });
 });
